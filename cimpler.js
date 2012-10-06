@@ -3,7 +3,7 @@ var config  = require('./config').config,
 
     fs      = require('fs'),
     path    = require('path'),
-    utils   = require('utils'),
+    util    = require('util'),
     events  = require('events');
 
 var Cimpler = function(mongo) {
@@ -12,7 +12,7 @@ var Cimpler = function(mongo) {
    this.finishedBuilds = new Queue();
 };
 
-utils.inherits(Cimpler, events.EventEmitter);
+util.inherits(Cimpler, events.EventEmitter);
 cimpler = new Cimpler();
 
 config.plugin_dirs.forEach(function(dir) {
@@ -27,7 +27,7 @@ config.plugin_dirs.forEach(function(dir) {
              pluginName = path.basename(files[i], '.js'),
              conf       = { enabled: true };
 
-         if (path.extname(filename) != 'js') {
+         if (path.extname(filename) != '.js') {
             continue;
          }
 
@@ -37,7 +37,7 @@ config.plugin_dirs.forEach(function(dir) {
 
          if (conf.enabled == undefined || conf.enabled) {
             console.log('Loading plugin: ' + pluginName);
-            require(filename).init(conf, cimpler);
+            require("./" + filename).init(conf, cimpler);
          } else {
             console.log('Not loading disabled plugin ' + pluginName);
          }
