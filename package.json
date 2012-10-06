@@ -18,7 +18,11 @@
       "github": "~0.1.5"
    },
 
+   "devDependencies" : {
+      "expresso" : "~0.9.2"
+   },
+
    "main": "./cimpler.js",
 
-   "scripts": { "test": "expresso test/test.js" }
+   "scripts": { "test": "expresso test/" }
 }
