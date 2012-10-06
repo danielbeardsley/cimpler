@@ -10,3 +10,7 @@ It's super simple to setup and configure.
 ## Requirements
 
  * [Node.js](http://nodejs.org/)
+
+## Inspired By
+
+ * [Mergeatron](https://github.com/SnapInteractive/mergeatron)
