@@ -50,3 +50,17 @@ exports.consumeBuild = function(done) {
       assert.equal(cb, 1);
    });
 };
+
+exports.shutdown = function(done) {
+   var cb = 0,
+   cimpler = new Cimpler();
+  
+   cimpler.on('shutdown', function() {
+      cb++;
+   });
+   cimpler.shutdown();
+
+   done(function() {
+      assert.equal(cb, 1);
+   });
+};
