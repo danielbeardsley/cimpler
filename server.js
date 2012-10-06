@@ -1,23 +1,9 @@
-var config  = require('./config').config,
-    Queue   = require('./lib/queue'),
+Cimpler = require('./lib/cimpler');
+config  = require('./config').config;
+fs      = require('fs');
+path    = require('path');
 
-    fs      = require('fs'),
-    path    = require('path'),
-    util    = require('util'),
-    events  = require('events');
-
-var Cimpler = function(mongo) {
-   this.mongo = mongo;
-   this.builds = new Queue();
-   this.finishedBuilds = new Queue();
-};
-
-util.inherits(Cimpler, events.EventEmitter);
-Cimpler.prototype.registerPlugin = function(plugin, config) {
-   plugin.init(config, this);
-};
 cimpler = new Cimpler();
-
 config.plugin_dirs.forEach(function(dir) {
    fs.readdir(dir, function(err, files) {
       if (err) {
@@ -47,3 +33,4 @@ config.plugin_dirs.forEach(function(dir) {
       }
    });
 });
+
