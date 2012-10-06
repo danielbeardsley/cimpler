@@ -1,7 +1,5 @@
 http       = require('http');
 util       = require('util');
-GitHubApi  = require('github');
-GitHub     = new GitHubApi({ version: '3.0.0' });
 allowedIps = [
    '127.0.0.1',      // For Testing
    '207.97.227.253', // GitHub #1
@@ -11,17 +9,6 @@ allowedIps = [
 
 
 exports.init = function(config, cimpler) {
-   GitHub.authenticate({
-      type: 'basic',
-      username: config.auth.user,
-      password: config.auth.pass
-   });
-
-   cimpler.finishedBuilds.pop(function(build, done) {
-      reportBuildStatus(build);
-      done();
-   });
-
    /**
     * Listen for post-recieve hooks
     */
@@ -39,7 +26,7 @@ exports.init = function(config, cimpler) {
       request.on('end', function() {
          try {
             var build = extractBuildInfo(body);
-            cimpler.builds.push(build);
+            cimpler.addBuild(build);
             reportBuildStatus(build);
          } catch (e) {
             util.error("Bad Request");
@@ -49,16 +36,12 @@ exports.init = function(config, cimpler) {
       });
    }).listen(config.listen_port);
 
-   function reportBuildStatus(build) {
-      GitHub.statuses.create({
-         user: config.user,
-         repo: config.repo,
-         sha: build.sha,
-         state: build.status,
-         target_url: "http://www.example.com/",
-         description: "Build " + build.status });
-   }
+   cimpler.on('shutdown', function() {
+      server.close();
+   });
 
+   function reportBuildStatus(build) {
+   }
 };
 
 function passesWhitelist(req, res) {
