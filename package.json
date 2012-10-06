@@ -1,0 +1,24 @@
+{
+	"name": "cimpler",
+	"version": "0.0.1",
+	"author": "Daniel Beardsley <daniel.beardsley@gmail.com>",
+	"description": "A simple continuous integration server with github support and a fully pluggable architecture",
+
+	"licenses": [{
+		"type": "MIT",
+		"url": "http://github.com/danielbeardsley/cimpler/raw/master/LICENSE"
+	}],
+
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/danielbeardsley/cimpler.git"
+	},
+
+	"dependencies": {
+		"github": "~0.1.5"
+	},
+
+	"main": "./cimpler.js",
+
+	"scripts": { "test": "expresso test/test.js" }
+}
