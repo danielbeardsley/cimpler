@@ -13,6 +13,9 @@ var Cimpler = function(mongo) {
 };
 
 util.inherits(Cimpler, events.EventEmitter);
+Cimpler.prototype.registerPlugin = function(plugin, config) {
+   plugin.init(config, this);
+};
 cimpler = new Cimpler();
 
 config.plugin_dirs.forEach(function(dir) {
@@ -37,7 +40,7 @@ config.plugin_dirs.forEach(function(dir) {
 
          if (conf.enabled == undefined || conf.enabled) {
             console.log('Loading plugin: ' + pluginName);
-            require("./" + filename).init(conf, cimpler);
+            cimpler.registerPlugin(require("./" + filename), conf);
          } else {
             console.log('Not loading disabled plugin ' + pluginName);
          }
