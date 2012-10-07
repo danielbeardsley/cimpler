@@ -4,16 +4,25 @@
 exports.config = {
    plugin_dirs: [ './plugins/' ],
    plugins: {
-      github: {
+      'github-commit-status': {
          /**
-          * For updating commit status via the API
+          * For updating commit status via the github API
           */
          auth: {
-            user: 'username',
+            user: 'githubuser',
             pass: 'password'
          },
-         user: 'user-to-watch',
-         repo: 'repo_name'
+         /**
+          * user/repo to update
+          */
+         user: 'user',
+         repo: 'repo'
+      },
+      github: {
+         /**
+          * TCP port to listen for Github post-receive hooks on
+          */
+         listen_port: 12345
       }
    }
 };
