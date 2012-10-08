@@ -10,8 +10,8 @@ exports.init = function(config, cimpler) {
             BUILD_STATUS: build.status
          }
       };
-      childProcess.exec(config.cmd, options, function() {
-         build.status = 'success';
+      childProcess.exec(config.cmd, options, function(err) {
+         build.status = err ? 'failed' : 'success';
          finished();
       });
    });

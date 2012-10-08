@@ -1,30 +1,12 @@
 var Cimpler  = require('../lib/cimpler'),
     fs = require('fs');
 
-exports.shellCmd = function(done, assert) {
-   var cb = false,
-   tempFile = "/tmp/cimpler_" + Math.floor(Math.random() * 100000),
-   cimpler = new Cimpler();
-  
-   cimpler.registerPlugin(
-      require('../plugins/shell'),
-      {
-         cmd: "touch " + tempFile
-      });
-   cimpler.addBuild({});
+exports.shellCmdBad = function(done, assert) {
+   testCommand('exit 1', 'failed', done, assert);
+};
 
-   cimpler.on('finishBuild',
-      function(build) {
-         cb = true;
-         var exists = fs.statSync(tempFile);
-         if (exists)
-            fs.unlink(tempFile);
-         assert.ok(exists);
-      });
-
-   done(function() {
-      assert.ok(cb);
-   });
+exports.shellCmdGood = function(done, assert) {
+   testCommand('exit 0', 'success', done, assert);
 };
 
 exports.shellEnvironment = function(done, assert) {
@@ -74,3 +56,26 @@ exports.shellEnvironment = function(done, assert) {
       assert.ok(cb);
    });
 };
+
+
+function testCommand(cmd, status, done, assert) {
+   var cb = false,
+   cimpler = new Cimpler();
+  
+   cimpler.registerPlugin(
+      require('../plugins/shell'),
+      {
+         cmd: cmd
+      });
+   cimpler.addBuild({});
+
+   cimpler.on('finishBuild',
+      function(build) {
+         cb = true;
+         assert.equal(build.status, status);
+      });
+
+   done(function() {
+      assert.ok(cb);
+   });
+}
