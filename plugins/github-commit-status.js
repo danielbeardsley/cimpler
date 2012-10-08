@@ -18,12 +18,13 @@ exports.init = function(config, cimpler) {
    });
 
    function reportBuildStatus(build) {
-      GitHub.statuses.create({
+      var commitStatus = {
          user: config.user,
          repo: config.repo,
          sha: build.sha,
          state: build.status,
-         target_url: "http://www.example.com/",
-         description: "Build " + build.status });
+         target_url: build.logUrl,
+         description: "Build " + build.status };
+      GitHub.statuses.create(commitStatus);
    }
 };
