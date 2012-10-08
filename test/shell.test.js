@@ -1,8 +1,7 @@
-Cimpler  = require('../lib/cimpler');
-assert = require('assert');
-fs = require('fs');
+var Cimpler  = require('../lib/cimpler'),
+    fs = require('fs');
 
-exports.shellCmd = function(done) {
+exports.shellCmd = function(done, assert) {
    var cb = false,
    tempFile = "/tmp/cimpler_" + Math.floor(Math.random() * 100000),
    cimpler = new Cimpler();

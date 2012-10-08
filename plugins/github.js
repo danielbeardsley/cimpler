@@ -1,11 +1,11 @@
-http       = require('http');
-util       = require('util');
-allowedIps = [
-   '127.0.0.1',      // For Testing
-   '207.97.227.253', // GitHub #1
-   '50.57.128.197',  // GitHub #2
-   '108.171.174.178' // GitHub #3
-];
+var http       = require('http'),
+    util       = require('util'),
+    allowedIps = [
+       '127.0.0.1',      // For Testing
+       '207.97.227.253', // GitHub #1
+       '50.57.128.197',  // GitHub #2
+       '108.171.174.178' // GitHub #3
+    ];
 
 
 exports.init = function(config, cimpler) {

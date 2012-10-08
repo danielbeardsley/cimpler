@@ -1,7 +1,7 @@
-Cimpler = require('./lib/cimpler');
-config  = require('./config').config;
-fs      = require('fs');
-path    = require('path');
+var Cimpler = require('./lib/cimpler'),
+    config  = require('./config').config,
+    fs      = require('fs'),
+    path    = require('path');
 
 cimpler = new Cimpler();
 config.plugin_dirs.forEach(function(dir) {

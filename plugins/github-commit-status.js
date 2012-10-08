@@ -1,4 +1,4 @@
-util       = require('util');
+var util   = require('util'),
 GitHubApi  = require('github');
 
 exports.init = function(config, cimpler) {

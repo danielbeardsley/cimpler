@@ -1,4 +1,4 @@
-childProcess = require('child_process');
+var childProcess = require('child_process');
 
 exports.init = function(config, cimpler) {
    cimpler.consumeBuild(function(build, finished) {
