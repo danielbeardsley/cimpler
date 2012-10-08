@@ -16,7 +16,8 @@ exports.config = {
           * user/repo to update
           */
          user: 'user',
-         repo: 'repo'
+         repo: 'repo',
+         enabled: true
       },
       github: {
          /**
@@ -41,7 +42,7 @@ exports.config = {
        * Checkout the build, merge in master and perform a build
        */
 		"git-build":  {
-         // Path to an existing repo
+         // Path to a local clone of the github repo
          repoPath: "/home/user/ci/cloned-repo",
          // Arbitrary shell command
          cmd: "make test",
