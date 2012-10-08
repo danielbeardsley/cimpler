@@ -51,6 +51,25 @@ exports.consumeBuild = function(done) {
    });
 };
 
+exports.consumeMultipleBuilds = function(done, assert) {
+   var first = {f: 1},
+   second = {s: 1},
+   cb = 0,
+   cimpler = new Cimpler();
+  
+   cimpler.consumeBuild(function(inBuild, done) {
+      assert.equal(inBuild, cb == 0 ? first : second);
+      cb++;
+      done();
+   });
+   cimpler.addBuild(first);
+   cimpler.addBuild(second);
+
+   done(function() {
+      assert.equal(cb, 2);
+   });
+};
+
 exports.finishedBuild = function(done) {
    var build = {a: 1},
    cb = 0,
