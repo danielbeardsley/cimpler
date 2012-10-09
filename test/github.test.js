@@ -1,6 +1,7 @@
 var Cimpler  = require('../lib/cimpler'),
     Github   = require('../plugins/github'),
-    http     = require('http');
+    http     = require('http'),
+    githubPort = 19191;
 
 exports.githubPostRecieve = function(done, assert) {
    var config = {a: 1},
@@ -9,12 +10,12 @@ exports.githubPostRecieve = function(done, assert) {
    cimpler = new Cimpler();
 
    cimpler.registerPlugin(Github, {
-      listen_port: 12345
+      listen_port: githubPort
    });
  
    var options = {
      host: '127.0.0.1',
-     port: 12345,
+     port: githubPort,
      method: 'POST',
      agent: false
    };
