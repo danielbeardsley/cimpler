@@ -26,8 +26,10 @@ exports.init = function(config, cimpler) {
       request.on('end', function() {
          try {
             var build = extractBuildInfo(body);
-            cimpler.addBuild(build);
-            reportBuildStatus(build);
+            if (build) {
+               cimpler.addBuild(build);
+               reportBuildStatus(build);
+            }
          } catch (e) {
             util.error("Bad Request");
             util.error(e.stack);
@@ -59,6 +61,11 @@ function extractBuildInfo(requestBody) {
    // Get rid of "payload="
    var payload = body.substring(8);
    var info = JSON.parse(payload);
+
+   // Filter out notifications about annotated tags
+   if (info.ref.indexOf('refs/tags/') == 0) {
+      return null;
+   }
 
    // ref: "refs/heads/master"
    var branch = info.ref.split('/').pop();

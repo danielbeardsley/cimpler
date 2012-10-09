@@ -29,13 +29,22 @@ exports.githubPostRecieve = function(done, assert) {
    };
 
    // Pretend to be github and POST to our listener
-   req.write("payload=" +
-      encodeURIComponent(JSON.stringify(postBuild)));
+   req.write("payload=" + encodeURIComponent(JSON.stringify(postBuild)));
    req.end();
 
-   cimpler.consumeBuild(function(build) {
+   /**
+    * Ensure "tag" notifications get filtered
+    * (this shouldn't get to consumeBuild)
+    */
+   postBuild.ref = "refs/tags/some_tag";
+   req = http.request(options);
+   // Pretend to be github and POST to our listener
+   req.write("payload=" + encodeURIComponent(JSON.stringify(postBuild)));
+   req.end();
+
+   cimpler.consumeBuild(function(build, done) {
+      assert.equal(cb, 0, "Only one build should get through");
       cb++;
-      cimpler.shutdown();
 
       assert.deepEqual(build, {
          repo:    'http',
@@ -43,7 +52,12 @@ exports.githubPostRecieve = function(done, assert) {
          branch:  'master',
          status:  'pending'
       });
+      done();
    });
+
+   setTimeout(function() {
+      cimpler.shutdown();
+   }, 1000);
 
    done(function() {
       assert.equal(cb, 1);
