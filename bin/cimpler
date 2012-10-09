@@ -1,0 +1,63 @@
+#!/bin/env node
+
+var config = require('../config.js'),
+net            = require('net'),
+util           = require('util'),
+childProcess   = require('child_process'),
+options        = {},
+defaultTcpPort = 20001,
+build          = {};
+
+var plugins = config.plugins;
+var tcpPort = (plugins && plugins.cli && plugins.cli.tcpPort) || defaultTcpPort;
+
+console.log("TCPPORT:");
+console.log(tcpPort);
+
+exec("git remote -v", function(stdout) {
+   // Output looks like:
+   // origin  http://remote_url (fetch)
+   build.remote = stdout.split(/\s+/)[1];
+   getSha();
+});
+
+function getSha() {
+   exec("git rev-parse HEAD", function(stdout) {
+      build.sha = stdout.trim();
+      getBranch();
+   });
+}
+
+function getBranch() {
+   exec("git symbolic-ref HEAD --short", function(stdout) {
+      build.branch = stdout.trim();
+      triggerBuild();
+   });
+}
+
+function triggerBuild() {
+   var connection = net.createConnection(tcpPort, "127.0.0.1", function() {
+      connection.end(JSON.stringify(build));
+   });
+
+   var body = '';
+   connection.setEncoding('utf8');
+   connection.on('data', function(chunk) {
+      body += chunk;
+   });
+
+   connection.on('end', function() {
+      console.dir(body);
+   });
+}
+
+function exec(cmd, callback) {
+   childProcess.exec(cmd, options, function(err, stdout) {
+      if (err) {
+         util.error("Command failed: " + cmd);
+         process.exit(1);
+      }
+      callback(stdout.toString());
+   });
+}
+
