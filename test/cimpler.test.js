@@ -116,6 +116,8 @@ exports.shutdown = function(done) {
       cb++;
    });
    cimpler.shutdown();
+   // Ensure it only gets called once
+   cimpler.shutdown();
 
    done(function() {
       assert.equal(cb, 1);
