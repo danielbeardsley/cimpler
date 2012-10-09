@@ -15,7 +15,8 @@ exports.cliInterface = function(done, assert) {
    var build = {
       repo:       'http',
       branch:     'test-branch',
-      sha:        '12345678'
+      sha:        '12345678',
+      status:     'pending'
    };
 
    cimpler.consumeBuild(function(inBuild) {
