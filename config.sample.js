@@ -1,8 +1,7 @@
 /**
  * Copy to config.js in the same directory
  */
-exports.config = {
-   plugin_dirs: [ './plugins/' ],
+module.exports = {
    plugins: {
       'github-commit-status': {
          /**
@@ -16,8 +15,7 @@ exports.config = {
           * user/repo to update
           */
          user: 'user',
-         repo: 'repo',
-         enabled: true
+         repo: 'repo'
       },
       github: {
          /**
@@ -29,6 +27,10 @@ exports.config = {
        * Automatically marks all builds as successful (for testing)
        */
       dummy: {
+         /**
+          * `enabled` is not required, but if `enabled: false` is present in
+          * any plugin config, that plugin will not be loaded
+          */
          enabled: false
       },
       /**
@@ -39,7 +41,7 @@ exports.config = {
          enabled: false
       },
       /**
-       * Checkout the build, merge in master and perform a build
+       * Checkout the appropriate commit, merge in master and perform a build
        */
 		"git-build":  {
          // Path to a local clone of the github repo
