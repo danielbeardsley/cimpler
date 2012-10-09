@@ -34,6 +34,12 @@ module.exports = {
          enabled: false
       },
       /**
+       * Enable the command line plugin (uses tcp)
+       */
+      cli: {
+         tcpPort: 20001 // if omitted, default port is 20001
+      },
+      /**
        * Run arbitraty shell commands on each build
        */
       shell: {
