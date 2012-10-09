@@ -1,6 +1,25 @@
 var Cimpler  = require('../lib/cimpler')
   , assert = require('assert');
 
+exports.registerPlugins = function(done) {
+   var dummyConfig = { a:1 },
+      config = {
+         plugins: {
+            dummy: dummyConfig,
+            notLoadedPlugin: {
+               enabled: false
+            }
+         }
+      };
+
+   var cimpler = new Cimpler(config);
+  
+   assert.equal(1, cimpler.plugins.length);
+   var dummy = require('../plugins/dummy');
+   assert.equal(dummy, cimpler.plugins[0]);
+   assert.equal(dummyConfig, cimpler.plugins[0].config);
+};
+
 exports.registerPlugin = function(done) {
    var config = {a: 1},
    cb = false,
