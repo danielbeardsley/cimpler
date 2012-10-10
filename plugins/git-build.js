@@ -1,5 +1,6 @@
 var childProcess  = require('child_process'),
     fs            = require('fs'),
+    util          = require('util'),
     path          = require('path');
 
 exports.init = function(config, cimpler) {
@@ -40,9 +41,9 @@ exports.init = function(config, cimpler) {
                stdout += "\n\n" + failed;
                console.log(id(build) + " -- " + failed);
                if (logFilePath(build)) {
-                  fs.writeFile(logFilePath(build), stdout);
+                  fs.writeFileSync(logFilePath(build), stdout);
                }
-               finished();
+               finishedBuild();
             } else {
                if (!build.sha) {
                   build.sha = stdout.trim();
@@ -59,36 +60,47 @@ exports.init = function(config, cimpler) {
             "git merge origin/master) 2>&1";
 
          exec(commands, function(err, stdout) {
+            var nextStep, message;
+
             if (err) {
-               var failed = "Merge Failed";
+               message = "Merge Failed";
+               nextStep = finishedBuild;
                build.status = 'error';
-               build.error = failed;
-               stdout += "\n\n" + failed;
-               console.log(id(build) + " -- " + failed);
-               finished();
+               build.error = message;
+               stdout += "\n\n" + message;
+
             } else {
-               var success = "Merge Successful";
-               stdout += success;
-               console.log(id(build) + " -- " + success);
-               startBuild();
+               message = "Merge Successful";
+               nextStep = startBuild;
+               stdout = message + "\n";
+
             }
 
+            console.log(id(build) + " -- " + message);
             if (logFilePath(build)) {
-               fs.writeFile(logFilePath(build), stdout);
+               fs.writeFileSync(logFilePath(build), stdout);
             }
+
+            nextStep();
          });
       }
 
       function startBuild() {
-         var commands = "(" + config.cmd + ")" +
-            echoStatusCmd('Build') +
-            logRedirection(build);
+         var commands = cdToRepo + " && (" + config.cmd + ")" +
+                        echoStatusCmd('Build');
 
-         exec(commands, function(err, stdout) {
+         var proc = exec(commands, function(err, stdout, stderr) {
             build.status = err ? 'failure' : 'success';
             console.log(id(build) + " -- Build " + build.status);
-            finished();
+            finishedBuild();
          });
+
+         /**
+          * Use piping instead of shell redirection to capture output
+          * in case of a syntax error in cmd
+          */
+         proc.stdout.pipe(logFile(), {end:false});
+         proc.stderr.pipe(logFile(), {end:false});
       }
 
       function logFilePath(inBuild) {
@@ -106,8 +118,16 @@ exports.init = function(config, cimpler) {
          return inBuild.logPath;
       }
 
-      function logRedirection(inBuild) {
-         return ' 1>>"' + logFilePath(inBuild) + '" 2>&1';
+      var logFileStream;
+      function logFile() {
+         return logFileStream  =
+            logFileStream ||
+            fs.createWriteStream(logFilePath(build), {flags:'a+'});
+      }
+
+      function finishedBuild() {
+         if (logFileStream) logFileStream.end();
+         finished();
       }
 
       function exec(cmd, callback) {
