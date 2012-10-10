@@ -19,6 +19,9 @@ exports.init = function(config, cimpler) {
    });
 
    function reportBuildStatus(build, status, description) {
+      // If we don't know the SHA, we can't report the status
+      if (!build.sha) return;
+
       var commitStatus = {
          user: config.user,
          repo: config.repo,
