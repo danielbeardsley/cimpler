@@ -25,7 +25,7 @@ exports.cliInterface = function(done, assert) {
       consumedBuild = true;
       cimpler.shutdown();
 
-      assert.deepEqual(build, inBuild);
+      assert.deepEqual(inBuild, build);
    });
 
    exec(bin + " test", function(stdout) {

@@ -1,5 +1,5 @@
-var Cimpler  = require('../lib/cimpler')
-  , assert = require('assert');
+var Cimpler  = require('../lib/cimpler'),
+    assert = require('assert');
 
 exports.registerPlugins = function(done) {
    var dummyConfig = { a:1 },
@@ -13,8 +13,8 @@ exports.registerPlugins = function(done) {
       };
 
    var cimpler = new Cimpler(config);
-  
-   assert.equal(1, cimpler.plugins.length);
+
+   assert.equal(cimpler.plugins.length, 1);
    var dummy = require('../plugins/dummy');
    assert.equal(dummy, cimpler.plugins[0]);
    assert.equal(dummyConfig, cimpler.plugins[0].config);
@@ -28,8 +28,8 @@ exports.registerPlugin = function(done) {
    cimpler.registerPlugin({
       init: function(inConfig, inCimpler) {
          cb = true;
-         assert.ok(inConfig == config);
-         assert.ok(inCimpler == cimpler);
+         assert.equal(inConfig, config);
+         assert.equal(inCimpler, cimpler);
       }
    }, config);
 
@@ -77,7 +77,7 @@ exports.consumeMultipleBuilds = function(done, assert) {
    cimpler = new Cimpler();
   
    cimpler.consumeBuild(function(inBuild, done) {
-      assert.equal(inBuild, cb == 0 ? first : second);
+      assert.equal(inBuild, cb === 0 ? first : second);
       cb++;
       done();
    });

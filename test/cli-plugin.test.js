@@ -23,7 +23,7 @@ exports.cliInterface = function(done, assert) {
       consumedBuild = true;
       cimpler.shutdown();
 
-      assert.deepEqual(build, inBuild);
+      assert.deepEqual(inBuild, build);
    });
 
    var connection = net.createConnection(tcpPort, "127.0.0.1", function() {

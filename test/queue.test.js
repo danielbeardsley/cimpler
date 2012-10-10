@@ -37,7 +37,7 @@ exports.concurrency = function(done) {
   });
   
   done(function() {
-    assert.ok(concurrency == 0);
+    assert.equal(concurrency, 0);
   })
 };
 
@@ -48,7 +48,7 @@ exports.pop_then_push = function(done) {
   
   queue.pop(function(retjob, done) {
     assert.ok(! cb1);
-    assert.eql(job, retjob);
+    assert.eql(retjob, job);
     cb1 = true;
     done();
   });
@@ -66,7 +66,7 @@ exports.pop_no_push = function(done) {
   
   queue.pop(function(retjob, done) {
     assert.ok(! cb1);
-    assert.eql(job, retjob);
+    assert.eql(retjob, job);
     cb1 = true;
     done();
   });
