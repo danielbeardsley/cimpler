@@ -38,35 +38,32 @@ exports.registerPlugin = function(done) {
    });
 };
 
-exports.onNewBuild = function(done) {
+exports['build events'] = function(done) {
    var build = {a: 1},
-   cb = 0,
+   cb = [],
    cimpler = new Cimpler();
   
-   cimpler.on('newBuild', function(inBuild) {
+   cimpler.on('buildAdded', function(inBuild) {
       assert.equal(inBuild, build);
-      cb++;
+      cb.push('added');
    });
    cimpler.addBuild(build);
-
-   done(function() {
-      assert.equal(cb, 1);
-   });
-};
-
-exports.consumeBuild = function(done) {
-   var build = {a: 1},
-   cb = 0,
-   cimpler = new Cimpler();
-  
-   cimpler.consumeBuild(function(inBuild) {
+   cimpler.on('buildStarted', function(inBuild) {
       assert.equal(inBuild, build);
-      cb++;
+      cb.push('started');
    });
-   cimpler.addBuild(build);
+   cimpler.consumeBuild(function(inBuild, done) {
+      assert.equal(inBuild, build);
+      cb.push('consumed');
+      done();
+   });
+   cimpler.on('buildFinished', function(inBuild) {
+      assert.equal(inBuild, build);
+      cb.push('finished');
+   });
 
    done(function() {
-      assert.equal(cb, 1);
+      assert.deepEqual(cb, ['added', 'consumed', 'started', 'finished']);
    });
 };
 
@@ -86,25 +83,6 @@ exports.consumeMultipleBuilds = function(done, assert) {
 
    done(function() {
       assert.equal(cb, 2);
-   });
-};
-
-exports.finishedBuild = function(done) {
-   var build = {a: 1},
-   cb = 0,
-   cimpler = new Cimpler();
-  
-   cimpler.addBuild(build);
-   cimpler.on('finishBuild', function(inBuild) {
-      assert.equal(inBuild, build);
-      cb++;
-   });
-   cimpler.consumeBuild(function(inBuild, finished) {
-      finished();
-   });
-
-   done(function() {
-      assert.equal(cb, 1);
    });
 };
 

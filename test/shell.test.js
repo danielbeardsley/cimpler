@@ -32,7 +32,7 @@ exports.shellEnvironment = function(done, assert) {
       status: 'began'
    });
 
-   cimpler.on('finishBuild',
+   cimpler.on('buildFinished',
       function(build) {
          cb = true;
          var exists = fs.statSync(tempFile);
@@ -69,7 +69,7 @@ function testCommand(cmd, status, done, assert) {
       });
    cimpler.addBuild({});
 
-   cimpler.on('finishBuild',
+   cimpler.on('buildFinished',
       function(build) {
          cb = true;
          assert.equal(build.status, status);
