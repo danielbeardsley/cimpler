@@ -53,6 +53,7 @@ function getSha() {
 }
 
 function triggerBuild() {
+   process.stdout.write("Triggering build on " + build.branch + " ... ");
    var connection = net.createConnection(tcpPort, "127.0.0.1", function() {
       connection.end(JSON.stringify(build));
    });
@@ -71,6 +72,11 @@ function triggerBuild() {
       if (body !== 'OK') {
          process.exit(1);
       }
+   });
+
+   connection.on('error', function() {
+      console.log("Couldn't connect to cimpler server");
+      process.exit(1);
    });
 }
 
