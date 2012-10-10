@@ -11,9 +11,6 @@ build          = {};
 var plugins = config.plugins;
 var tcpPort = (plugins && plugins.cli && plugins.cli.tcpPort) || defaultTcpPort;
 
-console.log("TCPPORT:");
-console.log(tcpPort);
-
 exec("git remote -v", function(stdout) {
    // Output looks like:
    // origin  http://remote_url (fetch)
