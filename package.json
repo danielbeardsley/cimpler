@@ -15,7 +15,8 @@
    },
 
    "dependencies": {
-      "github": "~0.1.5"
+      "github": "~0.1.5",
+      "optimist": "~0.3.4"
    },
 
    "devDependencies" : {

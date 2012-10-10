@@ -11,7 +11,9 @@ exports.init = function(config, cimpler) {
    /**
     * Listen for post-recieve hooks
     */
-   var server = net.createServer(function(connection) {
+   var server = net.createServer({
+         allowHalfOpen: true
+      }, function(connection) {
       if (allowedIps.indexOf(connection.address().address) < 0) {
          util.error("Connection denied from: " +
             JSON.stringify(connection.address()));
@@ -28,9 +30,12 @@ exports.init = function(config, cimpler) {
          try {
             var build = JSON.parse(body);
             cimpler.addBuild(build);
+            connection.end('OK');
          } catch (e) {
-            util.error("Bad command line request");
+            var msg = "Error processing command line request." + e.message;
+            util.error(msg);
             util.error(e.stack);
+            connection.end(msg + " -- " + e.message);
          }
       });
    });
