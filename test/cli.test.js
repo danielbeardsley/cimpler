@@ -1,4 +1,5 @@
-var Cimpler  = require('../lib/cimpler'),
+var Cimpler      = require('../lib/cimpler'),
+    util         = require('util'),
     childProcess = require('child_process');
 
 exports.cliInterface = function(done, assert) {
@@ -12,6 +13,7 @@ exports.cliInterface = function(done, assert) {
    options = {
       cwd: __dirname + "/../fixtures/repo/"
    },
+   cimplerCalled = false,
    consumedBuild = false;
 
    var build = {
