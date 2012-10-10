@@ -42,9 +42,9 @@ exports.init = function(config, cimpler) {
 
       function startMerge() {
          var commands = 
-            '(set -v; set -x; printenv;' +
+            '(set -v; set -x;' +
             'cd "' + config.repoPath + '" && ' +
-            "gig fetch && " +
+            "git fetch && " +
             "git reset --hard && " +
             "git checkout $BUILD_SHA && " +
             "git merge origin/master) 2>&1";
@@ -75,6 +75,7 @@ exports.init = function(config, cimpler) {
             echoStatusCmd('Build') +
             logRedirection;
 
+         console.log(build.sha + " -- Running: " + commands);
          exec(commands, function(err, stdout) {
             build.status = err ? 'failure' : 'success';
             console.log(build.sha + " -- Build " + build.status);
