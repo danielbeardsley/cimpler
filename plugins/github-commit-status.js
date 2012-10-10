@@ -9,22 +9,23 @@ exports.init = function(config, cimpler) {
       password: config.auth.pass
    });
 
-   cimpler.on('finishBuild', function(build) {
-      reportBuildStatus(build);
+   cimpler.on('buildStarted', function(build) {
+      reportBuildStatus(build, 'pending', 'Build Started');
    });
 
-   cimpler.on('newBuild', function(build) {
-      reportBuildStatus(build);
+   cimpler.on('buildFinished', function(build) {
+      var desc = build.error || ("Build " + build.status);
+      reportBuildStatus(build, build.status, desc);
    });
 
-   function reportBuildStatus(build) {
+   function reportBuildStatus(build, status, description) {
       var commitStatus = {
          user: config.user,
          repo: config.repo,
          sha: build.sha,
-         state: build.status,
+         state: status,
          target_url: build.logUrl,
-         description: "Build " + build.status };
+         description: description };
       GitHub.statuses.create(commitStatus);
    }
 };
