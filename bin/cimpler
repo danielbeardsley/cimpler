@@ -35,19 +35,11 @@ exec("git remote -v", function(stdout) {
 function getBranch() {
    if (args.branch) {
       build.branch = args.branch;
-      return getSha();
+      return triggerBuild();
    }
 
    exec("git symbolic-ref HEAD --short", function(stdout) {
       build.branch = stdout.trim();
-      getSha();
-   });
-}
-
-function getSha() {
-   var branch = build.branch || 'HEAD';
-   exec("git rev-parse " + branch, function(stdout) {
-      build.sha = stdout.trim();
       triggerBuild();
    });
 }

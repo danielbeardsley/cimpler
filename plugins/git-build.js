@@ -13,8 +13,7 @@ exports.init = function(config, cimpler) {
          },
          timeout: config.timeout || 0
       },
-      logFilePath,
-      logRedirection = '';
+      cdToRepo = 'set -v; set -x; cd "' + config.repoPath + '"';
 
       for(var key in process.env) {
          execOptions.env[key] = process.env[key];
@@ -24,29 +23,39 @@ exports.init = function(config, cimpler) {
          throw new Error("Missing the 'path' option of git-build config");
       }
 
-      var logRedirection = "";
-      if (config.logs.path) {
-         var logFilename = build.branch + "--" + build.sha + ".log";
+      console.log(id(build) + " -- Building with git");
 
-         logFilePath = path.join(config.logs.path, logFilename);
-         logRedirection = ' 1>"' + logFilePath + '" 2>&1';
+      startFetch();
 
-         if (config.logs.url) {
-            build.logUrl = path.join(config.logs.url, logFilename);
-         }
+      function startFetch() {
+         var commands = '(cd "' + config.repoPath + '" && ' +
+            "git fetch --quiet 2>/dev/null && " +
+            "git rev-parse origin/" + build.branch + ") 2>&1";
+
+         exec(commands, function(err, stdout) {
+            if (err) {
+               var failed = "Fetch Failed";
+               build.status = 'error';
+               build.error = failed;
+               stdout += "\n\n" + failed;
+               console.log(id(build) + " -- " + failed);
+               if (logFilePath(build)) {
+                  fs.writeFile(logFilePath(build), stdout);
+               }
+               finished();
+            } else {
+               if (!build.sha) {
+                  build.sha = stdout.trim();
+               }
+               startMerge();
+            }
+         });
       }
 
-      console.log(build.sha + " -- Building with git");
-
-      startMerge();
-
       function startMerge() {
-         var commands = 
-            '(set -v; set -x;' +
-            'cd "' + config.repoPath + '" && ' +
-            "git fetch && " +
+         var commands = '(' + cdToRepo + " && " +
             "git reset --hard && " +
-            "git checkout $BUILD_SHA && " +
+            "git checkout "+build.sha+" && " +
             "git merge origin/master) 2>&1";
 
          exec(commands, function(err, stdout) {
@@ -55,17 +64,17 @@ exports.init = function(config, cimpler) {
                build.status = 'error';
                build.error = failed;
                stdout += "\n\n" + failed;
-               console.log(build.sha + " -- " + failed);
+               console.log(id(build) + " -- " + failed);
                finished();
             } else {
                var success = "Merge Successful";
                stdout += success;
-               console.log(build.sha + " -- " + success);
+               console.log(id(build) + " -- " + success);
                startBuild();
             }
 
-            if (logFilePath) {
-               fs.writeFile(logFilePath, stdout);
+            if (logFilePath(build)) {
+               fs.writeFile(logFilePath(build), stdout);
             }
          });
       }
@@ -73,14 +82,32 @@ exports.init = function(config, cimpler) {
       function startBuild() {
          var commands = "(" + config.cmd + ")" +
             echoStatusCmd('Build') +
-            logRedirection;
+            logRedirection(build);
 
-         console.log(build.sha + " -- Running: " + commands);
          exec(commands, function(err, stdout) {
             build.status = err ? 'failure' : 'success';
-            console.log(build.sha + " -- Build " + build.status);
+            console.log(id(build) + " -- Build " + build.status);
             finished();
          });
+      }
+
+      function logFilePath(inBuild) {
+         if (!config.logs.path)
+            return null;
+
+         var logFilename = (inBuild.branch || 'HEAD') + "--" +
+                           (inBuild.sha || 'unknown') + ".log";
+
+         if (config.logs.url) {
+            inBuild.logUrl = path.join(config.logs.url, logFilename);
+         }
+
+         inBuild.logPath = path.join(config.logs.path, logFilename);
+         return inBuild.logPath;
+      }
+
+      function logRedirection(inBuild) {
+         return ' 1>>"' + logFilePath(inBuild) + '" 2>&1';
       }
 
       function exec(cmd, callback) {
@@ -88,6 +115,11 @@ exports.init = function(config, cimpler) {
             function(err, stdout, stderr) {
                callback(err, stdout.toString());
             });
+      }
+
+      function id(inBuild) {
+         return inBuild.branch +
+            (inBuild.sha ? ' (' + inBuild.sha.substr(0,10) + ')' : '');
       }
    });
 
