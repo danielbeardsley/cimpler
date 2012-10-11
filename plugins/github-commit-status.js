@@ -2,12 +2,11 @@ var util   = require('util'),
 GitHubApi  = require('github');
 
 exports.init = function(config, cimpler) {
+   // Just to allow mocking the api in the tests.
+   var GitHubApi = config._overrideApi || GitHubApi;
+
    var GitHub = new GitHubApi({ version: '3.0.0' });
-   GitHub.authenticate({
-      type: 'basic',
-      username: config.auth.user,
-      password: config.auth.pass
-   });
+   GitHub.authenticate(config.auth);
 
    cimpler.on('buildStarted', function(build) {
       reportBuildStatus(build, 'pending', 'Build Started');
@@ -15,7 +14,7 @@ exports.init = function(config, cimpler) {
 
    cimpler.on('buildFinished', function(build) {
       var desc = build.error || ("Build " + build.status);
-      reportBuildStatus(build, build.status, desc);
+      reportBuildStatus(build, build.error ? 'error' : build.status, desc);
    });
 
    function reportBuildStatus(build, status, description) {

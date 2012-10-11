@@ -6,10 +6,15 @@ module.exports = {
       'github-commit-status': {
          /**
           * For updating commit status via the github API
+          *
+          * Passed straight through to github.authenticate()
+          * from the `github` npm module:
+          * https://github.com/ajaxorg/node-github
           */
          auth: {
-            user: 'githubuser',
-            pass: 'password'
+            type: 'basic', // or 'oauth'
+            username: 'githubuser',
+            password: 'password'
          },
          /**
           * user/repo to update
