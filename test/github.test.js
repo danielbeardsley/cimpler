@@ -42,7 +42,7 @@ exports.githubPostRecieve = function(done, assert) {
    req.write("payload=" + encodeURIComponent(JSON.stringify(postBuild)));
    req.end();
 
-   cimpler.consumeBuild(function(build, done) {
+   cimpler.consumeBuild(function(build, started, finished) {
       assert.equal(cb, 0, "Only one build should get through");
       cb++;
 
@@ -52,7 +52,7 @@ exports.githubPostRecieve = function(done, assert) {
          branch:  'master',
          status:  'pending'
       });
-      done();
+      finished();
    });
 
    setTimeout(function() {

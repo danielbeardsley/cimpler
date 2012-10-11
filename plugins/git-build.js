@@ -4,7 +4,7 @@ var childProcess  = require('child_process'),
     path          = require('path');
 
 exports.init = function(config, cimpler) {
-   cimpler.consumeBuild(function(build, finished) {
+   cimpler.consumeBuild(function(build, started, finished) {
       var execOptions = {
          env: {
             BUILD_REPO:   build.repo,
@@ -76,9 +76,14 @@ exports.init = function(config, cimpler) {
 
             }
 
+            // Assigns a log file to this build
+            var logPath = logFilePath(build);
+            // Fire the started event now that our build has a log.
+            started();
+
             console.log(id(build) + " -- " + message);
-            if (logFilePath(build)) {
-               fs.writeFileSync(logFilePath(build), stdout);
+            if (logPath) {
+               fs.writeFileSync(logPath, stdout);
             }
 
             nextStep();

@@ -1,7 +1,7 @@
 var childProcess = require('child_process');
 
 exports.init = function(config, cimpler) {
-   cimpler.consumeBuild(function(build, finished) {
+   cimpler.consumeBuild(function(build, started, finished) {
       var options = {
          env: {
             BUILD_REPO:   build.repo,

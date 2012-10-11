@@ -20,11 +20,10 @@ exports.cliInterface = function(done, assert) {
    var build = {
       remote: 'http://example.com/repo.git',
       branch: 'master',
-      sha:    'aac5cd96ddd3173678e3666d677699ea6adce875',
       status: 'pending'
    };
 
-   cimpler.consumeBuild(function(inBuild, done) {
+   cimpler.consumeBuild(function(inBuild, started, finished) {
       builtBranches.push(inBuild.branch);
       if (builtBranches.length >= expectedBuilds) {
          cimpler.shutdown();
@@ -32,7 +31,7 @@ exports.cliInterface = function(done, assert) {
       assert.deepEqual(inBuild, build);
       // So the next assertion will succeed
       build.branch = 'test-branch';
-      done();
+      finished();
    });
 
    exec(bin, function(stdout) { }, /* expect failure = */ true);

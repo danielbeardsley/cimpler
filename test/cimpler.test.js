@@ -52,10 +52,13 @@ exports['build events'] = function(done) {
       assert.equal(inBuild, build);
       cb.push('started');
    });
-   cimpler.consumeBuild(function(inBuild, done) {
+   cimpler.consumeBuild(function(inBuild, started, finished) {
       assert.equal(inBuild, build);
       cb.push('consumed');
-      done();
+      process.nextTick(function() {
+         started();
+         process.nextTick(function() { finished();});
+      });
    });
    cimpler.on('buildFinished', function(inBuild) {
       assert.equal(inBuild, build);
@@ -73,10 +76,10 @@ exports.consumeMultipleBuilds = function(done, assert) {
    cb = 0,
    cimpler = new Cimpler();
   
-   cimpler.consumeBuild(function(inBuild, done) {
+   cimpler.consumeBuild(function(inBuild, started, finished) {
       assert.equal(inBuild, cb === 0 ? first : second);
       cb++;
-      done();
+      finished();
    });
    cimpler.addBuild(first);
    cimpler.addBuild(second);
