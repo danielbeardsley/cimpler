@@ -3,7 +3,7 @@ GitHubApi  = require('github');
 
 exports.init = function(config, cimpler) {
    // Just to allow mocking the api in the tests.
-   var GitHubApi = config._overrideApi || GitHubApi;
+   GitHubApi = config._overrideApi || GitHubApi;
 
    var GitHub = new GitHubApi({ version: '3.0.0' });
    GitHub.authenticate(config.auth);
