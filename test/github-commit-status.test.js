@@ -40,7 +40,7 @@ exports['started then finished'] = function(done, assert) {
 
 exports['build Error'] = function(done, assert) {
    var build = {
-      repo: "git://github.com/user/repo.git",
+      repo: "git://github.com:user/repo.git",
       status: 'BLAH',
       sha: '11111', 
       logUrl: 'http',

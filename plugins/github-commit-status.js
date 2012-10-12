@@ -40,7 +40,7 @@ exports.init = function(config, cimpler) {
 };
 
 function extractRepoFromURL(url) {
-   var matches = url.match(/([^\/]+)\/([^\/.]+)(\.git|$)/);
+   var matches = url.match(/([^:\/]+)\/([^\/.]+)(\.git|$)/);
    return {
       user: matches[1],
       name: matches[2]
