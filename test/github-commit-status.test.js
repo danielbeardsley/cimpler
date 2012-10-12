@@ -16,6 +16,7 @@ exports.authentication = function(done, assert) {
 
 exports['started then finished'] = function(done, assert) {
    var build = {
+      repo: "git://github.com/user/repo.git",
       status: 'BLAH',
       sha: '11111', 
       logUrl: 'http'
@@ -39,6 +40,7 @@ exports['started then finished'] = function(done, assert) {
 
 exports['build Error'] = function(done, assert) {
    var build = {
+      repo: "git://github.com/user/repo.git",
       status: 'BLAH',
       sha: '11111', 
       logUrl: 'http',
@@ -69,9 +71,7 @@ function sendBuild(assert, build, callback) {
    GH = newApi();
 
    cimpler.registerPlugin(GCS, {
-      _overrideApi: GH,
-      user: 'user',
-      repo: 'repo'
+      _overrideApi: GH
    });
 
    statuses = GH.collected.statuses;

@@ -18,12 +18,19 @@ exports.init = function(config, cimpler) {
    });
 
    function reportBuildStatus(build, status, description) {
+      // Don't report status for non-github repos
+      if (build.repo.indexOf('github.com') == -1) {
+         return;
+      }
+
+      var repo = extractRepoFromURL(build.repo);
+
       // If we don't know the SHA, we can't report the status
       if (!build.sha) return;
 
       var commitStatus = {
-         user: config.user,
-         repo: config.repo,
+         user: repo.user,
+         repo: repo.name,
          sha: build.sha,
          state: status,
          target_url: build.logUrl,
@@ -31,3 +38,11 @@ exports.init = function(config, cimpler) {
       GitHub.statuses.create(commitStatus);
    }
 };
+
+function extractRepoFromURL(url) {
+   var matches = url.match(/([^\/]+)\/([^\/.]+)(\.git|$)/);
+   return {
+      user: matches[1],
+      name: matches[2]
+   };
+}

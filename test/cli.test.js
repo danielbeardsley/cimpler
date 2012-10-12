@@ -18,7 +18,7 @@ exports.cliInterface = function(done, assert) {
    consumedBuild  = false;
 
    var build = {
-      remote: 'http://example.com/repo.git',
+      repo:   'http://example.com/repo.git',
       branch: 'master',
       status: 'pending'
    };

@@ -15,12 +15,7 @@ module.exports = {
             type: 'basic', // or 'oauth'
             username: 'githubuser',
             password: 'password'
-         },
-         /**
-          * user/repo to update
-          */
-         user: 'user',
-         repo: 'repo'
+         }
       },
       github: {
          /**

@@ -28,7 +28,7 @@ var tcpPort = args.port ||
 exec("git remote -v", function(stdout) {
    // Output looks like:
    // origin  http://remote_url (fetch)
-   build.remote = stdout.split(/\s+/)[1];
+   build.repo = stdout.split(/\s+/)[1];
    getBranch();
 });
 
