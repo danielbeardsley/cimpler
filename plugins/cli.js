@@ -9,7 +9,9 @@ exports.init = function(config, cimpler) {
    var cliPort = config.tcpPort || 20001;
 
    /**
-    * Listen for post-recieve hooks
+    * Listen for incoming data via TCP
+    *
+    * This expects the entirety of the packet to be a JSON encoded build object
     */
    var server = net.createServer({
          allowHalfOpen: true

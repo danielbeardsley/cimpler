@@ -15,6 +15,7 @@ manage one repo at a time.
 
     $ git clone https://github.com/danielbeardsley/cimpler.git
     $ cd cimpler
+    $ npm install --production
     $ cp config.sample.js config.js
 
 ## Configuration
@@ -33,12 +34,58 @@ least github's servers).
 
 ## Hacking
 
+    $ npm install
+    $ npm test
+
 The architecture is very simple and based on plugins.  A plugin has access to
-several methods.
+several methods and events. Please look at the existing plugins as a guide to
+writing your own.
+
+### Plugins
+
+A plugin is a node.js module that exports an object which has an `init`
+property like: `function(config, cimpler)`
+
+* __config:__ The value from the corresponding entry in config.js ("some value"
+    from below)
+
+        // config.js
+        module.exports = {
+           plugins: {
+              'plugin-name': "some value" // passed to the init() function
+           }, ...
+        }
+
+* __cimpler:__ an instance of Cimpler which exposes methods and events
+   * Methods:
+      * `.addBuild(build)` : Adds a build to the system. A build is an object
+        with these properties at a minimum:
+         * `repo` : a string identifying the repository of the build (a url,
+           a local path to the originating repo)
+         * `branch` : The name of the branch this build should be run against
+      * `.consumeBuild(callback)` : registers this plugin as a build consumer.
+         * `callback` has signature: `function(build, started, finished)`
+            * `started()` and `finished()` are both functions a plugin should
+              call when a build is started and finished.
+            * `started()` and the `buildStarted` event will be triggered
+              implicitly if `finished()` is called first.
+         * The callback will be called for every build, serially. `callback()`
+           will only be called for the next build once `finished()` is called.
+      * `.shutdown()` : Initiates shutdown of the server and triggers the
+        `shutdown` event.
+   * Events:
+      * `buildAdded(build)` : Emitted immediately after `cimpler.addBuild`
+        is called
+      * `buildStarted(build)` : Emitted after a build has been started by
+        a build consumer
+      * `buildFinished(build)` : Emitted after a build has finished
+      * `shutdown` : Your plugin should release it's resources because the
+        server is shutting down.
+
 
 ## Requirements
 
- * [Node.js](http://nodejs.org/)
+ * [Node.js](http://nodejs.org/) (0.6 and above)
 
 ## Inspired By
 
