@@ -23,7 +23,7 @@ exports.shellEnvironment = function(done, assert) {
    // Load the shell plugin with a cmd that writes the env vars to a file
    cimpler.registerPlugin(
       require('../plugins/shell'),
-      { cmd: 'echo -n "$' + envVars.join(' $') + '" >> ' + tempFile });
+      { cmd: 'echo "$' + envVars.join(' $') + '" >> ' + tempFile });
 
    cimpler.addBuild({
       repo:'repo',
@@ -47,7 +47,7 @@ exports.shellEnvironment = function(done, assert) {
             'began' // build.status (status will have changed)
          ].join(' ');
 
-         assert.equal(contents, expectedContents);
+         assert.equal(contents, expectedContents + "\n");
          if (exists)
             fs.unlink(tempFile);
       });
