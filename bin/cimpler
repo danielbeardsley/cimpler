@@ -1,4 +1,4 @@
-#!/bin/env node
+#!/usr/bin/env node
 
 var config = require('../config.js'),
 net            = require('net'),
