@@ -1,5 +1,6 @@
 var Cimpler       = require('../lib/cimpler'),
     dummyPlugin   = require('../plugins/dummy'),
+    expect        = require("./expect"),
     assert        = require('assert');
 
 describe("Cimpler", function() {
@@ -79,14 +80,6 @@ describe("Cimpler", function() {
             cb.push('finished');
             check();
          });
-
-         function expect(count, callback) {
-            return function() {
-               if (--count == 0) {
-                  callback();
-               }
-            }
-         };
       });
    });
 
