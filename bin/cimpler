@@ -2,8 +2,9 @@
 
 var net        = require('net'),
 util           = require('util'),
-util           = require('fs'),
+fs             = require('fs'),
 childProcess   = require('child_process'),
+error          = (util.error || console.log),
 execOptions    = {},
 defaultTcpPort = 20001,
 build          = {},
@@ -77,7 +78,8 @@ function triggerBuild() {
 function exec(cmd, callback) {
    childProcess.exec(cmd, execOptions, function(err, stdout) {
       if (err) {
-         util.error("Command failed: " + cmd);
+         error("Command failed: " + cmd);
+         error(err.trace);
          process.exit(1);
       }
       callback(stdout.toString());
@@ -90,6 +92,6 @@ function loadConfig(path) {
       if (fs.statSync(path)) {
          return require(path);
       }
-   } catch (error) {}
+   } catch (err) {}
    return {};
 }
