@@ -9,7 +9,8 @@ exports.cliInterface = function(done, assert) {
    cimpler = new Cimpler({
       plugins: {
          cli: { tcpPort: tcpPort}
-      }
+      },
+      testMode: true  // Don't console.log() anything
    });
 
    var build = {

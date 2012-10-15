@@ -9,7 +9,8 @@ exports.registerPlugins = function(done) {
             notLoadedPlugin: {
                enabled: false
             }
-         }
+         },
+         testMode: true  // Don't console.log() anything
       };
 
    var cimpler = new Cimpler(config);

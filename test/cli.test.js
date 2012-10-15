@@ -11,7 +11,8 @@ exports.cliInterface = function(done, assert) {
          cli: {
             tcpPort: cliPort
          }
-      }
+      },
+      testMode: true  // Don't console.log() anything
    }),
    bin = "../../bin/cimpler -p " + cliPort,
    builtBranches  = [],
