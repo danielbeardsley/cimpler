@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
-var config = require('../config.js'),
-net            = require('net'),
+var net        = require('net'),
 util           = require('util'),
+util           = require('fs'),
 childProcess   = require('child_process'),
 execOptions    = {},
 defaultTcpPort = 20001,
 build          = {},
-
 args           = require('optimist')
    .demand(1)
    .usage("Usage: cimpler test [-b branch-name]")
@@ -20,9 +19,12 @@ args           = require('optimist')
       describe: 'TCP port of the cimpler server (defaults to value in config.js)'
    }).argv;
 
-var plugins = config.plugins;
+
+var plugins;
 var tcpPort = args.port ||
-              (plugins && plugins.cli && plugins.cli.tcpPort) ||
+              ((plugins = loadConfig(__dirname + '/../config.js').plugins) &&
+               plugins.cli &&
+               plugins.cli.tcpPort) ||
               defaultTcpPort;
 
 exec("git remote -v", function(stdout) {
@@ -82,3 +84,12 @@ function exec(cmd, callback) {
    });
 }
 
+
+function loadConfig(path) {
+   try {
+      if (fs.statSync(path)) {
+         return require(path);
+      }
+   } catch (error) {}
+   return {};
+}
