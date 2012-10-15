@@ -1,64 +1,71 @@
 var Cimpler  = require('../lib/cimpler'),
-    fs = require('fs');
+    assert   = require('assert'),
+    fs       = require('fs');
 
-exports.shellCmdBad = function(done, assert) {
-   testCommand('exit 1', 'failed', done, assert);
-};
-
-exports.shellCmdGood = function(done, assert) {
-   testCommand('exit 0', 'success', done, assert);
-};
-
-exports.shellEnvironment = function(done, assert) {
-   var cb = false,
-   tempFile = "/tmp/cimpler_" + Math.floor(Math.random() * 100000),
-   // All the environment variables set by the shell plugin
-   envVars = [
-      'BUILD_REPO',
-      'BUILD_SHA',
-      'BUILD_BRANCH',
-      'BUILD_STATUS'],
-   cimpler = new Cimpler();
-
-   // Load the shell plugin with a cmd that writes the env vars to a file
-   cimpler.registerPlugin(
-      require('../plugins/shell'),
-      { cmd: 'echo "$' + envVars.join(' $') + '" >> ' + tempFile });
-
-   cimpler.addBuild({
-      repo:'repo',
-      sha: '12345',
-      branch: 'master',
-      status: 'began'
-   });
-
-   cimpler.on('buildFinished',
-      function(build) {
-         cb = true;
-         var exists = fs.statSync(tempFile);
-         assert.ok(exists);
-
-         // This file should have been written by the plugin
-         var contents = fs.readFileSync(tempFile, 'utf8');
-         var expectedContents = [
-            build.repo,
-            build.sha,
-            build.branch,
-            'began' // build.status (status will have changed)
-         ].join(' ');
-
-         assert.equal(contents, expectedContents + "\n");
-         if (exists)
-            fs.unlink(tempFile);
+describe("Shell plugin", function() {
+   describe("exiting with status code = 1", function() {
+      it("should trigger failure", function(done) {
+         testCommand('exit 1', 'failed', done);
       });
-
-   done(function() {
-      assert.ok(cb);
    });
-};
+
+   describe("exiting with status code = 0", function() {
+      it("should trigger success", function(done) {
+         testCommand('exit 0', 'success', done);
+      });
+   });
+
+   describe("environment variables", function() {
+      it("should pass all the useful info", function(done) {
+         var cb = false,
+         tempFile = "/tmp/cimpler_" + Math.floor(Math.random() * 100000),
+         // All the environment variables set by the shell plugin
+         envVars = [
+            'BUILD_REPO',
+            'BUILD_SHA',
+            'BUILD_BRANCH',
+            'BUILD_STATUS'],
+         cimpler = new Cimpler();
+
+         // Load the shell plugin with a cmd that writes the env vars to a file
+         cimpler.registerPlugin(
+            require('../plugins/shell'),
+            { cmd: 'echo "$' + envVars.join(' $') + '" >> ' + tempFile });
+
+         cimpler.addBuild({
+            repo:'repo',
+            sha: '12345',
+            branch: 'master',
+            status: 'began'
+         });
+
+         cimpler.on('buildFinished',
+            function(build) {
+               cb = true;
+               var exists = fs.statSync(tempFile);
+               assert.ok(exists);
+
+               // This file should have been written by the plugin
+               var contents = fs.readFileSync(tempFile, 'utf8');
+               var expectedContents = [
+                  build.repo,
+                  build.sha,
+                  build.branch,
+                  'began' // build.status (status will have changed)
+               ].join(' ');
+
+               assert.equal(contents, expectedContents + "\n");
+               if (exists)
+                  fs.unlink(tempFile);
+
+               done();
+            });
+      });
+   });
+});
 
 
-function testCommand(cmd, status, done, assert) {
+function testCommand(cmd, status, done) {
    var cb = false,
    cimpler = new Cimpler();
   
@@ -70,12 +77,8 @@ function testCommand(cmd, status, done, assert) {
    cimpler.addBuild({});
 
    cimpler.on('buildFinished',
-      function(build) {
-         cb = true;
-         assert.equal(build.status, status);
-      });
-
-   done(function() {
-      assert.ok(cb);
+   function(build) {
+      assert.equal(build.status, status);
+      done();
    });
 }
