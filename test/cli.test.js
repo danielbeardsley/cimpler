@@ -1,6 +1,8 @@
 var Cimpler      = require('../lib/cimpler'),
     util         = require('util'),
+    fs           = require('fs'),
     childProcess = require('child_process'),
+    testRepoDir  = __dirname + "/../fixtures/repo/"
     cliPort      = 20003;
 
 exports.cliInterface = function(done, assert) {
@@ -59,11 +61,14 @@ exports.cliInterface = function(done, assert) {
    done(function() {
       assert.equal(cimplerCalls, 2);
       assert.deepEqual(builtBranches, ['master', 'test-branch']);
+      cleanupTestRepo();
    });
 
    function exec(cmd, callback, expectFailure) {
+      prepareTestRepo();
+
       var execOptions = {
-         cwd: __dirname + "/../fixtures/repo/"
+         cwd: testRepoDir
       };
       childProcess.exec(cmd, execOptions, function(err, stdout, stderr) {
          if (!expectFailure && err) {
@@ -76,3 +81,33 @@ exports.cliInterface = function(done, assert) {
       });
    }
 };
+
+/**
+ * Because Git doesn't allow adding any files or dirs named .git
+ * we can't add the test repo's .git dir directly to the main repo.
+ * We must resort to dynamically creating and destroying a
+ * "symlink-like" file that points git to a different folder for
+ * the actual repo dir.
+ *
+ * Actual repo dir:        fixtures/repo/git
+ * "symlink" to repo dir:  fixtures/repo/.git
+ */
+var testRepoPrepared = false;
+function prepareTestRepo() {
+   if (testRepoPrepared) {
+      return;
+   }
+
+   try {
+      fs.writeFileSync(testRepoDir + '.git', "gitdir: ./git");
+      testRepoPrepared  = true;
+   } catch (err) {}
+}
+
+function cleanupTestRepo() {
+   if (!testRepoPrepared) {
+      return;
+   }
+
+   fs.unlink(testRepoDir + '.git');
+}
