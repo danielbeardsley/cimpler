@@ -57,7 +57,7 @@ function passesWhitelist(req, res) {
 }
 
 function extractBuildInfo(requestBody) {
-   body = decodeURIComponent(requestBody);
+   var body = decodeURIComponent(requestBody);
    // Get rid of "payload="
    var payload = body.substring(8);
    var info = JSON.parse(payload);
