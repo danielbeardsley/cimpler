@@ -1,70 +1,84 @@
 var Cimpler  = require('../lib/cimpler'),
-    GCS      = require('../plugins/github-commit-status');
+    GCS      = require('../plugins/github-commit-status'),
+    assert   = require('assert');
 
-exports.authentication = function(done, assert) {
-   var auth = {a: 1},
-   cimpler = new Cimpler(),
-   GH = newApi();
+describe("Github commit status plugin", function() {
+   describe("authentication", function() {
+      it("should pass the 'auth' config object straight through", function() {
+         var auth = {a: 1},
+         cimpler = new Cimpler(),
+         GH = newApi();
 
-   cimpler.registerPlugin(GCS, {
-      auth: auth,
-      _overrideApi: GH
+         cimpler.registerPlugin(GCS, {
+            auth: auth,
+            _overrideApi: GH
+         });
+
+         assert.equal(GH.collected.auth, auth);
+      });
    });
 
-   assert.equal(GH.collected.auth, auth);
-};
+   it("started then finished", function(done) {
+      var build = {
+         repo: "git://github.com/user/repo.git",
+         status: 'BLAH',
+         sha: '11111', 
+         logUrl: 'http'
+      };
 
-exports['started then finished'] = function(done, assert) {
-   var build = {
-      repo: "git://github.com/user/repo.git",
-      status: 'BLAH',
-      sha: '11111', 
-      logUrl: 'http'
-   };
-   sendBuild(assert, build, function(statuses) {
-      assert.equal(statuses.length, 2);
+      sendBuild(assert, build, function(statuses) {
+         assert.equal(statuses.length, 2);
 
-      var status = {
-         user: 'user',
-         repo: 'repo',
-         sha: build.sha,
-         state: 'pending',
-         target_url: build.logUrl,
-         description: 'Build Started' };
-      assert.deepEqual(statuses[0], status);
-      status.description = "Build BLAH";
-      status.state = 'BLAH';
-      assert.deepEqual(statuses[1], status);
+         var status = {
+            user: 'user',
+            repo: 'repo',
+            sha: build.sha,
+            state: 'pending',
+            target_url: build.logUrl,
+            description: 'Build Started' };
+         assert.deepEqual(statuses[0], status);
+         status.description = "Build BLAH";
+         status.state = 'BLAH';
+         assert.deepEqual(statuses[1], status);
+         done();
+      });
    });
-}
 
-exports['build Error'] = function(done, assert) {
-   var build = {
-      repo: "git://github.com:user/repo.git",
-      status: 'BLAH',
-      sha: '11111', 
-      logUrl: 'http',
-      error: "ERR"
-   };
-   sendBuild(assert, build, function(statuses) {
-      assert.equal(statuses.length, 2);
+   describe("build errors", function() {
+      it("should emit an error commit status", function(done) {
+         var build = {
+            repo: "git://github.com:user/repo.git",
+            status: 'BLAH',
+            sha: '11111', 
+            logUrl: 'http',
+            error: "ERR"
+         };
+         sendBuild(assert, build, function(statuses) {
+            assert.equal(statuses.length, 2);
 
-      var status = {
-         user: 'user',
-         repo: 'repo',
-         sha: build.sha,
-         state: 'pending',
-         target_url: build.logUrl,
-         description: 'Build Started' };
+            var status = {
+               user: 'user',
+               repo: 'repo',
+               sha: build.sha,
+               state: 'pending',
+               target_url: build.logUrl,
+               description: 'Build Started' };
 
-      assert.deepEqual(statuses[0], status);
-      // The status for 'finished' will be 'error' if build.error
-      status.description = "ERR";
-      status.state = 'error';
-      assert.deepEqual(statuses[1], status);
+            assert.deepEqual(statuses[0], status);
+            // The status for 'finished' will be 'error' if build.error
+            status.description = "ERR";
+            status.state = 'error';
+            assert.deepEqual(statuses[1], status);
+            done();
+         });
+      });
    });
-}
+});
 
+/**
+ * Passes a build throught thestarted/finished phase and collect the commit
+ * status API calls.
+ */
 function sendBuild(assert, build, callback) {
    var cimpler = new Cimpler(),
    startedBuild = false,
@@ -74,7 +88,7 @@ function sendBuild(assert, build, callback) {
       _overrideApi: GH
    });
 
-   statuses = GH.collected.statuses;
+   var statuses = GH.collected.statuses;
    assert.equal(statuses.length, 0);
 
    cimpler.addBuild(build);
