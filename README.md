@@ -1,5 +1,8 @@
 # cimpler
 
+[![Build
+Status](https://secure.travis-ci.org/danielbeardsley/cimpler.png)](http://travis-ci.org/danielbeardsley/cimpler)
+
 cimpler is a very simple Node.js continous integration server that
 interfaces with [Github post-recieve
 hooks](https://help.github.com/articles/post-receive-hooks) and the
