@@ -41,8 +41,9 @@ function getBranch() {
       return triggerBuild();
    }
 
-   exec("git symbolic-ref HEAD --short", function(stdout) {
-      build.branch = stdout.trim();
+   exec("git symbolic-ref HEAD", function(stdout) {
+      // output == "refs/heads/branch"
+      build.branch = stdout.trim().split('/').pop();
       triggerBuild();
    });
 }
