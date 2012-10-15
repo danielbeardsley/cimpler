@@ -1,77 +1,72 @@
 var Queue  = require('../lib/queue')
   , assert = require('assert');
 
-exports.push_then_pop = function(done) {
-   var job = {a: 1, b: 2}
-    , queue = new Queue()
-    , cb1 = false;
-  
-  queue.push(job);
-  queue.pop(function(retjob, done) {
-    assert.ok(! cb1);
-    assert.eql(job, retjob);
-    cb1 = true;
-    done();
-  });
-  
-  done(function() {
-    assert.ok(cb1);
-  })
-};
+describe("Queue", function() {
+   describe(".push() and .pop()", function() {
+      it("should enqueue and dequeue items", function (done) {
+         var job = {a: 1, b: 2},
+            cb = 0,
+            queue = new Queue();
+        
+         queue.push(job);
+         queue.pop(function(retjob, next) {
+            cb++;
+            assert.equal(cb, 1);
+            assert.equal(job, retjob);
+            next();
+            // Ensure this callback doesn't get called again by
+            // delaying the done()
+            later(function() { done(); });
+         });
+      });
 
-exports.concurrency = function(done) {
-  var job = {a: 1, b: 2}
-    , queue = new Queue()
-    , concurrency = 0;
-  
-  queue.push(job);
-  queue.push(job);
-  queue.pop(function(retjob, done) {
-    concurrency++;
-    if (concurrency > 1) assert.ok(false);
-    // delay a bit
-    setTimeout(function() {
-        done();
-        concurrency--;
-    },10);
-  });
-  
-  done(function() {
-    assert.equal(concurrency, 0);
-  })
-};
+      it("should have a max concurrency of 1", function (done) {
+         var job = {a: 1, b: 2},
+            queue = new Queue(),
+            cb = 0,
+            concurrency = 0;
 
-exports.pop_then_push = function(done) {
-  var job = {a: 2, b: 2}
-    , queue = new Queue()
-    , cb1 = false;
-  
-  queue.pop(function(retjob, done) {
-    assert.ok(! cb1);
-    assert.eql(retjob, job);
-    cb1 = true;
-    done();
-  });
-  queue.push(job);
-  
-  done(function() {
-    assert.ok(cb1);
-  })
-};
+         queue.push(job);
+         queue.push(job);
+         queue.pop(function(retjob, next) {
+            concurrency++;
+            cb++;
+            if (concurrency > 1) assert.fail();
+            // delay a bit
+            later(function() {
+              next();
+              concurrency--;
+              if (concurrency == 0 && cb == 2) done();
+            });
+         });
+      });
 
-exports.pop_no_push = function(done) {
-  var job = {a: 3, b: 2}
-    , queue = new Queue()
-    , cb1 = false;
-  
-  queue.pop(function(retjob, done) {
-    assert.ok(! cb1);
-    assert.eql(retjob, job);
-    cb1 = true;
-    done();
-  });
+      it("should work when pop is called first", function (done) {
+         var job = {a: 1, b: 2},
+            cb = 0,
+            ready = false,
+            queue = new Queue();
+        
+         queue.pop(function(retjob, next) {
+            cb++;
+            assert.ok(ready);
+            assert.equal(cb, 1);
+            assert.equal(job, retjob);
+            next();
+            // Ensure this callback doesn't get called again by
+            // delaying the done()
+            later(function() { done(); });
+         });
+         later(function() {
+            ready = true;
+            queue.push(job);
+         });
+      });
+   });
+});
 
-  done(function() {
-    assert.ok(! cb1);
-  })
-};
+function later(callback) {
+   process.nextTick(function() {
+      process.nextTick(callback);
+   });
+}
