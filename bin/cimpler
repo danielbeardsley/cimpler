@@ -79,7 +79,7 @@ function exec(cmd, callback) {
    childProcess.exec(cmd, execOptions, function(err, stdout) {
       if (err) {
          error("Command failed: " + cmd);
-         error(err.trace);
+         error(err.toString());
          process.exit(1);
       }
       callback(stdout.toString());
