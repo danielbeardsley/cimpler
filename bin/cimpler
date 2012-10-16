@@ -31,8 +31,29 @@ var tcpPort = args.port ||
 exec("git remote -v", function(stdout) {
    // Output looks like:
    // origin  http://remote_url (fetch)
-   build.repo = stdout.split(/\s+/)[1];
-   getBranch();
+   // ...
+   var remotes = stdout.split("\n");
+   // Default to the first remote.
+   var originRemote = remotes[0];
+   // Choose the first remote containing ^origin
+   for(var i=0; i<remotes.length; i++) {
+      if (remotes[i].match(/^origin\s/)){
+         originRemote = remotes[i];
+         break;
+      }
+   }
+   // If we found a remote
+   if (originRemote) {
+      build.repo = originRemote.split(/\s+/)[1];
+      getBranch();
+   } else {
+      exec("git rev-parse --show-toplevel", function(stdout) {
+         // Output looks like:
+         // /usr/blah/path/to/repo
+         build.repo = stdout.trim();
+         getBranch();
+      });
+   }
 });
 
 function getBranch() {

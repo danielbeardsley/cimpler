@@ -6,3 +6,6 @@
 [remote "origin"]
 	url = http://example.com/repo.git
 	fetch = +refs/heads/*:refs/remotes/origin/*
+[remote "first"]
+	url = http://bad.com
+	fetch = +refs/heads/*:refs/remotes/first/*
