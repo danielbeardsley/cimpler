@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+var tcpTrigger = require('../lib/tcp-trigger'),
+    Git        = require('../lib/git'),
+    git        = new Git(process.env.GIT_DIR);
+
+readAll(process.stdin, function(input) {
+   var parts = input.split(/\s+/);
+   var build = {
+      commit: parts[1],
+      branch: parts[2].split('/').pop()
+   };
+
+   git.remote(function(remote, repoPath) {
+      build.repo = remote || repoPath;
+      tcpTrigger(build, process.env.CIMPLER_PORT);
+   });
+});
+
+function readAll(stream, callback) {
+   stream.resume();
+   stream.setEncoding('utf8');
+
+   var data = '';
+   stream.on('data', function (chunk) {
+      data = data + chunk;
+   });
+
+   stream.on('end', function () {
+      callback(data);
+   });
+}
