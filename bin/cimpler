@@ -8,7 +8,6 @@ tcpTrigger     = require('../lib/tcp-trigger'),
 Git            = require('../lib/git'),
 git            = new Git(),
 error          = (util.error || console.log),
-execOptions    = {},
 build          = {},
 args           = require('optimist')
    .demand(1)
@@ -30,24 +29,12 @@ git.remote(function(remote, repoPath) {
 function getBranch() {
    if (args.branch) {
       build.branch = args.branch;
-      return tcpTrigger(build, args.port);
-   }
-
-   exec("git symbolic-ref HEAD", function(stdout) {
-      // output == "refs/heads/branch"
-      build.branch = stdout.trim().split('/').pop();
       tcpTrigger(build, args.port);
-   });
-}
-
-function exec(cmd, callback) {
-   childProcess.exec(cmd, execOptions, function(err, stdout) {
-      if (err) {
-         error("Command failed: " + cmd);
-         error(err.toString());
-         process.exit(1);
-      }
-      callback(stdout.toString());
-   });
+   } else {
+      git.currentBranch(function(branch) {
+         build.branch = branch;
+         tcpTrigger(build, args.port);
+      });
+   }
 }
 
