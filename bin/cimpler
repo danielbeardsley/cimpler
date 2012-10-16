@@ -5,6 +5,8 @@ util           = require('util'),
 fs             = require('fs'),
 childProcess   = require('child_process'),
 tcpTrigger     = require('../lib/tcp-trigger'),
+Git            = require('../lib/git'),
+git            = new Git(),
 error          = (util.error || console.log),
 execOptions    = {},
 build          = {},
@@ -20,39 +22,15 @@ args           = require('optimist')
       describe: 'TCP port of the cimpler server (defaults to value in config.js)'
    }).argv;
 
-
-exec("git remote -v", function(stdout) {
-   // Output looks like:
-   // origin  http://remote_url (fetch)
-   // ...
-   var remotes = stdout.split("\n");
-   // Default to the first remote.
-   var originRemote = remotes[0];
-   // Choose the first remote containing ^origin
-   for(var i=0; i<remotes.length; i++) {
-      if (remotes[i].match(/^origin\s/)){
-         originRemote = remotes[i];
-         break;
-      }
-   }
-   // If we found a remote
-   if (originRemote) {
-      build.repo = originRemote.split(/\s+/)[1];
-      getBranch();
-   } else {
-      exec("git rev-parse --show-toplevel", function(stdout) {
-         // Output looks like:
-         // /usr/blah/path/to/repo
-         build.repo = stdout.trim();
-         getBranch();
-      });
-   }
+git.remote(function(remote, repoPath) {
+   build.repo = remote || repoPath;
+   getBranch();
 });
 
 function getBranch() {
    if (args.branch) {
       build.branch = args.branch;
-      tcpTrigger(build, args.port);
+      return tcpTrigger(build, args.port);
    }
 
    exec("git symbolic-ref HEAD", function(stdout) {
