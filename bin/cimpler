@@ -1,13 +1,10 @@
 #!/usr/bin/env node
 
 var net        = require('net'),
-util           = require('util'),
-fs             = require('fs'),
 childProcess   = require('child_process'),
 tcpTrigger     = require('../lib/tcp-trigger'),
 Git            = require('../lib/git'),
 git            = new Git(),
-error          = (util.error || console.log),
 build          = {},
 args           = require('optimist')
    .demand(1)
