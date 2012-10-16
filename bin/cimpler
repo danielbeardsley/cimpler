@@ -4,9 +4,9 @@ var net        = require('net'),
 util           = require('util'),
 fs             = require('fs'),
 childProcess   = require('child_process'),
+tcpTrigger     = require('../lib/tcp-trigger'),
 error          = (util.error || console.log),
 execOptions    = {},
-defaultTcpPort = 20001,
 build          = {},
 args           = require('optimist')
    .demand(1)
@@ -20,13 +20,6 @@ args           = require('optimist')
       describe: 'TCP port of the cimpler server (defaults to value in config.js)'
    }).argv;
 
-
-var plugins;
-var tcpPort = args.port ||
-              ((plugins = loadConfig(__dirname + '/../config.js').plugins) &&
-               plugins.cli &&
-               plugins.cli.tcpPort) ||
-              defaultTcpPort;
 
 exec("git remote -v", function(stdout) {
    // Output looks like:
@@ -59,41 +52,13 @@ exec("git remote -v", function(stdout) {
 function getBranch() {
    if (args.branch) {
       build.branch = args.branch;
-      return triggerBuild();
+      tcpTrigger(build, args.port);
    }
 
    exec("git symbolic-ref HEAD", function(stdout) {
       // output == "refs/heads/branch"
       build.branch = stdout.trim().split('/').pop();
-      triggerBuild();
-   });
-}
-
-function triggerBuild() {
-   process.stdout.write("Triggering build on " + build.branch + " ... ");
-   var connection = net.createConnection(tcpPort, "127.0.0.1", function() {
-      connection.end(JSON.stringify(build));
-   });
-
-   var body = '';
-   connection.setEncoding('utf8');
-   connection.on('data', function(chunk) {
-      body += chunk;
-   });
-
-   connection.on('end', function() {
-      if (body) {
-         console.log(body);
-      }
-
-      if (body !== 'OK') {
-         process.exit(1);
-      }
-   });
-
-   connection.on('error', function() {
-      console.log("Couldn't connect to cimpler server");
-      process.exit(1);
+      tcpTrigger(build, args.port);
    });
 }
 
@@ -108,12 +73,3 @@ function exec(cmd, callback) {
    });
 }
 
-
-function loadConfig(path) {
-   try {
-      if (fs.statSync(path)) {
-         return require(path);
-      }
-   } catch (err) {}
-   return {};
-}
