@@ -62,6 +62,11 @@ describe("CLI program", function() {
                console.log(stdout.toString());
                console.log(stderr.toString());
                process.exit(1);
+            } else if (expectFailure && !err) {
+               util.error("Command was supposed to fail (but didn't): " + cmd);
+               console.log(stdout.toString());
+               console.log(stderr.toString());
+               process.exit(1);
             }
             callback(stdout.toString());
          });
