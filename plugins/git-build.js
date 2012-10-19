@@ -4,7 +4,16 @@ var childProcess  = require('child_process'),
     path          = require('path');
 
 exports.init = function(config, cimpler) {
-   cimpler.consumeBuild(function(build, started, finished) {
+   var paths = config.repoPath;
+   paths = Array.isArray(paths) ? paths : [paths]
+   paths.forEach(function(repoPath) {
+      var consumer = buildConsumer(config, cimpler, repoPath);
+      cimpler.consumeBuild(consumer);
+   });
+}
+
+function buildConsumer(config, cimpler, repoPath) {
+   return function(build, started, finished) {
       var execOptions = {
          env: {
             BUILD_REPO:   build.repo,
@@ -14,13 +23,13 @@ exports.init = function(config, cimpler) {
          },
          timeout: config.timeout || 0
       },
-      cdToRepo = 'set -v; set -x; cd "' + config.repoPath + '"';
+      cdToRepo = 'set -v; set -x; cd "' + repoPath + '"';
 
       for(var key in process.env) {
          execOptions.env[key] = process.env[key];
       }
 
-      if (!config.repoPath) {
+      if (!repoPath) {
          throw new Error("Missing the 'path' option of git-build config");
       }
 
@@ -29,8 +38,8 @@ exports.init = function(config, cimpler) {
       startFetch();
 
       function startFetch() {
-         var commands = '(cd "' + config.repoPath + '" && ' +
-            "git fetch --quiet 2>/dev/null && " +
+         var commands = '(cd "' + repoPath + '" && ' +
+            "git fetch && " +
             "git rev-parse origin/" + build.branch + ") 2>&1";
 
          exec(commands, function(err, stdout) {
@@ -109,7 +118,7 @@ exports.init = function(config, cimpler) {
       }
 
       function logFilePath(inBuild) {
-         if (!config.logs.path)
+         if (!config.logs || !config.logs.path)
             return null;
 
          var logFilename = (inBuild.branch || 'HEAD') + "--" +
@@ -146,9 +155,9 @@ exports.init = function(config, cimpler) {
          return inBuild.branch +
             (inBuild.sha ? ' (' + inBuild.sha.substr(0,10) + ')' : '');
       }
-   });
-
-   function echoStatusCmd(noun) {
-      return " && echo '"+noun+" Successful' || ( echo '"+noun+" Failed'; exit 1 )";
-   }
+   };
 };
+
+function echoStatusCmd(noun) {
+   return " && echo '"+noun+" Successful' || ( echo '"+noun+" Failed'; exit 1 )";
+}
