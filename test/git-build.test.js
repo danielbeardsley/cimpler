@@ -13,15 +13,14 @@ var testBranch = "aa6b0aa64229caee1b07500334a64de9e1ffcddd",
     masterParent = "aac5cd96ddd3173678e3666d677699ea6adce875";
 
 describe("git-build plugin", function() {
-   var testRepoDir = "/tmp/cimpler-test-repo-" +
-                        Math.floor(Math.random() * 999999);
+   var testRepoDirs = [tempDir(), tempDir()];
 
    it("should merge master into the branch under testing", function(done) {
       var concurrency = concurrencyChecker(1);
       var cimpler = new Cimpler({
          plugins: {
             "git-build": {
-               repoPath: testRepoDir,
+               repoPath: testRepoDirs[0],
                // Pass if test_branch is the build branch
                cmd: "[[ $BUILD_BRANCH == 'test-branch' ]]",
                logs: {
@@ -40,10 +39,11 @@ describe("git-build plugin", function() {
       var expectedBuildCommits = [ testBranch, master ];
       cimpler.on('buildStarted', function(build) {
          concurrency(1);
-         var cmd = "git rev-list --parents -n 1 HEAD";
          // git-build is supposed to lookup the sha for us.
          assert.equal(build.sha, expectedBuildCommits.shift());
-         exec(cmd, assertParents);
+
+         var cmd = "git rev-list --parents -n 1 HEAD";
+         exec(cmd, testRepoDirs[0], assertParents);
          check();
       });
 
@@ -79,9 +79,66 @@ describe("git-build plugin", function() {
       });
    });
 
-   function exec(cmd, callback, expectFailure) {
+   it("Create as many workers as there are repoPaths", function(done) {
+      var started = 0, finished = 0;
+      var cimpler = new Cimpler({
+         plugins: {
+            "git-build": {
+               repoPath: testRepoDirs,
+               // Pass if test_branch is the build branch
+               cmd: "sleep 1 && [[ $BUILD_BRANCH == 'test-branch' ]]",
+               logs: {
+                  path: buildLogsPath,
+                  url:  "http://www.example.com/ci-builds/"
+               },
+            }
+         },
+      });
+
+      var check = expect(4, function() {
+         cimpler.shutdown();
+         done();
+      });
+
+      var expectedBuildCommits = {
+         A: testBranch,
+         B: master
+      };
+      cimpler.on('buildStarted', function(build) {
+         assert.equal(build.sha, expectedBuildCommits[build.letter]);
+         check();
+         started++;
+         // We should be running these in paralell
+         assert.ok(finished == 0, "Both builds should start before either finish");
+      });
+
+      var expectedStatuses = {
+         A: 'success',
+         B: 'failure'
+      };
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.status, expectedStatuses[build.letter]);
+         check();
+         finished++;
+         // We should be running these in paralell
+         assert.ok(started == 2, "One build finished before both has started");
+      });
+
+      cimpler.addBuild({
+         letter: 'A',
+         repo: "doesn't matter",
+         branch: "test-branch"
+      });
+      cimpler.addBuild({
+         letter: 'B',
+         repo: "doesn't matter",
+         branch: "master"
+      });
+   });
+
+   function exec(cmd, dir, callback, expectFailure) {
       var execOptions = {
-         cwd: testRepoDir
+         cwd: dir
       };
       childProcess.exec(cmd, execOptions, function(err, stdout, stderr) {
          if (!expectFailure != !err) {
@@ -112,7 +169,10 @@ describe("git-build plugin", function() {
       // Ignore the "Already exists" errors
       try { fs.mkdirSync(buildLogsPath) } catch (err) {}
       // Clone the test repo into a temp dir.
-      var cmd = "git clone " + testRepoSource + " " + testRepoDir;
+      var cmd = testRepoDirs.map(function (dir) {
+         return "git clone " + testRepoSource + " " + dir;
+      }).join(" && ");
+      console.log(cmd);
       childProcess.exec(cmd, {}, done);
    });
 
@@ -128,4 +188,9 @@ function concurrencyChecker(max) {
       if (levels > max)
          assert.fail("Concurrency should not be greater than " + max);
    };
+}
+
+function tempDir() {
+   return "/tmp/cimpler-test-" +
+            Math.floor(Math.random() * 999999);
 }
