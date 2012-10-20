@@ -102,6 +102,51 @@ describe("Cimpler", function() {
       });
    });
 
+   describe(".addBuild()", function() {
+      it("should not replace existing builds from different branches", function(done) {
+         var branches  = "A B C D E F".split(' ');
+
+         var builds = branches.map(function(branch) {
+            return {
+               repo: "blah",
+               branch:branch
+            };
+         });
+
+         passBuildsThrough(builds, builds, done);
+      });
+
+      it("should not replace existing builds from different branches", function(done) {
+         var build = {
+            repo:    "blah",
+            branch:  "A"
+         };
+
+         var builds = [build,build,build,build];
+
+         passBuildsThrough(builds, [build, build], done);
+      });
+
+      function passBuildsThrough(inBuilds, expectedOutBuilds, done) {
+         var outBuilds = [],
+         cimpler = new Cimpler();
+
+         cimpler.consumeBuild(function(inBuild, started, finished) {
+            outBuilds.push(inBuild);
+            started();
+            setTimeout(function() { finished(); }, 1);
+            if (outBuilds.length >= expectedOutBuilds.length) {
+               assert.deepEqual(outBuilds, expectedOutBuilds);
+               done();
+            }
+         });
+
+         inBuilds.forEach(function(build) {
+            cimpler.addBuild(build);
+         });
+      }
+   });
+
    describe(".shutdown()", function() {
       it("should emit the shutdown event (only once)", function() {
          var cb = 0,
