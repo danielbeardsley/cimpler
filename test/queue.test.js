@@ -63,6 +63,19 @@ describe("Queue", function() {
          });
       });
    });
+   describe(".items()", function() {
+      it.only("should return an array of the currently queueed items", function(testDone) {
+         var queue = new Queue();
+         queue.push(1);
+         queue.push(2);
+         queue.push(3);
+         assert.deepEqual(queue.items(), [1,2,3]);
+         queue.pop(function(item, done) {
+            assert.deepEqual(queue.items(), [2,3]);
+            testDone()
+         });
+      });
+   });
 });
 
 function later(callback) {
