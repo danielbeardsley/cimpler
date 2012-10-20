@@ -116,7 +116,7 @@ describe("Cimpler", function() {
          passBuildsThrough(builds, builds, done);
       });
 
-      it("should not replace existing builds from different branches", function(done) {
+      it("should replace existing builds from the same branche", function(done) {
          var build = {
             repo:    "blah",
             branch:  "A"
@@ -125,6 +125,19 @@ describe("Cimpler", function() {
          var builds = [build,build,build,build];
 
          passBuildsThrough(builds, [build, build], done);
+      });
+
+      it("should not replace existing builds from different Repos", function(done) {
+         var repos  = "A B C D E F".split(' ');
+
+         var builds = repos.map(function(repo) {
+            return {
+               repo: repo,
+               branch: "A"
+            };
+         });
+
+         passBuildsThrough(builds, builds, done);
       });
 
       function passBuildsThrough(inBuilds, expectedOutBuilds, done) {
