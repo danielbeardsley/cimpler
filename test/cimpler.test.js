@@ -102,6 +102,84 @@ describe("Cimpler", function() {
       });
    });
 
+   describe(".addBuild()", function() {
+      it("should not replace existing builds from different branches", function(done) {
+         var branches  = "A B C D E F".split();
+
+         var builds = branches.map(function(branch) {
+            return {
+               repo: "blah",
+               branch:branch
+            };
+         });
+
+         passBuildsThrough(builds, builds, done);
+      });
+
+      it("should replace existing builds from the same branch", function(done) {
+         var build = {
+            repo:    "blah",
+            branch:  "A"
+         };
+
+         var builds = [build,build,build,build];
+
+         // expected.length == 2 because the first one is pop()ed immediately
+         // and thus can't be replaced.
+         passBuildsThrough(builds, [build, build], done);
+      });
+
+      it("should not replace existing builds from different Repos", function(done) {
+         var repos  = "A B C D E F".split();
+
+         var builds = repos.map(function(repo) {
+            return {
+               repo: repo,
+               branch: "A"
+            };
+         });
+
+         passBuildsThrough(builds, builds, done);
+      });
+
+      it("should replace the oldest queued build of the same branch", function(done) {
+         var repos  = "B A A A".split(' ');
+
+         var builds = repos.map(function(repo) {
+            return {
+               repo: repo,
+               branch: "A",
+               data: Math.random()
+            };
+         });
+
+         // The last added build of branch A should be the only one that makes
+         // it through.
+         var expectedOutBuilds = [builds[0], builds[3]];
+
+         passBuildsThrough(builds, expectedOutBuilds, done);
+      });
+
+      function passBuildsThrough(inBuilds, expectedOutBuilds, done) {
+         var outBuilds = [],
+         cimpler = new Cimpler();
+
+         cimpler.consumeBuild(function(inBuild, started, finished) {
+            outBuilds.push(inBuild);
+            started();
+            setTimeout(function() { finished(); }, 1);
+            if (outBuilds.length >= expectedOutBuilds.length) {
+               assert.deepEqual(outBuilds, expectedOutBuilds);
+               done();
+            }
+         });
+
+         inBuilds.forEach(function(build) {
+            cimpler.addBuild(build);
+         });
+      }
+   });
+
    describe(".shutdown()", function() {
       it("should emit the shutdown event (only once)", function() {
          var cb = 0,
