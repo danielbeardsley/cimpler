@@ -22,7 +22,7 @@ describe("git-build plugin", function() {
             "git-build": {
                repoPath: testRepoDirs[0],
                // Pass if test_branch is the build branch
-               cmd: "[[ $BUILD_BRANCH == 'test-branch' ]]",
+               cmd: "[ \"$BUILD_BRANCH\" = 'test-branch' ]",
                logs: {
                   path: buildLogsPath,
                   url:  "http://www.example.com/ci-builds/"
@@ -86,7 +86,7 @@ describe("git-build plugin", function() {
             "git-build": {
                repoPath: testRepoDirs,
                // Pass if test_branch is the build branch
-               cmd: "sleep 1 && [[ $BUILD_BRANCH == 'test-branch' ]]",
+               cmd: "sleep 1 && [ \"$BUILD_BRANCH\" = 'test-branch' ]",
                logs: {
                   path: buildLogsPath,
                   url:  "http://www.example.com/ci-builds/"
@@ -172,7 +172,6 @@ describe("git-build plugin", function() {
       var cmd = testRepoDirs.map(function (dir) {
          return "git clone " + testRepoSource + " " + dir;
       }).join(" && ");
-      console.log(cmd);
       childProcess.exec(cmd, {}, done);
    });
 
