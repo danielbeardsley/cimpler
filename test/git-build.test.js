@@ -172,7 +172,6 @@ describe("git-build plugin", function() {
       var cmd = testRepoDirs.map(function (dir) {
          return "git clone " + testRepoSource + " " + dir;
       }).join(" && ");
-      console.log(cmd);
       childProcess.exec(cmd, {}, done);
    });
 
