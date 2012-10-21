@@ -64,7 +64,7 @@ describe("Queue", function() {
       });
    });
    describe(".items()", function() {
-      it.only("should return an array of the currently queueed items", function(testDone) {
+      it("should return an array of the currently queueed items", function(testDone) {
          var queue = new Queue();
          queue.push(1);
          queue.push(2);
