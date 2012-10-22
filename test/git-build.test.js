@@ -20,7 +20,7 @@ describe("git-build plugin", function() {
       var cimpler = new Cimpler({
          plugins: {
             "git-build": {
-               repoPath: testRepoDirs[0],
+               repoPaths: testRepoDirs[0],
                // Pass if test_branch is the build branch
                cmd: "[ \"$BUILD_BRANCH\" = 'test-branch' ]",
                logs: {
@@ -84,7 +84,7 @@ describe("git-build plugin", function() {
       var cimpler = new Cimpler({
          plugins: {
             "git-build": {
-               repoPath: testRepoDirs,
+               repoPaths: testRepoDirs,
                // Pass if test_branch is the build branch
                cmd: "sleep 1 && [ \"$BUILD_BRANCH\" = 'test-branch' ]",
                logs: {
