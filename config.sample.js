@@ -50,8 +50,12 @@ module.exports = {
        * Checkout the appropriate commit, merge in master and perform a build
        */
 		"git-build":  {
-         // Path to a local clone of the github repo
-         repoPath: "/home/user/ci/cloned-repo",
+         /**
+          * Path (or array of paths) to a local clone of the github repo.
+          * One build "consumer" will be created for each path in the array
+          * This allows builds to be executed in parallel.
+          */
+         repoPaths: "/home/user/ci/cloned-repo",
          // Arbitrary shell command
          cmd: "make test",
          logs: {
