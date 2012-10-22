@@ -65,7 +65,10 @@ describe("Github plugin", function() {
          finished();
          // Ensure this callback doesn't get called again by
          // delaying the done()
-         setTimeout(function() { done(); }, 100);
+      setTimeout(function() {
+         cimpler.shutdown();
+         done();
+      }, 100);
       });
    });
 });
