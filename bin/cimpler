@@ -15,7 +15,7 @@ args           = require('optimist')
    })
    .options('port', {
       alias: 'p',
-      describe: 'TCP port of the cimpler server (defaults to value in config.js)'
+      describe: 'HTTP port of the cimpler server (defaults to value in config.js)'
    }).argv;
 
 git.remote(function(remote, repoPath) {
