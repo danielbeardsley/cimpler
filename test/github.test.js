@@ -2,15 +2,19 @@ var Cimpler  = require('../lib/cimpler'),
     Github   = require('../plugins/github'),
     http     = require('http'),
     assert   = require('assert'),
-    githubPort = 19191;
+    expect   = require("./expect"),
+    httpPort = 25750;
 
 var config = {a: 1},
 sha = "sha1232322",
 options = {
-   host: '127.0.0.1',
-   port: githubPort,
+   port: httpPort,
+   path: '/github',
    method: 'POST',
-   agent: false
+   agent: false,
+   headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+   }
 },
 postBuild = {
    ref:"b/master",
@@ -21,11 +25,11 @@ postBuild = {
 describe("Github plugin", function() {
    it("should listen for and add builds in the post-receive fashion",
    function(done) {
-      var cimpler = new Cimpler();
-
-      cimpler.registerPlugin(Github, {
-         listen_port: githubPort
+      var cimpler = new Cimpler({
+         httpPort: httpPort
       });
+
+      cimpler.registerPlugin(Github, { });
 
       var check = expect(1, function(count) {
          assert.fail();

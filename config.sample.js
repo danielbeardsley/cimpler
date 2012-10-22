@@ -24,12 +24,12 @@ module.exports = {
             password: 'password'
          }
       },
-      github: {
-         /**
-          * TCP port to listen for Github post-receive hooks on
-          */
-         listen_port: 12345
-      },
+      /**
+       * Github Post-Receive listener
+       *
+       * Listens to POSTs with urls === "/github" on httpPort
+       */
+      github: true,
       /**
        * Automatically marks all builds as successful (for testing)
        */
