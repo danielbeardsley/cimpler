@@ -1,5 +1,4 @@
-var http       = require('http'),
-    util       = require('util'),
+var util       = require('util'),
     allowedIps = [
        '127.0.0.1',      // For Testing
        '207.97.227.253', // GitHub #1
@@ -8,59 +7,43 @@ var http       = require('http'),
     ];
 
 
-exports.init = function(config, cimpler) {
+exports.init = function(config, cimpler, middleware) {
    /**
     * Listen for post-recieve hooks
     */
-   var server = http.createServer(function(request, response) {
-      if (!passesWhitelist(request, response)) {
+   middleware('/github', function(req, res, next) {
+      // We only care about POSTs to "/github"
+      if (req.method !== 'POST' || req.url !== '/') {
+         return next();
+      }
+
+      if (!passesWhitelist(req, next)) {
          return;
       }
 
-      var body = '';
-      request.setEncoding('utf8');
-      request.on('data', function(chunk) {
-         body += chunk;
-      });
-
-      request.on('end', function() {
-         try {
-            var build = extractBuildInfo(body);
-            if (build) {
-               cimpler.addBuild(build);
-               reportBuildStatus(build);
-            }
-         } catch (e) {
-            util.error("Bad Request");
-            util.error(e.stack);
+      try {
+         var build = extractBuildInfo(req.body);
+         if (build) {
+            cimpler.addBuild(build);
          }
-         response.end();
-      });
-   }).listen(config.listen_port);
-
-   cimpler.on('shutdown', function() {
-      server.close();
+      } catch (e) {
+         util.error("Bad Request");
+         util.error(e.stack);
+      }
+      res.end();
    });
-
-   function reportBuildStatus(build) {
-   }
 };
 
-function passesWhitelist(req, res) {
+function passesWhitelist(req, next) {
    if (allowedIps.indexOf(req.connection.remoteAddress) >= 0) {
       return true;
    }
-
-   res.writeHead(403, 'Access denied.');
-   res.end();
+   next({status: 403});
    console.warn('Access denied for ' + req.connection.remoteAddress);
 }
 
 function extractBuildInfo(requestBody) {
-   var body = decodeURIComponent(requestBody);
-   // Get rid of "payload="
-   var payload = body.substring(8);
-   var info = JSON.parse(payload);
+   var info = JSON.parse(requestBody.payload);
 
    // Filter out notifications about annotated tags
    if (info.ref.indexOf('refs/tags/') == 0) {

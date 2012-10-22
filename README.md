@@ -27,8 +27,9 @@ Add your server's url (and port) as a github POST receive hook
 
 ## Running
 
-Make sure the `config.github.listen_port` is accessible from the outside (or at
-least github's servers).
+If you are using the github plugin,
+make sure the `config.httpPort` is accessible from the outside
+(or at least from github's servers).
 
     $ node server.js
 
