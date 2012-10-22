@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var childProcess = require('child_process'),
-tcpTrigger     = require('../lib/tcp-trigger'),
+httpTrigger    = require('../lib/http-trigger'),
 Git            = require('../lib/git'),
 git            = new Git(),
 build          = {},
@@ -25,11 +25,11 @@ git.remote(function(remote, repoPath) {
 function getBranch() {
    if (args.branch) {
       build.branch = args.branch;
-      tcpTrigger(build, args.port);
+      httpTrigger(build, args.port);
    } else {
       git.currentBranch(function(branch) {
          build.branch = branch;
-         tcpTrigger(build, args.port);
+         httpTrigger(build, args.port);
       });
    }
 }
