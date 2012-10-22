@@ -4,7 +4,7 @@ var Cimpler  = require('../lib/cimpler'),
     childProcess = require('child_process');
 
 describe("CLI plugin", function() {
-   it("should accept builds via TCP", function(done) {
+   it("should accept builds via HTTP", function(done) {
       var cb = 0,
       httpPort = 25750,
       consumedBuild = false,

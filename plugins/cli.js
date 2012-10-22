@@ -7,9 +7,9 @@ var util       = require('util'),
 exports.init = function(config, cimpler, middleware) {
 
    /**
-    * Listen for incoming data via TCP
+    * Listen for incoming data via HTTP.
     *
-    * This expects the entirety of the packet to be a JSON encoded build object
+    * This expects JSON formatted POSTs at url: /build
     */
    middleware("/build", function (req, res, next) {
       // We only care about POSTs to "/build" 

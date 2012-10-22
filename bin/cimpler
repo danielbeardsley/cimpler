@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-var net        = require('net'),
-childProcess   = require('child_process'),
+var childProcess = require('child_process'),
 tcpTrigger     = require('../lib/tcp-trigger'),
 Git            = require('../lib/git'),
 git            = new Git(),
