@@ -10,6 +10,13 @@ module.exports = {
    httpPort: 25751
 
    plugins: {
+      /**
+       * HTTP endpoint for retrieving build-status information
+       *
+       * url: /builds/status
+       */
+      'build_status': true,
+
       'github-commit-status': {
          /**
           * For updating commit status via the github API

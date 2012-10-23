@@ -181,6 +181,26 @@ describe("Cimpler", function() {
       }
    });
 
+   describe(".builds()", function() {
+      it("should return an array of queued and running builds", function(done) {
+         var builds = [ {branch:'a'}, {branch:'b'}, {branch:'c'} ],
+             cimpler = new Cimpler();
+
+         cimpler.addBuild(builds[0]);
+         cimpler.addBuild(builds[1]);
+         cimpler.addBuild(builds[2]);
+         cimpler.consumeBuild(function(build) {
+         });
+         process.nextTick(function(){
+            assert.deepEqual(cimpler.builds(), {
+               queued: [builds[1], builds[2]],
+               building: [builds[0]]
+            });
+            done();
+         });
+      });
+   });
+
    describe(".shutdown()", function() {
       it("should emit the shutdown event (only once)", function() {
          var cb = 0,
