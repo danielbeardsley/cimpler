@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var tcpTrigger = require('../lib/tcp-trigger'),
+var httpTrigger = require('../lib/http-trigger'),
     Git        = require('../lib/git'),
     git        = new Git(process.env.GIT_DIR);
 
@@ -13,7 +13,9 @@ readAll(process.stdin, function(input) {
 
    git.remote(function(remote, repoPath) {
       build.repo = remote || repoPath;
-      tcpTrigger(build, process.env.CIMPLER_PORT);
+      // read the port from an env variable to allow override
+      // during testing
+      httpTrigger(build, process.env.CIMPLER_PORT);
    });
 });
 

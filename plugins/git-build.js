@@ -4,7 +4,7 @@ var childProcess  = require('child_process'),
     path          = require('path');
 
 exports.init = function(config, cimpler) {
-   var paths = config.repoPath;
+   var paths = config.repoPaths;
    paths = Array.isArray(paths) ? paths : [paths]
    paths.forEach(function(repoPath) {
       var consumer = buildConsumer(config, cimpler, repoPath);
@@ -39,7 +39,7 @@ function buildConsumer(config, cimpler, repoPath) {
 
       function startFetch() {
          var commands = '(cd "' + repoPath + '" && ' +
-            "git fetch && " +
+            "git fetch --quiet && " +
             "git rev-parse origin/" + build.branch + ") 2>&1";
 
          exec(commands, function(err, stdout) {

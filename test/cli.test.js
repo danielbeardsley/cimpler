@@ -5,19 +5,19 @@ var Cimpler      = require('../lib/cimpler'),
     expect       = require("./expect"),
     childProcess = require('child_process'),
     testRepoDir  = __dirname + "/../fixtures/repo/",
-    cliPort      = 20003;
+    httpPort     = 25750;
 
 describe("CLI program", function() {
    it("should add builds based on CWD or commandline params", function(done) {
       var cimpler = new Cimpler({
          plugins: {
             cli: {
-               tcpPort: cliPort
             }
          },
+         httpPort: httpPort,
          testMode: true  // Don't console.log() anything
       }),
-      bin = "../../bin/cimpler -p " + cliPort,
+      bin = "../../bin/cimpler -p " + httpPort,
       builtBranches  = [],
       expectedBuilds = 2,
       cimplerCalls   = 0,

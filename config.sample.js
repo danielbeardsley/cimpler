@@ -2,6 +2,13 @@
  * Copy to config.js in the same directory
  */
 module.exports = {
+   /**
+    * Cimpler needs only one port for all it's network activity.
+    *
+    * All interaction is done via http.
+    */
+   httpPort: 25751
+
    plugins: {
       /**
        * HTTP endpoint for retrieving build-status information
@@ -23,12 +30,12 @@ module.exports = {
             password: 'password'
          }
       },
-      github: {
-         /**
-          * TCP port to listen for Github post-receive hooks on
-          */
-         listen_port: 12345
-      },
+      /**
+       * Github Post-Receive listener
+       *
+       * Listens to POSTs with urls === "/github" on httpPort
+       */
+      github: true,
       /**
        * Automatically marks all builds as successful (for testing)
        */
@@ -40,11 +47,10 @@ module.exports = {
          enabled: false
       },
       /**
-       * Enable the command line plugin (uses tcp)
+       * Enable the command line plugin (uses http)
+       * (no options)
        */
-      cli: {
-         tcpPort: 20001 // if omitted, default port is 20001
-      },
+      cli: true,
       /**
        * Run arbitraty shell commands on each build
        */
@@ -56,8 +62,12 @@ module.exports = {
        * Checkout the appropriate commit, merge in master and perform a build
        */
 		"git-build":  {
-         // Path to a local clone of the github repo
-         repoPath: "/home/user/ci/cloned-repo",
+         /**
+          * Path (or array of paths) to a local clone of the github repo.
+          * One build "consumer" will be created for each path in the array
+          * This allows builds to be executed in parallel.
+          */
+         repoPaths: "/home/user/ci/cloned-repo",
          // Arbitrary shell command
          cmd: "make test",
          logs: {
