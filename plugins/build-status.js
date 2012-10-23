@@ -1,15 +1,7 @@
 var http = require('http');
 
-exports.init = function(config, cimpler) {
-   var queuedBuilds = [];
-   var runningBuilds = [];
-
-   var server = http.createServer(function(req, res) {
+exports.init = function(config, cimpler, middleware) {
+   middleware('/builds/status', function(req, res, next) {
       res.end(JSON.stringify(cimpler.builds()));
-   });
-   server.listen(config.httpPort || 20002);
-
-   cimpler.on('shutdown', function() {
-      server.close();
    });
 };

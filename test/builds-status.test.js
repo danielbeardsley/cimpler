@@ -1,14 +1,15 @@
-var Cimpler  = require('../lib/cimpler'),
-    http     = require('http'),
-    assert   = require('assert');
+var Cimpler  = require('../lib/cimpler');
+var http     = require('http');
+var assert   = require('assert');
+var httpPort = 25750;
 
 describe("build-status plugin", function() {
    it("should provide build list via http", function(done) {
-      var port = 20003,
-      cimpler = new Cimpler({
+      var cimpler = new Cimpler({
          plugins: {
-            "build-status": { httpPort: port }
+            "build-status": { }
          },
+         httpPort: httpPort,
          testMode: true  // Don't console.log() anything
       });
 
@@ -26,8 +27,8 @@ describe("build-status plugin", function() {
 
       var options = {
         host: 'localhost',
-        port: port,
-        path: '/'
+        port: httpPort,
+        path: '/builds/status'
       };
 
       http.get(options, function(res) {
