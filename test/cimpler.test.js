@@ -29,15 +29,16 @@ describe("Cimpler", function() {
    });
 
    describe(".registerPlugin()", function() {
-      it("should call plugin.init and pass the config", function(done) {
+      it("should call plugin.init() and pass the config and a function for regsitering middleware", function(done) {
          var config = {a: 1},
          cb = false,
          cimpler = new Cimpler();
 
          cimpler.registerPlugin({
-            init: function(inConfig, inCimpler) {
+            init: function(inConfig, inCimpler, middleware) {
                assert.equal(inConfig, config);
                assert.equal(inCimpler, cimpler);
+               assert.equal(typeof middleware, "function");
                done();
             }
          }, config);

@@ -1,17 +1,18 @@
 var Cimpler  = require('../lib/cimpler'),
-    net      = require('net'),
+    http     = require('http'),
     assert   = require('assert'),
     childProcess = require('child_process');
 
 describe("CLI plugin", function() {
-   it("should accept builds via TCP", function(done) {
+   it("should accept builds via HTTP", function(done) {
       var cb = 0,
-      tcpPort = 20002,
+      httpPort = 25750,
       consumedBuild = false,
       cimpler = new Cimpler({
          plugins: {
-            cli: { tcpPort: tcpPort}
+            cli: { }
          },
+         httpPort: httpPort,
          testMode: true  // Don't console.log() anything
       });
 
@@ -29,8 +30,23 @@ describe("CLI plugin", function() {
          done();
       });
 
-      var connection = net.createConnection(tcpPort, "127.0.0.1", function() {
-         connection.end(JSON.stringify(build));
+      var options = {
+         port: httpPort,
+         path: '/build',
+         method: 'POST',
+         headers: {
+            'Content-Type' : 'application/json'
+         }
+      };
+
+      var req = http.request(options);
+
+      req.on('error', function(err) {
+         cimpler.shutdown();
+         assert.fail(err);
+         done();
       });
+
+      req.end(JSON.stringify(build));
    });
 });

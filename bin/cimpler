@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
-var net        = require('net'),
-childProcess   = require('child_process'),
-tcpTrigger     = require('../lib/tcp-trigger'),
+var childProcess = require('child_process'),
+httpTrigger    = require('../lib/http-trigger'),
 Git            = require('../lib/git'),
 git            = new Git(),
 build          = {},
@@ -15,7 +14,7 @@ args           = require('optimist')
    })
    .options('port', {
       alias: 'p',
-      describe: 'TCP port of the cimpler server (defaults to value in config.js)'
+      describe: 'HTTP port of the cimpler server (defaults to value in config.js)'
    }).argv;
 
 git.remote(function(remote, repoPath) {
@@ -26,11 +25,11 @@ git.remote(function(remote, repoPath) {
 function getBranch() {
    if (args.branch) {
       build.branch = args.branch;
-      tcpTrigger(build, args.port);
+      httpTrigger(build, args.port);
    } else {
       git.currentBranch(function(branch) {
          build.branch = branch;
-         tcpTrigger(build, args.port);
+         httpTrigger(build, args.port);
       });
    }
 }

@@ -6,16 +6,15 @@ var Cimpler      = require('../lib/cimpler'),
     childProcess = require('child_process'),
     path         = require('path'),
     testRepoDir  = path.normalize(__dirname + "/../fixtures/repo/"),
-    cliPort      = 20003;
+    httpPort     = 25750;
 
 describe("post-receive git-hook", function() {
    it("should trigger a build when passed info via stdin", function(done) {
       var cimpler = new Cimpler({
          plugins: {
-            cli: {
-               tcpPort: cliPort
-            }
+            cli: { }
          },
+         httpPort: httpPort,
          testMode: true  // Don't console.log() anything
       }),
       bin = __dirname + "/../hooks/post-receive",
@@ -51,7 +50,7 @@ describe("post-receive git-hook", function() {
             env: {
                GIT_DIR: testRepoDir,
                PATH: process.env.PATH,
-               CIMPLER_PORT: cliPort
+               CIMPLER_PORT: httpPort
             }
          };
          return childProcess.exec(cmd, execOptions, function(err, stdout, stderr) {
