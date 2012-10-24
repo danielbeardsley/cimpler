@@ -77,6 +77,63 @@ describe("CLI build command", function() {
    });
 });
 
+describe("CLI status command", function() {
+   var exec = execInDir("./");
+
+   it("should print a pretty list of builds", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            'build-status': true
+         },
+         httpPort: httpPort,
+         testMode: true  // Don't console.log() anything
+      }),
+      bin = __dirname + "/../bin/cimpler -p " + httpPort;
+
+      cimpler.addBuild({
+         repo:   'http://',
+         branch: 'master'
+      });
+      cimpler.addBuild({
+         repo:   'http://',
+         branch: 'test-branch'
+      });
+
+      var expectedOutputs = [
+         "* master\n" +
+         "  test-branch\n",
+
+         "* test-branch\n",
+
+         "(no builds in queue)\n"
+      ];
+
+      cimpler.consumeBuild(function(inBuild, started, finished) {
+         started();
+         testNextCommand(finished);
+      });
+
+      function testNextCommand(callback) {
+         testCommand(bin + " status", expectedOutputs.shift(), function(){
+            callback();
+            if (expectedOutputs.length == 1) {
+               testNextCommand(function() {
+                  cimpler.shutdown();
+                  done();
+               });
+            }
+         });
+      }
+
+      function testCommand(command, expectedOutput, callback) {
+         exec(command, function(stdout) {
+            assert.equal(stdout, expectedOutput);
+            callback();
+         });
+      }
+   });
+});
+
 function execInDir(dir) {
    return function exec(cmd, callback, expectFailure) {
       var execOptions = {

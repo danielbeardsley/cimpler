@@ -7,7 +7,9 @@ git            = new Git(),
 build          = {},
 args           = require('optimist')
    .demand(1)
-   .usage("Usage: cimpler build [-b branch-name]")
+   .usage("Examples:\n" +
+   "   cimpler build [-b branch-name]   trigger a build on the current repo\n" +
+   "   cimpler status                   echo the list of builds in the queue (* means building)")
    .options('branch', {
       alias: 'b',
       describe: 'Name of the branch to build (defaults to current)'
@@ -17,20 +19,41 @@ args           = require('optimist')
       describe: 'HTTP port of the cimpler server (defaults to value in config.js)'
    }).argv;
 
-git.remote(function(remote, repoPath) {
-   build.repo = remote || repoPath;
-   getBranch();
-});
+var command = args._[0];
 
-function getBranch() {
-   if (args.branch) {
-      build.branch = args.branch;
-      httpTrigger(build, args.port);
-   } else {
-      git.currentBranch(function(branch) {
-         build.branch = branch;
-         httpTrigger(build, args.port);
+switch (command) {
+   case 'build':
+      git.remote(function(remote, repoPath) {
+         build.repo = remote || repoPath;
+         getBranch();
       });
-   }
+
+      function getBranch() {
+         if (args.branch) {
+            build.branch = args.branch;
+            httpTrigger.injectBuild(build, args.port);
+         } else {
+            git.currentBranch(function(branch) {
+               build.branch = branch;
+               httpTrigger.injectBuild(build, args.port);
+            });
+         }
+      }
+      break;
+
+   case 'status':
+      httpTrigger.getStatus(args.port, function(err, builds) {
+         builds.building.forEach(function(build) {
+            console.log("* " + build.branch);
+         });
+         builds.queued.forEach(function(build) {
+            console.log("  " + build.branch);
+         });
+         if (builds.building.length == 0 && builds.queued.length == 0) {
+            console.log("(no builds in queue)");
+         }
+      });
+      break;
+
 }
 
