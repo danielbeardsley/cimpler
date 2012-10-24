@@ -7,10 +7,10 @@ git            = new Git(),
 build          = {},
 args           = require('optimist')
    .demand(1)
-   .usage("Usage: cimpler test [-b branch-name]")
+   .usage("Usage: cimpler build [-b branch-name]")
    .options('branch', {
       alias: 'b',
-      describe: 'Name of the branch to test (defaults to current)'
+      describe: 'Name of the branch to build (defaults to current)'
    })
    .options('port', {
       alias: 'p',

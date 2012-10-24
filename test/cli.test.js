@@ -7,7 +7,7 @@ var Cimpler      = require('../lib/cimpler'),
     testRepoDir  = __dirname + "/../fixtures/repo/",
     httpPort     = 25750;
 
-describe("CLI program", function() {
+describe("CLI build command", function() {
    it("should add builds based on CWD or commandline params", function(done) {
       var cimpler = new Cimpler({
          plugins: {
@@ -45,9 +45,9 @@ describe("CLI program", function() {
 
       exec(bin, function(stdout) { }, /* expect failure = */ true);
 
-      exec(bin + " test", function(stdout) {
+      exec(bin + " build", function(stdout) {
          check();
-         exec(bin + " test --branch=test-branch", function(stdout) {
+         exec(bin + " build --branch=test-branch", function(stdout) {
             check();
          });
       });
