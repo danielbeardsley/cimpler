@@ -6,6 +6,6 @@ exports.init = function(config, cimpler) {
          console.dir(build);
          build.status = 'success';
          finished();
-      }, 20000);
+      }, (config.buildTime || 20) * 1000);
    });
 };
