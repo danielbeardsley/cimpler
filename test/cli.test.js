@@ -7,7 +7,9 @@ var Cimpler      = require('../lib/cimpler'),
     testRepoDir  = __dirname + "/../fixtures/repo/",
     httpPort     = 25750;
 
-describe("CLI program", function() {
+describe("CLI build command", function() {
+   var exec = execInDir(testRepoDir);
+
    it("should add builds based on CWD or commandline params", function(done) {
       var cimpler = new Cimpler({
          plugins: {
@@ -45,32 +47,13 @@ describe("CLI program", function() {
 
       exec(bin, function(stdout) { }, /* expect failure = */ true);
 
-      exec(bin + " test", function(stdout) {
+      exec(bin + " build", function(stdout) {
          check();
-         exec(bin + " test --branch=test-branch", function(stdout) {
+         exec(bin + " build --branch=test-branch", function(stdout) {
             check();
          });
       });
 
-      function exec(cmd, callback, expectFailure) {
-         var execOptions = {
-            cwd: testRepoDir
-         };
-         childProcess.exec(cmd, execOptions, function(err, stdout, stderr) {
-            if (!expectFailure && err) {
-               util.error("Command failed: " + cmd);
-               console.log(stdout.toString());
-               console.log(stderr.toString());
-               process.exit(1);
-            } else if (expectFailure && !err) {
-               util.error("Command was supposed to fail (but didn't): " + cmd);
-               console.log(stdout.toString());
-               console.log(stderr.toString());
-               process.exit(1);
-            }
-            callback(stdout.toString());
-         });
-      }
    });
 
    /**
@@ -93,3 +76,82 @@ describe("CLI program", function() {
       fs.unlink(testRepoDir + '.git');
    });
 });
+
+describe("CLI status command", function() {
+   var exec = execInDir("./");
+
+   it("should print a pretty list of builds", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            'build-status': true
+         },
+         httpPort: httpPort,
+         testMode: true  // Don't console.log() anything
+      }),
+      bin = __dirname + "/../bin/cimpler -p " + httpPort;
+
+      cimpler.addBuild({
+         repo:   'http://',
+         branch: 'master'
+      });
+      cimpler.addBuild({
+         repo:   'http://',
+         branch: 'test-branch'
+      });
+
+      var expectedOutputs = [
+         "* master\n" +
+         "  test-branch\n",
+
+         "* test-branch\n",
+
+         "(no builds in queue)\n"
+      ];
+
+      cimpler.consumeBuild(function(inBuild, started, finished) {
+         started();
+         testNextCommand(finished);
+      });
+
+      function testNextCommand(callback) {
+         testCommand(bin + " status", expectedOutputs.shift(), function(){
+            callback();
+            if (expectedOutputs.length == 1) {
+               testNextCommand(function() {
+                  cimpler.shutdown();
+                  done();
+               });
+            }
+         });
+      }
+
+      function testCommand(command, expectedOutput, callback) {
+         exec(command, function(stdout) {
+            assert.equal(stdout, expectedOutput);
+            callback();
+         });
+      }
+   });
+});
+
+function execInDir(dir) {
+   return function exec(cmd, callback, expectFailure) {
+      var execOptions = {
+         cwd: dir
+      };
+      childProcess.exec(cmd, execOptions, function(err, stdout, stderr) {
+         if (!expectFailure && err) {
+            util.error("Command failed: " + cmd);
+            console.log(stdout.toString());
+            console.log(stderr.toString());
+            process.exit(1);
+         } else if (expectFailure && !err) {
+            util.error("Command was supposed to fail (but didn't): " + cmd);
+            console.log(stdout.toString());
+            console.log(stderr.toString());
+            process.exit(1);
+         }
+         callback(stdout.toString());
+      });
+   };
+}
