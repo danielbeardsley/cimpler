@@ -41,6 +41,7 @@ describe("CLI build command", function() {
          assert.deepEqual(inBuild, expectedBuild);
          // So the next assertion will succeed
          expectedBuild.branch = 'test-branch';
+         expectedBuild.buildCommand = 'blah';
          finished();
          check();
       });
@@ -49,7 +50,7 @@ describe("CLI build command", function() {
 
       exec(bin + " build", function(stdout) {
          check();
-         exec(bin + " build --branch=test-branch", function(stdout) {
+         exec(bin + " build --branch=test-branch --command='blah'", function(stdout) {
             check();
          });
       });
