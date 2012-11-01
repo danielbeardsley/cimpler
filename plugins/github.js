@@ -1,4 +1,5 @@
 var util       = require('util'),
+    logger     = require('log4js').getLogger(),
     allowedIps = [
        '127.0.0.1',      // For Testing
        '207.97.227.253', // GitHub #1
@@ -39,7 +40,7 @@ function passesWhitelist(req, next) {
       return true;
    }
    next({status: 403});
-   console.warn('Access denied for ' + req.connection.remoteAddress);
+   logger.warn('Access denied for ' + req.connection.remoteAddress);
 }
 
 function extractBuildInfo(requestBody) {

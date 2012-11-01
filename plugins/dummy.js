@@ -1,9 +1,11 @@
+var logger  = require('log4js').getLogger();
+
 exports.init = function(config, cimpler) {
    this.config = config;
    cimpler.consumeBuild(function(build, started, finished) {
-      console.log("Starting Build");
+      logger.info("Starting Build");
       setTimeout(function() {
-         console.dir(build);
+         logger.info(build);
          build.status = 'success';
          finished();
       }, (config.buildTime || 20) * 1000);
