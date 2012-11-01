@@ -79,7 +79,7 @@ describe("git-build plugin", function() {
       });
    });
 
-   it("Create as many workers as there are repoPaths", function(done) {
+   it("should create as many workers as there are repoPaths", function(done) {
       var started = 0, finished = 0;
       var cimpler = new Cimpler({
          plugins: {
@@ -133,6 +133,50 @@ describe("git-build plugin", function() {
          letter: 'B',
          repo: "doesn't matter",
          branch: "master"
+      });
+   });
+
+   it("should allow custom commands to be specified per-build", function(done) {
+      var started = 0, finished = 0;
+      var cimpler = new Cimpler({
+         plugins: {
+            "git-build": {
+               repoPaths: testRepoDirs,
+               // Pass if test_branch is the build branch
+               cmd: "exit 1",
+               logs: {
+                  path: buildLogsPath,
+                  url:  "http://www.example.com/ci-builds/"
+               },
+            }
+         },
+      });
+
+      var check = expect(2, function() {
+         cimpler.shutdown();
+         done();
+      });
+
+      var expectedStatuses = {
+         A: 'success',
+         B: 'failure'
+      };
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.status, expectedStatuses[build.letter]);
+         check();
+      });
+
+      cimpler.addBuild({
+         letter: 'A',
+         repo: "doesn't matter",
+         branch: "master",
+         buildCommand: 'exit 0'
+      });
+      cimpler.addBuild({
+         letter: 'B',
+         repo: "doesn't matter",
+         branch: "master",
+         buildCommand: 'exit 1'
       });
    });
 
