@@ -18,7 +18,7 @@ function buildConsumer(config, cimpler, repoPath) {
       var execOptions = {
          env: {
             BUILD_REPO:   build.repo,
-            BUILD_SHA:    build.sha,
+            BUILD_COMMIT: build.commit,
             BUILD_BRANCH: build.branch,
             BUILD_STATUS: build.status
          },
@@ -55,8 +55,8 @@ function buildConsumer(config, cimpler, repoPath) {
                }
                finishedBuild();
             } else {
-               if (!build.sha) {
-                  build.sha = stdout.trim();
+               if (!build.commit) {
+                  build.commit = stdout.trim();
                }
                startMerge();
             }
@@ -66,7 +66,7 @@ function buildConsumer(config, cimpler, repoPath) {
       function startMerge() {
          var commands = '(' + cdToRepo + " && " +
             "git reset --hard && " +
-            "git checkout "+build.sha+" && " +
+            "git checkout "+build.commit+" && " +
             "git merge origin/master) 2>&1";
 
          exec(commands, function(err, stdout) {
@@ -123,7 +123,7 @@ function buildConsumer(config, cimpler, repoPath) {
             return null;
 
          var logFilename = (inBuild.branch || 'HEAD') + "--" +
-                           (inBuild.sha || 'unknown') + ".log";
+                           (inBuild.commit || 'unknown') + ".log";
 
          if (config.logs.url) {
             inBuild.logUrl = path.join(config.logs.url, logFilename);
@@ -154,7 +154,7 @@ function buildConsumer(config, cimpler, repoPath) {
 
       function id(inBuild) {
          return inBuild.branch +
-            (inBuild.sha ? ' (' + inBuild.sha.substr(0,10) + ')' : '');
+            (inBuild.commit ? ' (' + inBuild.commit.substr(0,10) + ')' : '');
       }
    };
 };

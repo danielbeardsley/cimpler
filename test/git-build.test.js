@@ -40,7 +40,7 @@ describe("git-build plugin", function() {
       cimpler.on('buildStarted', function(build) {
          concurrency(1);
          // git-build is supposed to lookup the sha for us.
-         assert.equal(build.sha, expectedBuildCommits.shift());
+         assert.equal(build.commit, expectedBuildCommits.shift());
 
          var cmd = "git rev-list --parents -n 1 HEAD";
          exec(cmd, testRepoDirs[0], assertParents);
@@ -105,7 +105,7 @@ describe("git-build plugin", function() {
          B: master
       };
       cimpler.on('buildStarted', function(build) {
-         assert.equal(build.sha, expectedBuildCommits[build.letter]);
+         assert.equal(build.commit, expectedBuildCommits[build.letter]);
          check();
          started++;
          // We should be running these in paralell

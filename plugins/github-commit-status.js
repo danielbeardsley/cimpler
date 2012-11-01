@@ -25,13 +25,13 @@ exports.init = function(config, cimpler) {
 
       var repo = extractRepoFromURL(build.repo);
 
-      // If we don't know the SHA, we can't report the status
-      if (!build.sha) return;
+      // If we don't know the commit SHA, we can't report the status
+      if (!build.commit) return;
 
       var commitStatus = {
          user: repo.user,
          repo: repo.name,
-         sha: build.sha,
+         commit: build.commit,
          state: status,
          target_url: build.logUrl,
          description: description };
