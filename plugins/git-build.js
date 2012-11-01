@@ -1,6 +1,7 @@
 var childProcess  = require('child_process'),
     fs            = require('fs'),
     util          = require('util'),
+    logger        = require('log4js').getLogger(),
     path          = require('path');
 
 exports.init = function(config, cimpler) {
@@ -33,7 +34,7 @@ function buildConsumer(config, cimpler, repoPath) {
          throw new Error("Missing the 'path' option of git-build config");
       }
 
-      console.log(id(build) + " -- Building with git");
+      logger.info(id(build) + " -- Building with git");
 
       startFetch();
 
@@ -48,7 +49,7 @@ function buildConsumer(config, cimpler, repoPath) {
                build.status = 'error';
                build.error = failed;
                stdout += "\n\n" + failed;
-               console.log(id(build) + " -- " + failed);
+               logger.warn(id(build) + " -- " + failed);
                if (logFilePath(build)) {
                   fs.writeFileSync(logFilePath(build), stdout);
                }
@@ -90,7 +91,7 @@ function buildConsumer(config, cimpler, repoPath) {
             // Fire the started event now that our build has a log.
             started();
 
-            console.log(id(build) + " -- " + message);
+            logger.info(id(build) + " -- " + message);
             if (logPath) {
                fs.writeFileSync(logPath, stdout);
             }
@@ -105,7 +106,7 @@ function buildConsumer(config, cimpler, repoPath) {
 
          var proc = exec(commands, function(err, stdout, stderr) {
             build.status = err ? 'failure' : 'success';
-            console.log(id(build) + " -- Build " + build.status);
+            logger.info(id(build) + " -- Build " + build.status);
             finishedBuild();
          });
 

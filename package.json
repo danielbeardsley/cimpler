@@ -18,7 +18,8 @@
       "github": "~0.1.5",
       "optimist": "~0.3.4",
       "notify-queue": "~0.0.1",
-      "connect": "~2.6.0"
+      "connect": "~2.6.0",
+      "log4js": "~0.5.4"
    },
 
    "devDependencies" : {
