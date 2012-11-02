@@ -10,6 +10,10 @@ args           = require('optimist')
    .usage("Examples:\n" +
    "   cimpler build [-b branch-name]   trigger a build on the current repo\n" +
    "   cimpler status                   echo the list of builds in the queue (* means building)")
+   .options('command', {
+      alias: 'c',
+      describe: 'Custom shell command to execute for this build'
+   })
    .options('branch', {
       alias: 'b',
       describe: 'Name of the branch to build (defaults to current)'
@@ -23,6 +27,9 @@ var command = args._[0];
 
 switch (command) {
    case 'build':
+      if (args.command) {
+         build.buildCommand = args.command;
+      }
       git.remote(function(remote, repoPath) {
          build.repo = remote || repoPath;
          getBranch();

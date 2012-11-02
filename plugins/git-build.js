@@ -101,7 +101,8 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function startBuild() {
-         var commands = cdToRepo + " && (" + config.cmd + ")" +
+         var buildCommand = build.buildCommand || config.cmd;
+         var commands = cdToRepo + " && (" + buildCommand + ")" +
                         echoStatusCmd('Build');
 
          var proc = exec(commands, function(err, stdout, stderr) {
