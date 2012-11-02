@@ -7,7 +7,7 @@ module.exports = {
     *
     * All interaction is done via http.
     */
-   httpPort: 25751
+   httpPort: 25751,
 
    plugins: {
       /**
@@ -15,7 +15,7 @@ module.exports = {
        *
        * url: /builds/status
        */
-      'build_status': true,
+      'build-status': true,
 
       'github-commit-status': {
          /**
@@ -31,12 +31,14 @@ module.exports = {
             password: 'password'
          }
       },
+
       /**
        * Github Post-Receive listener
        *
        * Listens to POSTs with urls === "/github" on httpPort
        */
       github: true,
+
       /**
        * Automatically marks all builds as successful (for testing)
        */
@@ -47,11 +49,13 @@ module.exports = {
           */
          enabled: false
       },
+
       /**
        * Enable the command line plugin (uses http)
        * (no options)
        */
       cli: true,
+
       /**
        * Run arbitraty shell commands on each build
        */
@@ -59,6 +63,7 @@ module.exports = {
          cmd: "echo some shell command",
          enabled: false
       },
+
       /**
        * Checkout the appropriate commit, merge in master and perform a build
        */
