@@ -18,6 +18,10 @@ args           = require('optimist')
       alias: 'b',
       describe: 'Name of the branch to build (defaults to current)'
    })
+   .options('verbose', {
+      alias: 'v',
+      describe: 'Produce more output for the status command. Includes details for each build.'
+   })
    .options('port', {
       alias: 'p',
       describe: 'HTTP port of the cimpler server (defaults to value in config.js)'
@@ -51,10 +55,19 @@ switch (command) {
    case 'status':
       httpTrigger.getStatus(args.port, function(err, builds) {
          builds.building.forEach(function(build) {
-            console.log("* " + build.branch);
+            if (args.verbose) {
+               build.building = true;
+               console.dir(build);
+            } else {
+               console.log("* " + build.branch);
+            }
          });
          builds.queued.forEach(function(build) {
-            console.log("  " + build.branch);
+            if (args.verbose) {
+               console.dir(build);
+            } else {
+               console.log("  " + build.branch);
+            }
          });
          if (builds.building.length == 0 && builds.queued.length == 0) {
             console.log("(no builds in queue)");
