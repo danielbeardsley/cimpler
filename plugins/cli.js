@@ -13,7 +13,7 @@ exports.init = function(config, cimpler, middleware) {
     */
    middleware("/build", function (req, res, next) {
       // We only care about POSTs to "/build" 
-      if (req.method !== 'POST' || req.url !== '/') {
+      if (req.method !== 'POST' || !req.url.match(/^\/($|\?)/)) {
          return next();
       }
 
