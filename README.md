@@ -57,6 +57,10 @@ property like: `function(config, cimpler)`
            }, ...
         }
 
+   * If `config` is an array, the `init()` function will be called once for
+     each value in the array. This allows you to configure multiple instances
+     of a plugin.
+
 * __cimpler:__ an instance of Cimpler which exposes methods and events
    * Methods:
       * `.addBuild(build)` : Adds a build to the system. A build is an object

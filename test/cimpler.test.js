@@ -31,19 +31,49 @@ describe("Cimpler", function() {
    describe(".registerPlugin()", function() {
       it("should call plugin.init() and pass the config and a function for regsitering middleware", function(done) {
          var config = {a: 1},
-         cb = false,
          cimpler = new Cimpler();
 
-         cimpler.registerPlugin({
-            init: function(inConfig, inCimpler, middleware) {
-               assert.equal(inConfig, config);
-               assert.equal(inCimpler, cimpler);
-               assert.equal(typeof middleware, "function");
-               done();
-            }
-         }, config);
+         var pluginInfo = createPlugin(function(inConfig, inCimpler, middleware) {
+            assert.equal(inConfig, config);
+            assert.equal(inCimpler, cimpler);
+            assert.equal(typeof middleware, "function");
+            done();
+         });
+
+         cimpler.registerPlugin(pluginInfo.plugin, config);
       });
    });
+
+   describe(".registerPlugin()", function() {
+      it("should call plugin.init() multiple times if config is an array.", function(done) {
+         var config = {a: 1},
+         check = expect(4, done),
+         cimpler = new Cimpler();
+
+         var pluginInfo = createPlugin(check);
+
+         cimpler.registerPlugin(pluginInfo.plugin, [config, config]);
+         cimpler.registerPlugin(pluginInfo.plugin, config);
+
+         assert.deepEqual(pluginInfo.passedConfigs, [config, config, config]);
+         check();
+      });
+   });
+
+   function createPlugin(init) {
+      var configs = [];
+      return {
+         plugin: {
+            init: function(inConfig, inCimpler, middleware) {
+               configs.push(inConfig);
+               if (init) {
+                  init(inConfig, inCimpler, middleware);
+               }
+            }
+         },
+         passedConfigs: configs
+      };
+   }
 
    describe("build events", function() {
       it("should be emitted in the correct order", function(done) {
