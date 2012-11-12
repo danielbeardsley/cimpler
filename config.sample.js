@@ -74,6 +74,15 @@ module.exports = {
           * This allows builds to be executed in parallel.
           */
          repoPaths: "/home/user/ci/cloned-repo",
+         /**
+          * Regex that allows filtering of which builds this plugin instance
+          * should be responsible for. Only builds who's `build.repo` property
+          * match this regex will be built.
+          *
+          * If this property is falsy or undefined, the plugin will accept all
+          * builds.
+          */
+         repoRegex: /githubuser\/reponame/,
          // Arbitrary shell command
          cmd: "make test",
          logs: {
