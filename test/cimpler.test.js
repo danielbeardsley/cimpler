@@ -85,15 +85,24 @@ describe("Cimpler", function() {
    });
 
    describe(".consumeBuild()", function() {
-      it("should work with multiple builds", function(done) {
+      it("should provide builds to consumers serially", function(done) {
          var first = {f: 1},
          second = {s: 1},
          cb = 0,
          cimpler = new Cimpler();
 
+         var concurrency = 0;
          cimpler.consumeBuild(function(inBuild, started, finished) {
+            concurrency++
             assert.equal(inBuild, cb === 0 ? first : second);
-            finished();
+            process.nextTick(function() {
+               started();
+               process.nextTick(function() {
+                  concurrency--;
+                  assert.equal(concurrency, 0);
+                  finished();
+               });
+            });
             cb++;
             if (cb >= 2) done();
          });
