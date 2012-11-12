@@ -110,6 +110,36 @@ describe("Cimpler", function() {
          cimpler.addBuild(first);
          cimpler.addBuild(second);
       });
+
+      it("should allow filtering by repo", function(done) {
+         var cimpler = new Cimpler();
+         var check = expect(6, done);
+
+         cimpler.consumeBuild(buildAsserter('A'), /A/);
+         cimpler.consumeBuild(buildAsserter('B'), /B/);
+
+         cimpler.addBuild(build('A'));
+         cimpler.addBuild(build('A'));
+         cimpler.addBuild(build('A'));
+         cimpler.addBuild(build('B'));
+         cimpler.addBuild(build('B'));
+         cimpler.addBuild(build('B'));
+
+         function buildAsserter(expectdRepo) {
+            return function(inBuild, started, finished) {
+               assert.equal(inBuild.repo, expectdRepo);
+               finished();
+               check();
+            };
+         }
+
+         function build(repo) {
+            return {
+               repo: repo,
+               branch: "" + Math.random()
+            };
+         }
+      });
    });
 
    describe(".addBuild()", function() {
