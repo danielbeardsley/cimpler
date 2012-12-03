@@ -9,7 +9,7 @@ module.exports =
       return function() {
          if (--count == 0) {
             // Delay a bit to see if any more events come through
-            setTimeout(callback, 100);
+            setTimeout(callback, 10);
          } else if (count < 0) {
             assert.fail("Got " + (originalCount + 1) +
              " events, expecting " + originalCount);

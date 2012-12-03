@@ -237,7 +237,7 @@ describe("Cimpler", function() {
          cimpler.consumeBuild(function(inBuild, started, finished) {
             outBuilds.push(inBuild);
             started();
-            setTimeout(function() { finished(); }, 1);
+            setTimeout(function() { finished(); }, 0);
             if (outBuilds.length >= expectedOutBuilds.length) {
                assert.deepEqual(outBuilds, expectedOutBuilds);
                done();
