@@ -57,6 +57,10 @@ property like: `function(config, cimpler)`
            }, ...
         }
 
+   * If `config` is an array, the `init()` function will be called once for
+     each value in the array. This allows you to configure multiple instances
+     of a plugin.
+
 * __cimpler:__ an instance of Cimpler which exposes methods and events
    * Methods:
       * `.addBuild(build)` : Adds a build to the system. A build is an object
@@ -64,13 +68,16 @@ property like: `function(config, cimpler)`
          * `repo` : a string identifying the repository of the build (a url,
            a local path to the originating repo)
          * `branch` : The name of the branch this build should be run against
-      * `.consumeBuild(callback)` : registers this plugin as a build consumer.
+      * `.consumeBuild(callback[, repoRegex])` : registers this plugin as a
+        build consumer.
          * `callback` has signature: `function(build, started, finished)`
             * `started()` and `finished()` are both functions a plugin should
               call when a build is started and finished.
             * `started()` and the `buildStarted` event will be triggered
               implicitly if `finished()` is called first.
-         * The callback will be called for every build, serially. `callback()`
+         * If `repoRegex` is provided, only builds with a `build.repo`
+           property that match the regex will be passed to the callback.
+         * The callback will be called for each build, serially. `callback()`
            will only be called for the next build once `finished()` is called.
       * `.shutdown()` : Initiates shutdown of the server and triggers the
         `shutdown` event.

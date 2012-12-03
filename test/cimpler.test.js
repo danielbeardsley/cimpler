@@ -31,19 +31,49 @@ describe("Cimpler", function() {
    describe(".registerPlugin()", function() {
       it("should call plugin.init() and pass the config and a function for regsitering middleware", function(done) {
          var config = {a: 1},
-         cb = false,
          cimpler = new Cimpler();
 
-         cimpler.registerPlugin({
-            init: function(inConfig, inCimpler, middleware) {
-               assert.equal(inConfig, config);
-               assert.equal(inCimpler, cimpler);
-               assert.equal(typeof middleware, "function");
-               done();
-            }
-         }, config);
+         var pluginInfo = createPlugin(function(inConfig, inCimpler, middleware) {
+            assert.equal(inConfig, config);
+            assert.equal(inCimpler, cimpler);
+            assert.equal(typeof middleware, "function");
+            done();
+         });
+
+         cimpler.registerPlugin(pluginInfo.plugin, config);
       });
    });
+
+   describe(".registerPlugin()", function() {
+      it("should call plugin.init() multiple times if config is an array.", function(done) {
+         var config = {a: 1},
+         check = expect(4, done),
+         cimpler = new Cimpler();
+
+         var pluginInfo = createPlugin(check);
+
+         cimpler.registerPlugin(pluginInfo.plugin, [config, config]);
+         cimpler.registerPlugin(pluginInfo.plugin, config);
+
+         assert.deepEqual(pluginInfo.passedConfigs, [config, config, config]);
+         check();
+      });
+   });
+
+   function createPlugin(init) {
+      var configs = [];
+      return {
+         plugin: {
+            init: function(inConfig, inCimpler, middleware) {
+               configs.push(inConfig);
+               if (init) {
+                  init(inConfig, inCimpler, middleware);
+               }
+            }
+         },
+         passedConfigs: configs
+      };
+   }
 
    describe("build events", function() {
       it("should be emitted in the correct order", function(done) {
@@ -85,21 +115,60 @@ describe("Cimpler", function() {
    });
 
    describe(".consumeBuild()", function() {
-      it("should work with multiple builds", function(done) {
+      it("should provide builds to consumers serially", function(done) {
          var first = {f: 1},
          second = {s: 1},
          cb = 0,
          cimpler = new Cimpler();
 
+         var concurrency = 0;
          cimpler.consumeBuild(function(inBuild, started, finished) {
+            concurrency++
             assert.equal(inBuild, cb === 0 ? first : second);
-            finished();
+            process.nextTick(function() {
+               started();
+               process.nextTick(function() {
+                  concurrency--;
+                  assert.equal(concurrency, 0);
+                  finished();
+               });
+            });
             cb++;
             if (cb >= 2) done();
          });
 
          cimpler.addBuild(first);
          cimpler.addBuild(second);
+      });
+
+      it("should allow filtering by repo", function(done) {
+         var cimpler = new Cimpler();
+         var check = expect(6, done);
+
+         cimpler.consumeBuild(buildAsserter('A'), /A/);
+         cimpler.consumeBuild(buildAsserter('B'), /B/);
+
+         cimpler.addBuild(build('A'));
+         cimpler.addBuild(build('A'));
+         cimpler.addBuild(build('A'));
+         cimpler.addBuild(build('B'));
+         cimpler.addBuild(build('B'));
+         cimpler.addBuild(build('B'));
+
+         function buildAsserter(expectdRepo) {
+            return function(inBuild, started, finished) {
+               assert.equal(inBuild.repo, expectdRepo);
+               finished();
+               check();
+            };
+         }
+
+         function build(repo) {
+            return {
+               repo: repo,
+               branch: "" + Math.random()
+            };
+         }
       });
    });
 
@@ -168,7 +237,7 @@ describe("Cimpler", function() {
          cimpler.consumeBuild(function(inBuild, started, finished) {
             outBuilds.push(inBuild);
             started();
-            setTimeout(function() { finished(); }, 1);
+            setTimeout(function() { finished(); }, 0);
             if (outBuilds.length >= expectedOutBuilds.length) {
                assert.deepEqual(outBuilds, expectedOutBuilds);
                done();

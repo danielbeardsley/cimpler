@@ -180,6 +180,29 @@ describe("git-build plugin", function() {
       });
    });
 
+   it("should pass the `repoRegex` the consumeBuild() function", function() {
+      var gitBuild = require('../plugins/git-build');
+      var _undefined;
+      var testRegex = /Blah/;
+      var regexes = [];
+      var mockCimpler = {
+         consumeBuild: function(consumer, repoRegex) {
+            regexes.push(repoRegex);
+         }
+      }
+
+      gitBuild.init({
+         repoPaths: testRepoDirs[0],
+         repoRegex: testRegex
+      }, mockCimpler);
+
+      gitBuild.init({
+         repoPaths: testRepoDirs[0],
+      }, mockCimpler);
+
+      assert.deepEqual(regexes, [testRegex, _undefined])
+   });
+
    function exec(cmd, dir, callback, expectFailure) {
       var execOptions = {
          cwd: dir

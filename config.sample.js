@@ -67,13 +67,22 @@ module.exports = {
       /**
        * Checkout the appropriate commit, merge in master and perform a build
        */
-		"git-build":  {
+		"git-build":[ {
          /**
           * Path (or array of paths) to a local clone of the github repo.
           * One build "consumer" will be created for each path in the array
           * This allows builds to be executed in parallel.
           */
          repoPaths: "/home/user/ci/cloned-repo",
+         /**
+          * Regex that allows filtering of which builds this plugin instance
+          * should be responsible for. Only builds who's `build.repo` property
+          * match this regex will be built.
+          *
+          * If this property is falsy or undefined, the plugin will accept all
+          * builds.
+          */
+         repoRegex: /githubuser\/reponame/,
          // Arbitrary shell command
          cmd: "make test",
          logs: {
@@ -83,6 +92,16 @@ module.exports = {
             url:  "http://www.example.com/ci-builds/"
          },
          enabled: true
-      }
+      }/** , {
+         * Any plugin who's configuration object is an array
+         * will have it's .init() function called once for each element
+         * in the array.
+         *
+         * Using the `repoRegex` config option allows you to
+         * build and test multiple repositories using the
+         * same instance of Cimpler
+         repoRegex: /githubuser\/otherrepo/,
+      }*/
+      ]
    }
 };
