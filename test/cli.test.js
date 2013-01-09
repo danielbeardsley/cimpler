@@ -2,6 +2,7 @@ var Cimpler      = require('../lib/cimpler'),
     util         = require('util'),
     fs           = require('fs'),
     assert       = require('assert');
+    _            = require('underscore');
     expect       = require("./expect"),
     childProcess = require('child_process'),
     testRepoDir  = __dirname + "/../fixtures/repo/",
@@ -27,7 +28,8 @@ describe("CLI build command", function() {
       expectedBuild = {
          repo:   'http://example.com/repo.git',
          branch: 'master',
-         status: 'pending'
+         status: 'pending',
+         _control: {}
       };
 
       var check = expect(4, function() {
@@ -37,11 +39,15 @@ describe("CLI build command", function() {
       });
 
       cimpler.consumeBuild(function(inBuild, started, finished) {
+         started();
+
          builtBranches.push(inBuild.branch);
          assert.deepEqual(inBuild, expectedBuild);
          // So the next assertion will succeed
          expectedBuild.branch = 'test-branch';
          expectedBuild.buildCommand = 'blah';
+         expectedBuild._control.tail_log = true
+
          finished();
          check();
       });
@@ -50,7 +56,7 @@ describe("CLI build command", function() {
 
       exec(bin + " build", function(stdout) {
          check();
-         exec(bin + " build --branch=test-branch --command='blah'", function(stdout) {
+         exec(bin + " build --tail --branch=test-branch --command='blah'", function(stdout) {
             check();
          });
       });

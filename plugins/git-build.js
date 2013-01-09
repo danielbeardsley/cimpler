@@ -88,19 +88,17 @@ function buildConsumer(config, cimpler, repoPath) {
 
             // Assigns a log file to this build
             var logPath = logFilePath(build);
-            // Fire the started event now that our build has a log.
-            started();
 
             logger.info(id(build) + " -- " + message);
             if (logPath) {
                fs.writeFileSync(logPath, stdout);
             }
 
-            nextStep();
+            nextStep(started);
          });
       }
 
-      function startBuild() {
+      function startBuild(started) {
          var buildCommand = build.buildCommand || config.cmd;
          var commands = cdToRepo + " && (" + buildCommand + ")" +
                         echoStatusCmd('Build');
@@ -117,6 +115,15 @@ function buildConsumer(config, cimpler, repoPath) {
           */
          proc.stdout.pipe(logFile(), {end:false});
          proc.stderr.pipe(logFile(), {end:false});
+         if (build._control.tail_log) {
+            build._control.logs = {
+               stdout : proc.stdout,
+               stderr : proc.stderr
+            };
+         }
+
+         // Fire the started event now that our build has a log.
+         started();
       }
 
       function logFilePath(inBuild) {

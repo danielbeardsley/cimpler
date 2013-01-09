@@ -3,6 +3,7 @@ var Cimpler  = require('../lib/cimpler'),
     http     = require('http'),
     assert   = require('assert'),
     expect   = require("./expect"),
+    _        = require('underscore'),
     httpPort = 25750;
 
 var config = {a: 1},
@@ -56,7 +57,8 @@ describe("Github plugin", function() {
          assert.equal(cb, 0, "Only one build should get through");
          cb++;
 
-         assert.deepEqual(build, {
+         var sanitizedBuild = _.pick(build, 'repo', 'commit', 'branch', 'status')
+         assert.deepEqual(sanitizedBuild, {
             repo:    'http',
             commit:   commit,
             branch:  'master',

@@ -34,7 +34,8 @@ describe("post-receive git-hook", function() {
 
       cimpler.consumeBuild(function(inBuild, started, finished) {
          builtBranches.push(inBuild.branch);
-         assert.deepEqual(inBuild, expectedBuild);
+         var sanitizedBuild = _.pick(inBuild, 'repo', 'branch', 'status', 'commit')
+         assert.deepEqual(sanitizedBuild, expectedBuild);
          finished();
          check();
       });
