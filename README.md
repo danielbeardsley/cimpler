@@ -11,6 +11,31 @@ hooks](https://help.github.com/articles/post-receive-hooks) and the
 It's super simple to setup and configure.  At this time it's designed to only
 manage one repo at a time.
 
+## Usage (command line)
+The most common usage won't be direct at all. i.e. Github post-recieve hook
+triggers build, build status and log are reported to Github commit status api,
+you view build log in the browser.
+
+cimpler provides an easy CLI:
+
+    $> cimpler --help
+    Examples:
+       cimpler build [-b branch-name]   trigger a build on the current repo
+       cimpler status                   echo the list of builds in the queue (* means building)
+
+    Options:
+      --command, -c  Custom shell command to execute for this build (instead of
+                     the one from config.js)
+      --branch, -b   Name of the branch to build (defaults to current)
+      --verbose, -v  Produce more output for the status command. Includes details for each build.
+      --port, -p     HTTP port of the cimpler server (defaults to value in config.js)
+
+_Note:_ The most common usage won't need the cli at all. i.e. Github
+post-recieve hook triggers build, build status and log are reported to Github
+commit status api, you view build log in the browser.
+
+But, cimpler does provide a nice CLI
+
 ## Installation
 
     $ git clone https://github.com/danielbeardsley/cimpler.git
