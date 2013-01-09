@@ -6,7 +6,7 @@ var Cimpler  = require('../lib/cimpler'),
     httpPort = 25750;
 
 var config = {a: 1},
-sha = "sha1232322",
+commit = "sha1232322",
 options = {
    port: httpPort,
    path: '/github',
@@ -19,7 +19,7 @@ options = {
 postBuild = {
    ref:"b/master",
    repository:{url:"http"},
-   after: sha
+   after: commit
 };
 
 describe("Github plugin", function() {
@@ -58,7 +58,7 @@ describe("Github plugin", function() {
 
          assert.deepEqual(build, {
             repo:    'http',
-            sha:     sha,
+            commit:   commit,
             branch:  'master',
             status:  'pending'
          });

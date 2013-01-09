@@ -57,7 +57,7 @@ function extractBuildInfo(requestBody) {
    // Build info structure
    return {
      repo   : info.repository.url,
-     sha    : info.after,
+     commit : info.after,
      branch : branch,
      status : 'pending'
    };

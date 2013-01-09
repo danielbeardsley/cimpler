@@ -22,7 +22,7 @@ describe("Shell plugin", function() {
          // All the environment variables set by the shell plugin
          envVars = [
             'BUILD_REPO',
-            'BUILD_SHA',
+            'BUILD_COMMIT',
             'BUILD_BRANCH',
             'BUILD_STATUS'],
          cimpler = new Cimpler();
@@ -34,7 +34,7 @@ describe("Shell plugin", function() {
 
          cimpler.addBuild({
             repo:'repo',
-            sha: '12345',
+            commit: '12345',
             branch: 'master',
             status: 'began'
          });
@@ -49,7 +49,7 @@ describe("Shell plugin", function() {
                var contents = fs.readFileSync(tempFile, 'utf8');
                var expectedContents = [
                   build.repo,
-                  build.sha,
+                  build.commit,
                   build.branch,
                   'began' // build.status (status will have changed)
                ].join(' ');

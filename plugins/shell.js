@@ -5,7 +5,7 @@ exports.init = function(config, cimpler) {
       var options = {
          env: {
             BUILD_REPO:   build.repo,
-            BUILD_SHA:    build.sha,
+            BUILD_COMMIT: build.commit,
             BUILD_BRANCH: build.branch,
             BUILD_STATUS: build.status
          }
