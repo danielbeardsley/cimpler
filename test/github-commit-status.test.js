@@ -22,7 +22,7 @@ describe("Github commit status plugin", function() {
       var build = {
          repo: "git://github.com/user/repo.git",
          status: 'BLAH',
-         sha: '11111', 
+         commit: '11111', 
          logUrl: 'http'
       };
 
@@ -32,7 +32,7 @@ describe("Github commit status plugin", function() {
          var status = {
             user: 'user',
             repo: 'repo',
-            sha: build.sha,
+            commit: build.commit,
             state: 'pending',
             target_url: build.logUrl,
             description: 'Build Started' };
@@ -49,7 +49,7 @@ describe("Github commit status plugin", function() {
          var build = {
             repo: "git://github.com:user/repo.git",
             status: 'BLAH',
-            sha: '11111', 
+            commit: '11111', 
             logUrl: 'http',
             error: "ERR"
          };
@@ -59,7 +59,7 @@ describe("Github commit status plugin", function() {
             var status = {
                user: 'user',
                repo: 'repo',
-               sha: build.sha,
+               commit: build.commit,
                state: 'pending',
                target_url: build.logUrl,
                description: 'Build Started' };
