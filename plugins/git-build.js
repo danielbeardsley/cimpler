@@ -9,7 +9,7 @@ exports.init = function(config, cimpler) {
    paths = Array.isArray(paths) ? paths : [paths]
    paths.forEach(function(repoPath) {
       var consumer = buildConsumer(config, cimpler, repoPath);
-      cimpler.consumeBuild(consumer);
+      cimpler.consumeBuild(consumer, config.repoRegex);
    });
 }
 
