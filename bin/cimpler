@@ -40,13 +40,14 @@ switch (command) {
             tail: args.tail
          };
          if (args.branch) {
-            build.branch = args.branch;
-            httpTrigger.injectBuild(build, args.port);
+            triggerBuild(args.branch);
          } else {
-            git.currentBranch(function(branch) {
-               build.branch = branch;
-               httpTrigger.injectBuild(build, args.port);
-            });
+            git.currentBranch(triggerBuild);
+         }
+
+         function triggerBuild(branch) {
+            build.branch = branch;
+            httpTrigger.injectBuild(build, args.port, options);
          }
       }
       break;
