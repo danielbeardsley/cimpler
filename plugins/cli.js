@@ -1,4 +1,5 @@
 var util       = require('util'),
+    _          = require('underscore'),
     allowedIps = [
        '127.0.0.1'
     ];
@@ -23,14 +24,53 @@ exports.init = function(config, cimpler, middleware) {
          return next({status: 403});
       }
 
+      var build = req.body;
+      build._control = {};
+
+      if (req.query && req.query.tail_log) {
+         build._control.tail_log = true;
+      }
+
       try {
-         cimpler.addBuild(req.body);
-         res.end("OK");
+         cimpler.addBuild(build);
       } catch (e) {
          var msg = "Error processing command line request." + e.message;
          util.error(msg);
          util.error(e.stack);
          res.end(msg + " -- " + e.message);
       }
+
+      // Schedule the logs to be piped once the build starts
+      if (build._control.tail_log) {
+         uponStarting(build, function() {
+            if (build._control.logs) {
+               var sanitizedBuild = _.omit(build, '_control');
+               res.write(JSON.stringify(sanitizedBuild) + "\n");
+               // Pipe the log to the HTTP response obj
+               build._control.logs.stdout.pipe(res);
+            }
+         });
+      } else {
+         res.end('OK');
+      }
+   });
+
+   var index = 0;
+   var waitingOnBuilds = {};
+   function uponStarting(build, callback) {
+      waitingOnBuilds[index++] = {
+         build: build,
+         callback: callback
+      };
+   }
+
+   cimpler.on('buildStarted', function(build) {
+      Object.keys(waitingOnBuilds).forEach(function(key) {
+         var waitingFor = waitingOnBuilds[key];
+         if (waitingFor.build === build) {
+            waitingFor.callback();
+            delete waitingOnBuilds[key];
+         }
+      });
    });
 };

@@ -2,6 +2,7 @@ var Cimpler      = require('../lib/cimpler'),
     util         = require('util'),
     fs           = require('fs'),
     assert       = require('assert');
+    _            = require('underscore');
     expect       = require("./expect"),
     childProcess = require('child_process'),
     testRepoDir  = __dirname + "/../fixtures/repo/",
@@ -38,7 +39,8 @@ describe("CLI build command", function() {
 
       cimpler.consumeBuild(function(inBuild, started, finished) {
          builtBranches.push(inBuild.branch);
-         assert.deepEqual(inBuild, expectedBuild);
+         var sanitizedBuild = _.omit(inBuild, '_control');
+         assert.deepEqual(sanitizedBuild, expectedBuild);
          // So the next assertion will succeed
          expectedBuild.branch = 'test-branch';
          finished();
