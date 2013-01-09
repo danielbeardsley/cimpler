@@ -31,7 +31,7 @@ exports.init = function(config, cimpler) {
       var commitStatus = {
          user: repo.user,
          repo: repo.name,
-         commit: build.commit,
+         sha: build.commit,
          state: status,
          target_url: build.logUrl,
          description: description };
