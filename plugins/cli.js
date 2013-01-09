@@ -43,11 +43,15 @@ exports.init = function(config, cimpler, middleware) {
       // Schedule the logs to be piped once the build starts
       if (build._control.tail_log) {
          uponStarting(build, function() {
+            var sanitizedBuild = _.omit(build, '_control');
+            res.write(JSON.stringify(sanitizedBuild) + "\n");
+
             if (build._control.logs) {
-               var sanitizedBuild = _.omit(build, '_control');
-               res.write(JSON.stringify(sanitizedBuild) + "\n");
                // Pipe the log to the HTTP response obj
                build._control.logs.stdout.pipe(res);
+            } else {
+               // Logs aren't available, end the response.
+               res.end('OK');
             }
          });
       } else {

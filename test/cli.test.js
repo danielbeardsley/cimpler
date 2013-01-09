@@ -28,7 +28,8 @@ describe("CLI build command", function() {
       expectedBuild = {
          repo:   'http://example.com/repo.git',
          branch: 'master',
-         status: 'pending'
+         status: 'pending',
+         _control: {}
       };
 
       var check = expect(4, function() {
@@ -38,11 +39,14 @@ describe("CLI build command", function() {
       });
 
       cimpler.consumeBuild(function(inBuild, started, finished) {
+         started();
+
          builtBranches.push(inBuild.branch);
-         var sanitizedBuild = _.omit(inBuild, '_control');
-         assert.deepEqual(sanitizedBuild, expectedBuild);
+         assert.deepEqual(inBuild, expectedBuild);
          // So the next assertion will succeed
          expectedBuild.branch = 'test-branch';
+         expectedBuild._control.tail_log = true
+
          finished();
          check();
       });
@@ -51,7 +55,7 @@ describe("CLI build command", function() {
 
       exec(bin + " build", function(stdout) {
          check();
-         exec(bin + " build --branch=test-branch", function(stdout) {
+         exec(bin + " build --tail --branch=test-branch", function(stdout) {
             check();
          });
       });
