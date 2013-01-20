@@ -8,8 +8,8 @@ var Cimpler      = require('../lib/cimpler'),
     buildLogsPath    = "/tmp/cimpler-test-logs/";
 
 // Current branch pointers in our test repo.
-var testBranch = "aa6b0aa64229caee1b07500334a64de9e1ffcddd",
-    master     = "ff47c0e58eef626f912c7e5d80d67d8796f65003",
+var testBranch   = "aa6b0aa64229caee1b07500334a64de9e1ffcddd",
+    masterBranch = "ff47c0e58eef626f912c7e5d80d67d8796f65003",
     masterParent = "aac5cd96ddd3173678e3666d677699ea6adce875";
 
 describe("git-build plugin", function() {
@@ -36,7 +36,7 @@ describe("git-build plugin", function() {
          done();
       });
 
-      var expectedBuildCommits = [ testBranch, master ];
+      var expectedBuildCommits = [ testBranch, masterBranch ];
       cimpler.on('buildStarted', function(build) {
          concurrency(1);
          // git-build is supposed to lookup the sha for us.
@@ -52,7 +52,7 @@ describe("git-build plugin", function() {
       });
 
       var expectedParents = [
-         [ testBranch, master ],
+         [ testBranch, masterBranch ],
          [ masterParent ]
       ];
       function assertParents(stdout) {
@@ -102,7 +102,7 @@ describe("git-build plugin", function() {
 
       var expectedBuildCommits = {
          A: testBranch,
-         B: master
+         B: masterBranch
       };
       cimpler.on('buildStarted', function(build) {
          assert.equal(build.commit, expectedBuildCommits[build.letter]);
