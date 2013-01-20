@@ -31,7 +31,11 @@ describe("git-build plugin", function() {
          },
       });
 
-      var check = expect(6, function() {
+      /**
+       * A helper to ensure we have exactly the number of callbacks we need.
+       * 4 check() calls per build
+       */
+      var check = expect(2 * 4, function() {
          cimpler.shutdown();
          done();
       });
@@ -63,9 +67,28 @@ describe("git-build plugin", function() {
          check();
       }
 
+      /**
+       * Assert that each has it's expected outcome
+       * Note: the test is current branch == 'test-branch'
+       */
       var expectedStatuses = ['success', 'failure'];
       cimpler.on('buildFinished', function(build) {
          assert.equal(build.status, expectedStatuses.shift());
+         check();
+      });
+
+      /**
+       * Assert that the build logs were created correctly
+       */
+      var expectedLogs = [{
+         path:  buildLogsPath + "/test-branch--" + testBranch + ".log"
+      },{
+         path:  buildLogsPath + "/master--" + masterBranch + ".log"
+      }];
+      cimpler.on('buildFinished', function(build) {
+         var expectedLog = expectedLogs.pop();
+         assert.ok(fs.existsSync(expectedLog.path));
+         fs.unlinkSync(expectedLog.path);
          check();
       });
 
