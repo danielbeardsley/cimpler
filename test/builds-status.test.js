@@ -38,7 +38,7 @@ describe("build-status plugin", function() {
             var expected = {
                queued: [builds[1]],
                building: [builds[0]]
-            }
+            };
             assert.deepEqual(JSON.parse(body), expected);
             finished();
          });

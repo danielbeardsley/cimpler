@@ -46,7 +46,7 @@ describe("CLI build command", function() {
          // So the next assertion will succeed
          expectedBuild.branch = 'test-branch';
          expectedBuild.buildCommand = 'blah';
-         expectedBuild._control.tail_log = true
+         expectedBuild._control.tail_log = true;
 
          finished();
          check();
