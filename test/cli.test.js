@@ -54,7 +54,7 @@ describe("CLI build command", function() {
 
       exec(bin, function(stdout) { }, /* expect failure = */ true);
 
-      exec(bin + " build", function(stdout) {
+      exec(bin + " build --no-tail", function(stdout) {
          check();
          exec(bin + " build --tail --branch=test-branch --command='blah'", function(stdout) {
             check();
