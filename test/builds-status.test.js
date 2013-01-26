@@ -1,6 +1,7 @@
 var Cimpler  = require('../lib/cimpler');
 var http     = require('http');
 var assert   = require('assert');
+var _        = require('underscore');
 var httpPort = 25750;
 
 describe("build-status plugin", function() {
@@ -35,6 +36,9 @@ describe("build-status plugin", function() {
          onEntireBody(res, function(err, body) {
             cimpler.shutdown();
             if (err) assert.fail(err);
+            builds = builds.map(function(build) {
+               return _.omit(build, '_control');
+            });
             var expected = {
                queued: [builds[1]],
                building: [builds[0]]
