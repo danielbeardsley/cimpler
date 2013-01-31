@@ -69,7 +69,7 @@ function buildConsumer(config, cimpler, repoPath) {
             "git clean -ffd && " +
             "git checkout "+build.commit+" && " +
             "git merge origin/master && " +
-            "git submodule update --init ) 2>&1";
+            "git submodule update --init --recursive ) 2>&1";
 
          exec(commands, function(err, stdout) {
             var nextStep, message;
