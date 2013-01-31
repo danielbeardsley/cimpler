@@ -66,8 +66,10 @@ function buildConsumer(config, cimpler, repoPath) {
       function startMerge() {
          var commands = '(' + cdToRepo + " && " +
             "git reset --hard && " +
+            "git clean -ffd && " +
             "git checkout "+build.commit+" && " +
-            "git merge origin/master) 2>&1";
+            "git merge origin/master && " +
+            "git submodule update --init --recursive ) 2>&1";
 
          exec(commands, function(err, stdout) {
             var nextStep, message;
