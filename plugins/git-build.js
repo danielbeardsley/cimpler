@@ -36,6 +36,10 @@ function buildConsumer(config, cimpler, repoPath) {
 
       logger.info(id(build) + " -- Building with git");
 
+      if (logFilePath(build)) {
+         fs.writeFileSync(logFilePath(build), new Date());
+      }
+
       startFetch();
 
       function startFetch() {
@@ -50,9 +54,7 @@ function buildConsumer(config, cimpler, repoPath) {
                build.error = failed;
                stdout += "\n\n" + failed;
                logger.warn(id(build) + " -- " + failed);
-               if (logFilePath(build)) {
-                  fs.writeFileSync(logFilePath(build), stdout);
-               }
+               fs.appendFileSync(logFilePath(build), stdout);
                finishedBuild();
             } else {
                if (!build.commit) {
@@ -92,9 +94,7 @@ function buildConsumer(config, cimpler, repoPath) {
             var logPath = logFilePath(build);
 
             logger.info(id(build) + " -- " + message);
-            if (logPath) {
-               fs.writeFileSync(logPath, stdout);
-            }
+            fs.appendFileSync(logPath, stdout);
 
             nextStep(started);
          });
