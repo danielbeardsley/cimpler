@@ -17,7 +17,7 @@ args           = require('optimist')
    .options('tail', {
       boolean: true,
       default: true,
-      describe: 'Blocks until the build is started and tails the log when used with the "build" command.'
+      describe: '[ or --no-tail ] Blocks until the build is started and tails the log when used with the "build" command.'
    })
    .options('branch', {
       alias: 'b',
@@ -29,7 +29,7 @@ args           = require('optimist')
    })
    .options('port', {
       alias: 'p',
-      describe: 'HTTP port of the cimpler server (defaults to value in config.js)'
+      describe: 'HTTP port of the cimpler server (defaults to the value in config.js)'
    }).argv;
 
 var command = args._[0];
