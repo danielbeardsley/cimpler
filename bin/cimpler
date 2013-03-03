@@ -12,7 +12,7 @@ args           = require('optimist')
    "   cimpler status                   echo the list of builds in the queue (* means building)")
    .options('command', {
       alias: 'c',
-      describe: 'Custom shell command to execute for this build'
+      describe: 'Custom shell command to execute for this build instead of the one from the config file'
    })
    .options('tail', {
       boolean: true,

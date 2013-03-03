@@ -2,38 +2,37 @@
 
 [![Build Status](https://travis-ci.org/danielbeardsley/cimpler.png?branch=master)](https://travis-ci.org/danielbeardsley/cimpler)
 
-cimpler is a very simple Node.js continous integration server that
-interfaces with [Github post-recieve
-hooks](https://help.github.com/articles/post-receive-hooks) and the
-[Github commit status api](http://developer.github.com/v3/repos/statuses/).
-
-It's super simple to setup and configure.  At this time it's designed to only
-manage one repo at a time.
+cimpler is a Node.js continous integration server that primarily
+interfaces with [Github post-recieve hooks][post-receive] and the
+[Github commit status api][status]
+It's designed to be straight-forward to setup and configure
+yet allows for easy extension with plugins.
 
 ## Usage (command line)
-The most common usage won't be direct at all. i.e. Github post-recieve hook
-triggers build, build status and log are reported to Github commit status api,
-you view build log in the browser.
+The most common usage won't be direct at all.
+i.e. Github post-recieve hook triggers builds,
+build status and log are reported using the Github commit status api,
+logs and results are found and viewed in the browser.
 
-cimpler provides an easy CLI:
+But, cimpler does provide a local-repo post-receive hook and a nice CLI:
 
     $> cimpler --help
     Examples:
        cimpler build [-b branch-name]   trigger a build on the current repo
-       cimpler status                   echo the list of builds in the queue (* means building)
-
+       cimpler status                   echo the list of builds in the
+                                        queue (* means building)
+    
     Options:
-      --command, -c  Custom shell command to execute for this build (instead of
-                     the one from config.js)
+      --command, -c  Custom shell command to execute for this build
+                     instead of the one from the config file
+      --tail         Blocks until the build is started and tails the
+                     log when used with the "build" command.  [boolean]
+                     [default: true]
       --branch, -b   Name of the branch to build (defaults to current)
-      --verbose, -v  Produce more output for the status command. Includes details for each build.
-      --port, -p     HTTP port of the cimpler server (defaults to value in config.js)
-
-_Note:_ The most common usage won't need the cli at all. i.e. Github
-post-recieve hook triggers build, build status and log are reported to Github
-commit status api, you view build log in the browser.
-
-But, cimpler does provide a nice CLI
+      --verbose, -v  Produce more output for the status command.
+                     Includes details for each build.
+      --port, -p     HTTP port of the cimpler server
+                     (defaults to value in config.js)
 
 ## Installation
 
@@ -44,8 +43,8 @@ But, cimpler does provide a nice CLI
 
 ## Configuration
 
-Add your server's url (and port) as a github POST receive hook
- _(http://www.example.com:12345/)_
+Add your server's url with path: `/github` as a github post-receive hook:
+ _(http://www.example.com/github)_
 
     $ vim config.js  # Edit to your liking, config.sample.js is well documented
 
@@ -66,7 +65,7 @@ The architecture is very simple and based on plugins.  A plugin has access to
 several methods and events. Please look at the existing plugins as a guide to
 writing your own.
 
-### Plugins
+### Plugin Interface
 
 A plugin is a node.js module that exports an object which has an `init`
 property like: `function(config, cimpler)`
@@ -123,3 +122,6 @@ property like: `function(config, cimpler)`
 
  * [Mergeatron](https://github.com/SnapInteractive/mergeatron)
  * [CI Joe](https://github.com/defunkt/cijoe)
+
+[post-receive]: https://help.github.com/articles/post-receive-hooks
+[status]: http://developer.github.com/v3/repos/statuses/
