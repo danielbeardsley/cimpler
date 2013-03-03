@@ -15,7 +15,7 @@ readAll(process.stdin, function(input) {
       build.repo = remote || repoPath;
       // read the port from an env variable to allow override
       // during testing
-      httpTrigger.injectBuild(build, process.env.CIMPLER_PORT);
+      httpTrigger.injectBuild(build, {httpPort: process.env.CIMPLER_PORT});
    });
 });
 
