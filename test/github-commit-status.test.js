@@ -32,7 +32,7 @@ describe("Github commit status plugin", function() {
          var status = {
             user: 'user',
             repo: 'repo',
-            commit: build.commit,
+            sha: build.commit,
             state: 'pending',
             target_url: build.logUrl,
             description: 'Build Started' };
@@ -59,7 +59,7 @@ describe("Github commit status plugin", function() {
             var status = {
                user: 'user',
                repo: 'repo',
-               commit: build.commit,
+               sha: build.commit,
                state: 'pending',
                target_url: build.logUrl,
                description: 'Build Started' };

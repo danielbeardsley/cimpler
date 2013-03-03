@@ -46,7 +46,7 @@ describe("CLI build command", function() {
          // So the next assertion will succeed
          expectedBuild.branch = 'test-branch';
          expectedBuild.buildCommand = 'blah';
-         expectedBuild._control.tail_log = true
+         expectedBuild._control.tail_log = true;
 
          finished();
          check();
@@ -54,7 +54,7 @@ describe("CLI build command", function() {
 
       exec(bin, function(stdout) { }, /* expect failure = */ true);
 
-      exec(bin + " build", function(stdout) {
+      exec(bin + " build --no-tail", function(stdout) {
          check();
          exec(bin + " build --tail --branch=test-branch --command='blah'", function(stdout) {
             check();

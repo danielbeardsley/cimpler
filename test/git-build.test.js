@@ -65,6 +65,11 @@ describe("git-build plugin", function() {
 
       var expectedStatuses = ['success', 'failure'];
       cimpler.on('buildFinished', function(build) {
+         if (build.error) {
+            var log = fs.readFileSync(build.logPath);
+            console.log(log.toString());
+         }
+         assert.equal(build.error, null);
          assert.equal(build.status, expectedStatuses.shift());
          check();
       });
@@ -237,7 +242,14 @@ describe("git-build plugin", function() {
       try { fs.mkdirSync(buildLogsPath) } catch (err) {}
       // Clone the test repo into a temp dir.
       var cmd = testRepoDirs.map(function (dir) {
-         return "git clone " + testRepoSource + " " + dir;
+         var cmds = [
+            "git clone " + testRepoSource + " " + dir,
+            // Otherwise creating any new commits fails with "tell me who you are".
+            "cd " + dir,
+            "git config user.name 'tester'",
+            "git config user.email 'tester@test.com'"
+         ];
+         return cmds.join(" && ");
       }).join(" && ");
       childProcess.exec(cmd, {}, done);
    });

@@ -5,6 +5,7 @@ var Cimpler      = require('../lib/cimpler'),
     expect       = require("./expect"),
     childProcess = require('child_process'),
     path         = require('path'),
+    _            = require('underscore'),
     testRepoDir  = path.normalize(__dirname + "/../fixtures/repo/"),
     httpPort     = 25750;
 
