@@ -5,17 +5,31 @@ var httpTrigger = require('../lib/http-trigger'),
     git        = new Git(process.env.GIT_DIR);
 
 readAll(process.stdin, function(input) {
-   var parts = input.split(/\s+/);
-   var build = {
-      commit: parts[1],
-      branch: parts[2].split('/').pop()
-   };
+   var builds = input.split("\n").map(function(line) {
+      var parts = line.split(/\s+/);
+      return {
+         commit: parts[1],
+         branch: parts[2].split('/').pop()
+      };
+   });
 
    git.remote(function(remote, repoPath) {
-      build.repo = remote || repoPath;
-      // read the port from an env variable to allow override
-      // during testing
-      httpTrigger.injectBuild(build, process.env.CIMPLER_PORT);
+      var index = 0;
+      // Send them one at a time, serially
+      // TODO: support POSTing an array of builds eventually.
+      function sendNextBuild() {
+         var build = builds[index++];
+         build.repo = remote || repoPath;
+         // read the port from an env variable to allow override
+         // during testing
+         console.log("Triggering: " + build.branch);
+         httpTrigger.injectBuild(build, {httpPort: process.env.CIMPLER_PORT}, function() {
+            if (index < builds.length) {
+               process.nextTick(sendNextBuild);
+            }
+         });
+      };
+      sendNextBuild();
    });
 });
 

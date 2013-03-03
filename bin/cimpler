@@ -59,7 +59,8 @@ switch (command) {
 
          function triggerBuild(branch) {
             build.branch = branch;
-            httpTrigger.injectBuild(build, args.port, options);
+            options.httpPort = args.port;
+            httpTrigger.injectBuild(build, options);
          }
       }
       break;
