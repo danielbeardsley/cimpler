@@ -65,6 +65,11 @@ describe("git-build plugin", function() {
 
       var expectedStatuses = ['success', 'failure'];
       cimpler.on('buildFinished', function(build) {
+         if (build.error) {
+            var log = fs.readFileSync(build.logPath);
+            console.log(log.toString());
+         }
+         assert.equal(build.error, null);
          assert.equal(build.status, expectedStatuses.shift());
          check();
       });
