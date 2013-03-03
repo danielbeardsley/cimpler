@@ -8,11 +8,11 @@ var util       = require('util'),
     ];
 
 
-exports.init = function(config, cimpler, middleware) {
+exports.init = function(config, cimpler) {
    /**
-    * Listen for post-recieve hooks
+    * Listen for post-receive hooks
     */
-   middleware('/github', function(req, res, next) {
+   cimpler.registerMiddleware('/github', function(req, res, next) {
       // We only care about POSTs to "/github"
       if (req.method !== 'POST' || req.url !== '/') {
          return next();
