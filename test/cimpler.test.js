@@ -1,7 +1,9 @@
 var Cimpler       = require('../lib/cimpler'),
     dummyPlugin   = require('../plugins/dummy'),
     expect        = require("./expect"),
-    assert        = require('assert');
+    assert        = require('assert'),
+    http          = require('http'),
+    httpPort      = 25750;
 
 describe("Cimpler", function() {
    describe(".registerPlugins()", function() {
@@ -29,14 +31,13 @@ describe("Cimpler", function() {
    });
 
    describe(".registerPlugin()", function() {
-      it("should call plugin.init() and pass the config and a function for regsitering middleware", function(done) {
+      it("should call plugin.init() and pass the config", function(done) {
          var config = {a: 1},
          cimpler = new Cimpler();
 
-         var pluginInfo = createPlugin(function(inConfig, inCimpler, middleware) {
+         var pluginInfo = createPlugin(function(inConfig, inCimpler) {
             assert.equal(inConfig, config);
             assert.equal(inCimpler, cimpler);
-            assert.equal(typeof middleware, "function");
             done();
          });
 
@@ -60,14 +61,46 @@ describe("Cimpler", function() {
       });
    });
 
+   describe(".registerMiddleware()", function() {
+      it("should allow a function to be setup as a connect middlware", function(done) {
+         var check = expect(3, function() {
+            cimpler.shutdown();
+            done();
+         });
+         var cimpler = new Cimpler({
+            httpPort: httpPort
+         });
+
+         cimpler.registerMiddleware("/blah", function(req, res) {
+            check();
+            res.end("OK");
+         });
+
+         var options = {
+            port: httpPort,
+            path: '/blah'
+         };
+
+         http.get(options, function(res) {
+            check();
+            res.setEncoding('utf8');
+            res.on('data', function(chunk) {
+               check()
+               assert.equal("OK", chunk);
+            });
+            assert.equal(200, res.statusCode);
+         });
+      });
+   });
+
    function createPlugin(init) {
       var configs = [];
       return {
          plugin: {
-            init: function(inConfig, inCimpler, middleware) {
+            init: function(inConfig, inCimpler) {
                configs.push(inConfig);
                if (init) {
-                  init(inConfig, inCimpler, middleware);
+                  init(inConfig, inCimpler);
                }
             }
          },

@@ -5,14 +5,14 @@ var util       = require('util'),
     ];
 
 
-exports.init = function(config, cimpler, middleware) {
+exports.init = function(config, cimpler) {
 
    /**
     * Listen for incoming data via HTTP.
     *
     * This expects JSON formatted POSTs at url: /build
     */
-   middleware("/build", function (req, res, next) {
+   cimpler.registerMiddleware("/build", function (req, res, next) {
       // We only care about POSTs to "/build" 
       if (req.method !== 'POST' || !req.url.match(/^\/($|\?)/)) {
          return next();
