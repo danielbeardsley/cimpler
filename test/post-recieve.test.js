@@ -20,23 +20,28 @@ describe("post-receive git-hook", function() {
       }),
       bin = __dirname + "/../hooks/post-receive",
       builtBranches  = [],
-      expectedBuild = {
+      expectedBuilds = [{
          repo:   'http://example.com/repo.git',
-         branch: 'imabranch',
+         branch: 'imabranchA',
          status: 'pending',
-         commit: 'commit-new'
-      };
+         commit: 'commit-newA'
+      },{
+         repo:   'http://example.com/repo.git',
+         branch: 'imabranchB',
+         status: 'pending',
+         commit: 'commit-newB'
+      }];
 
-      var check = expect(2, function() {
+      var check = expect(3, function() {
          cimpler.shutdown();
-         assert.deepEqual(builtBranches, ['imabranch']);
+         assert.deepEqual(builtBranches, ['imabranchA', 'imabranchB']);
          done();
       });
 
       cimpler.consumeBuild(function(inBuild, started, finished) {
          builtBranches.push(inBuild.branch);
          var sanitizedBuild = _.pick(inBuild, 'repo', 'branch', 'status', 'commit')
-         assert.deepEqual(sanitizedBuild, expectedBuild);
+         assert.deepEqual(sanitizedBuild, expectedBuilds.shift());
          finished();
          check();
       });
@@ -44,7 +49,11 @@ describe("post-receive git-hook", function() {
       var proc = exec(bin, function(stdout) {
          check();
       });
-      proc.stdin.end("commit-old commit-new refs/heads/imabranch");
+      var lines = [
+         "commit-oldA commit-newA refs/heads/imabranchA",
+         "commit-oldB commit-newB refs/heads/imabranchB"
+      ];
+      proc.stdin.end(lines.join("\n"));
 
       function exec(cmd, callback) {
          var execOptions = {
