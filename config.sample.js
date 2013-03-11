@@ -57,7 +57,10 @@ module.exports = {
       cli: true,
 
       /**
-       * Run arbitraty shell commands on each build
+       * Run arbitraty shell commands on for build (an alternative to git-build).
+       * This does not do depend on a local clone, it executes `cmd` in the
+       * cimpler directory and has several environment variables set before
+       * each build.
        */
       shell: {
          cmd: "echo some shell command",
@@ -67,7 +70,7 @@ module.exports = {
       /**
        * Checkout the appropriate commit, merge in master and perform a build
        */
-		"git-build":[ {
+      "git-build":[ {
          /**
           * Path (or array of paths) to a local clone of the github repo.
           * One build "consumer" will be created for each path in the array
@@ -83,7 +86,11 @@ module.exports = {
           * builds.
           */
          repoRegex: /githubuser\/reponame/,
-         // Arbitrary shell command
+         /**
+          * The shell command that is run for each build.
+          * The exit code of this command determines success or failure
+          * of the build. Both stdout and stderr are sent to the log.
+          */
          cmd: "make test",
          logs: {
             // Path to write log files for each build (optional)
