@@ -37,13 +37,14 @@ function buildConsumer(config, cimpler, repoPath) {
       logger.info(id(build) + " -- Building with git");
 
       var fd = fs.openSync(logFilePath(build), 'a');
-      fs.writeSync(fd, 'Log created: ' + new Date() +
-         "\n-----------------------"
-      );
 
       startFetch();
 
       function startFetch() {
+         fs.writeSync(fd, 'Log created: ' + new Date() +
+            "\n-----------------------"
+         );
+
          var commands = '(cd "' + repoPath + '" && ' +
             "git fetch --quiet && " +
             "git rev-parse origin/" + build.branch + ") 2>&1";
@@ -153,6 +154,10 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function finishedBuild() {
+         fs.writeSync(fd, "\n-----------------------" +
+            'Log closed: ' + new Date()
+         );
+
          if (logFileStream) logFileStream.end();
          finished();
       }
