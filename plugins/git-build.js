@@ -36,7 +36,7 @@ function buildConsumer(config, cimpler, repoPath) {
 
       logger.info(id(build) + " -- Building with git");
 
-      fd = fs.openSync(logFilePath(build), 'a');
+      var fd = fs.openSync(logFilePath(build), 'a');
       fs.writeSync(fd, 'Log created: ' + new Date() +
          "\n-----------------------"
       );
