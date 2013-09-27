@@ -9,6 +9,7 @@ var Cimpler      = require('../lib/cimpler'),
 
 // Current branch pointers in our test repo.
 var testBranch = "aa6b0aa64229caee1b07500334a64de9e1ffcddd",
+    conflictBranch = "ac3b2b311ce6cb11e0698fd7aaca906ecf6bf0a6",
     master     = "ff47c0e58eef626f912c7e5d80d67d8796f65003",
     masterParent = "aac5cd96ddd3173678e3666d677699ea6adce875";
 
@@ -81,6 +82,46 @@ describe("git-build plugin", function() {
       cimpler.addBuild({
          repo: "doesn't matter",
          branch: "master"
+      });
+   });
+
+   it("should fail a build if the merge fails", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            "git-build": {
+               repoPaths: testRepoDirs[0],
+               // Pass if test_branch is the build branch
+               cmd: "[ \"$BUILD_BRANCH\" = 'conflict-branch' ]",
+               logs: {
+                  path: buildLogsPath,
+                  url:  "http://www.example.com/ci-builds/"
+               },
+            }
+         },
+      });
+
+      var check = expect(2, function() {
+         cimpler.shutdown();
+         done();
+      });
+
+      cimpler.on('buildStarted', function(build) {
+         check();
+      });
+
+      cimpler.on('buildFinished', function(build) {
+         // git-build is supposed to lookup the sha for us.
+         assert.equal(build.commit, conflictBranch);
+         assert.equal(build.error, "Merge Failed");
+         // Assert that the log exists and contains "Merge Failed"
+         var log = fs.readFileSync(build.logPath).toString();
+         assert.ok(log.match('Merge Failed'))
+         check();
+      });
+
+      cimpler.addBuild({
+         repo: "doesn't matter",
+         branch: "conflict-branch"
       });
    });
 
