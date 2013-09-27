@@ -26,7 +26,7 @@ describe("Github commit status plugin", function() {
          logUrl: 'http'
       };
 
-      sendBuild(assert, build, function(statuses) {
+      sendBuild(build, function(statuses) {
          assert.equal(statuses.length, 2);
 
          var status = {
@@ -53,7 +53,7 @@ describe("Github commit status plugin", function() {
             logUrl: 'http',
             error: "ERR"
          };
-         sendBuild(assert, build, function(statuses) {
+         sendBuild(build, function(statuses) {
             assert.equal(statuses.length, 2);
 
             var status = {
@@ -76,10 +76,10 @@ describe("Github commit status plugin", function() {
 });
 
 /**
- * Passes a build throught thestarted/finished phase and collect the commit
+ * Passes a build through the started/finished phase and collect the commit
  * status API calls.
  */
-function sendBuild(assert, build, callback) {
+function sendBuild(build, callback) {
    var cimpler = new Cimpler(),
    startedBuild = false,
    GH = newApi();
