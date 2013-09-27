@@ -72,6 +72,32 @@ describe("Github commit status plugin", function() {
             done();
          });
       });
+
+      it("should not emit a 'started' status when finish() is called before started()", function(done) {
+         var build = {
+            repo: "git://github.com:user/repo.git",
+            status: 'BLAH',
+            commit: '11111', 
+            logUrl: 'http',
+            fail_message: "ERR",
+            failFast: true
+         };
+         sendBuild(build, function(statuses) {
+            var status = statuses[0];
+            assert.equal(statuses.length, 1);
+
+            var expectedStatus = {
+               user: 'user',
+               repo: 'repo',
+               sha: build.commit,
+               state: 'error',
+               target_url: build.logUrl,
+               description: build.error };
+
+            assert.deepEqual(expectedStatus, status);
+            done();
+         });
+      });
    });
 });
 
@@ -95,10 +121,11 @@ function sendBuild(build, callback) {
 
    cimpler.consumeBuild(function(build, started, finished) {
       assert.equal(statuses.length, 0);
-      started();
+      if (!build.failFast) {
+         started();
+      }
 
       later(function() {
-         assert.equal(statuses.length, 1);
          if (build.fail_message) {
             build.error = build.fail_message;
          }
@@ -108,7 +135,6 @@ function sendBuild(build, callback) {
 
    cimpler.on('buildFinished', function(build) {
       later(function() {
-         assert.equal(statuses.length, 2);
          callback(GH.collected.statuses);
       });
    });

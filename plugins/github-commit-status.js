@@ -9,7 +9,9 @@ exports.init = function(config, cimpler) {
    GitHub.authenticate(config.auth);
 
    cimpler.on('buildStarted', function(build) {
-      reportBuildStatus(build, 'pending', 'Build Started');
+      if (!build.error) {
+         reportBuildStatus(build, 'pending', 'Build Started');
+      }
    });
 
    cimpler.on('buildFinished', function(build) {
