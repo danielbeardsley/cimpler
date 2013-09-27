@@ -1,3 +1,4 @@
-# pack-refs with: peeled 
+# pack-refs with: peeled fully-peeled 
+ac3b2b311ce6cb11e0698fd7aaca906ecf6bf0a6 refs/heads/conflict-branch
 ff47c0e58eef626f912c7e5d80d67d8796f65003 refs/heads/master
 aa6b0aa64229caee1b07500334a64de9e1ffcddd refs/heads/test-branch
