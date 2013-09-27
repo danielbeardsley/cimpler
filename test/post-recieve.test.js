@@ -86,6 +86,9 @@ describe("post-receive git-hook", function() {
    });
 
    after(function() {
-      fs.unlink(testRepoDir + '.git');
+      // Dont' do this, because Travis seems to execute its builds in paralell
+      // on the same dir tree. So if one test finishes during a parallel
+      // execution of the same test, the parallel test could fail.
+      // fs.unlink(testRepoDir + '.git');
    });
 });
