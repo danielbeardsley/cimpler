@@ -44,14 +44,14 @@ describe("Github commit status plugin", function() {
       });
    });
 
-   describe("build errors", function() {
-      it("should emit an error commit status", function(done) {
+   describe("with build errors", function() {
+      it("should emit a started, then error commit status", function(done) {
          var build = {
             repo: "git://github.com:user/repo.git",
             status: 'BLAH',
             commit: '11111', 
             logUrl: 'http',
-            error: "ERR"
+            fail_message: "ERR"
          };
          sendBuild(build, function(statuses) {
             assert.equal(statuses.length, 2);
@@ -99,6 +99,9 @@ function sendBuild(build, callback) {
 
       later(function() {
          assert.equal(statuses.length, 1);
+         if (build.fail_message) {
+            build.error = build.fail_message;
+         }
          finished();
       });
    });
