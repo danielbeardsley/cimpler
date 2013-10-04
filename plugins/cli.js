@@ -1,5 +1,6 @@
 var util       = require('util'),
     _          = require('underscore'),
+    connectionTimeout = 30*60*1000, // 30 min
     allowedIps = [
        '127.0.0.1'
     ];
@@ -42,6 +43,10 @@ exports.init = function(config, cimpler) {
 
       // Schedule the logs to be piped once the build starts
       if (build._control.tail_log) {
+         // To support both <=0.8 and >=0.10
+         var connection = res.connection || res;
+         connection.setTimeout(connectionTimeout);
+
          uponStarting(build, function() {
             res.write("Build Started\n\n");
             if (build._control.logs) {
