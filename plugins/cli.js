@@ -43,14 +43,16 @@ exports.init = function(config, cimpler) {
       // Schedule the logs to be piped once the build starts
       if (build._control.tail_log) {
          uponStarting(build, function() {
+            res.write("Build Started\n\n");
             if (build._control.logs) {
                // Pipe the log to the HTTP response obj
                build._control.logs.stdout.pipe(res);
             } else {
                // Logs aren't available, end the response.
-               res.end('OK');
+               res.end('No Log');
             }
          });
+         res.write("Added ... ");
       } else {
          res.end('OK');
       }

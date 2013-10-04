@@ -89,10 +89,7 @@ describe("CLI plugin", function() {
 
          res.on('end', function(err) {
             build.started = true;
-            var parts = body.split("\n");
-            assert.deepEqual(JSON.parse(parts.shift()), build);
-            var log = parts.join("\n");
-            assert.equal(log, "OUTPUT");
+            assert.equal(body, "Added ... Build Started\n\nOUTPUT");
             cimpler.shutdown();
             if (err) assert.fail(err);
             done();
