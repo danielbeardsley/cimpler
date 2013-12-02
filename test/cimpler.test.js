@@ -227,6 +227,14 @@ describe("Cimpler", function() {
 
          var builds = [build,build,build,build];
 
+         // This ensures the builds get the various properties added to them.
+         build = {
+            repo:    "blah",
+            branch:  "A",
+            _control: {},
+            status:  "pending"
+         };
+
          // expected.length == 2 because the first one is pop()ed immediately
          // and thus can't be replaced.
          passBuildsThrough(builds, [build, build], done);
