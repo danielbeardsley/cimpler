@@ -64,11 +64,23 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function startMerge() {
+         var branchToMerge = 'master';
+         var regex, mergeBranch;
+         if (config.mergeBranchRegexes) {
+            for (var i = 0; i < config.mergeBranchRegexes.length; ++i) {
+               regex = config.mergeBranchRegexes[i][0];
+               mergeBranch = config.mergeBranchRegexes[i][1];
+               if (build.branch.match(regex)) {
+                  branchToMerge = mergeBranch;
+                  break;
+               }
+            }
+         }
          var commands = '(' + cdToRepo + " && " +
             "git reset --hard && " +
             "git clean -ffd && " +
             "git checkout "+build.commit+" && " +
-            "git merge origin/master && " +
+            "git merge origin/"+branchToMerge+" && " +
             "git submodule sync && " +
             "git submodule update --init --recursive ) 2>&1";
 

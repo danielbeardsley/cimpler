@@ -11,17 +11,22 @@ var Cimpler      = require('../lib/cimpler'),
 var testBranch = "aa6b0aa64229caee1b07500334a64de9e1ffcddd",
     conflictBranch = "ac3b2b311ce6cb11e0698fd7aaca906ecf6bf0a6",
     master     = "ff47c0e58eef626f912c7e5d80d67d8796f65003",
-    masterParent = "aac5cd96ddd3173678e3666d677699ea6adce875";
+    masterParent = "aac5cd96ddd3173678e3666d677699ea6adce875",
+    hotfixTestBranch = "97d2ad995a7ea62bc425b3d75c7629e0b836a456";
 
 describe("git-build plugin", function() {
    var testRepoDirs = [tempDir(), tempDir()];
 
-   it("should merge master into the branch under testing", function(done) {
+   it("should merge the appropriate branch into the branch under testing", 
+    function(done) {
       var concurrency = concurrencyChecker(1);
       var cimpler = new Cimpler({
          plugins: {
             "git-build": {
                repoPaths: testRepoDirs[0],
+               mergeBranchRegexes: [
+                  [/^hotfix-/, 'test-branch']
+               ],
                // Pass if test_branch is the build branch
                cmd: "[ \"$BUILD_BRANCH\" = 'test-branch' ]",
                logs: {
@@ -32,19 +37,33 @@ describe("git-build plugin", function() {
          },
       });
 
-      var check = expect(6, function() {
+      // 9 is 3 per build started.
+      var check = expect(9, function() {
          cimpler.shutdown();
          done();
       });
 
-      var expectedBuildCommits = [ testBranch, master ];
+      var expectedStatuses = ['success', 'failure', 'failure'];
+      var expectedBuildCommits = [ testBranch, master, hotfixTestBranch ];
+      var expectedParents = [
+         [ testBranch, master ],
+         [ masterParent ],
+         [ hotfixTestBranch, testBranch ]
+      ];
+
       cimpler.on('buildStarted', function(build) {
          concurrency(1);
          // git-build is supposed to lookup the sha for us.
          assert.equal(build.commit, expectedBuildCommits.shift());
 
          var cmd = "git rev-list --parents -n 1 HEAD";
-         exec(cmd, testRepoDirs[0], assertParents);
+         exec(cmd, testRepoDirs[0], function assertParents(stdout) {
+            var parents = stdout.split(' ');
+            // drop the first hash which == HEAD
+            parents.shift();
+            assert.deepEqual(parents, expectedParents.shift());
+            check();
+         });
          check();
       });
 
@@ -52,19 +71,6 @@ describe("git-build plugin", function() {
          concurrency(-1);
       });
 
-      var expectedParents = [
-         [ testBranch, master ],
-         [ masterParent ]
-      ];
-      function assertParents(stdout) {
-         var parents = stdout.split(' ');
-         // drop the first hash which == HEAD
-         parents.shift();
-         assert.deepEqual(parents, expectedParents.shift());
-         check();
-      }
-
-      var expectedStatuses = ['success', 'failure'];
       cimpler.on('buildFinished', function(build) {
          if (build.error) {
             var log = fs.readFileSync(build.logPath);
@@ -82,6 +88,10 @@ describe("git-build plugin", function() {
       cimpler.addBuild({
          repo: "doesn't matter",
          branch: "master"
+      });
+      cimpler.addBuild({
+         repo: "doesn't matter",
+         branch: "hotfix-test-branch"
       });
    });
 
