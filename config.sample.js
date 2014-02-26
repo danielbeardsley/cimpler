@@ -87,6 +87,16 @@ module.exports = {
           */
          repoRegex: /githubuser\/reponame/,
          /**
+          * Array of regex-branch mappings to determine which branch to
+          * merge into a test branch. For example, setting this to
+          *   [[/^hotfix-/, 'stable'], [/^coldfix-/, 'rickety']]
+          * will cause the 'stable' branch to be merged into any branch that
+          * begins with 'hotfix-' and cause the 'rickety' branch to be
+          * merged into any branch that begins with 'coldfix-'. Any branches
+          * that don't match will have master merged into them.
+          */
+         mergeBranchRegexes: [],
+         /**
           * The shell command that is run for each build.
           * The exit code of this command determines success or failure
           * of the build. Both stdout and stderr are sent to the log.
