@@ -44,6 +44,11 @@ switch (command) {
          getBranch();
       });
 
+      if (args.branch === true) {
+         require('optimist').showHelp();
+         process.exit(1);
+      }
+
       function getBranch() {
          if (args.block) {
             console.log("Blocking until the build has been started... Ctrl-C exits, but won't stop the build")
