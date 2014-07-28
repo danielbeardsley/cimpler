@@ -15,6 +15,7 @@ exports.init = function(config, cimpler) {
 
 function buildConsumer(config, cimpler, repoPath) {
    return function(build, started, finished) {
+      var startedAt = Date.now();
       var execOptions = {
          env: {
             BUILD_REPO:   build.repo,
@@ -39,9 +40,17 @@ function buildConsumer(config, cimpler, repoPath) {
       startFetch();
 
       function startFetch() {
+         var logPath = logFilePath(build);
          var commands = '(cd "' + repoPath + '" && ' +
             "git fetch --quiet && " +
             "git rev-parse origin/" + build.branch + ") 2>&1";
+
+         if (logPath) {
+            fs.writeFileSync(logPath, 
+            "----------------------------------------------\n" +
+            " Cimpler build started at: " + Date() + "\n" +
+            "----------------------------------------------\n");
+         }
 
          exec(commands, function(err, stdout) {
             if (err) {
@@ -50,8 +59,8 @@ function buildConsumer(config, cimpler, repoPath) {
                build.error = failed;
                stdout += "\n\n" + failed;
                logger.warn(id(build) + " -- " + failed);
-               if (logFilePath(build)) {
-                  fs.writeFileSync(logFilePath(build), stdout);
+               if (logPath) {
+                  fs.writeFileSync(logPath, stdout);
                }
                finishedBuild();
             } else {
@@ -164,7 +173,13 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function finishedBuild() {
-         if (logFileStream) logFileStream.end();
+         if (logFileStream) {
+            var seconds = Math.round((Date.now() - startedAt) / 1000);
+            logFileStream.end(
+             "\n-------------------------------------------" +
+             "\n Cimpler build finished in " + seconds + "\n" +
+             "\n-------------------------------------------\n");
+         }
          finished();
       }
 
