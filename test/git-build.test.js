@@ -236,6 +236,34 @@ describe("git-build plugin", function() {
       });
    });
 
+   it("should deal with leaving out the logs config option", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            "git-build": {
+               repoPaths: testRepoDirs[0],
+               // Pass if test_branch is the build branch
+               cmd: "exit 1",
+            }
+         },
+      });
+
+      function finished() {
+         cimpler.shutdown();
+         done();
+      };
+
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.status, 'failure');
+         finished();
+      });
+
+      cimpler.addBuild({
+         letter: 'A',
+         repo: "doesn't matter",
+         branch: "master"
+      });
+   });
+
    it("should pass the `repoRegex` the consumeBuild() function", function() {
       var gitBuild = require('../plugins/git-build');
       var _undefined;
