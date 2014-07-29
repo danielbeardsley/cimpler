@@ -5,7 +5,8 @@ var Cimpler      = require('../lib/cimpler'),
     expect       = require("./expect"),
     childProcess = require('child_process'),
     testRepoSource   = __dirname + "/../fixtures/repo/",
-    buildLogsPath    = "/tmp/cimpler-test-logs/";
+    buildLogsPath    = "/tmp/cimpler-test-logs/",
+    buildLogsUrl     = "http://www.example.com/ci-builds/";
 
 // Current branch pointers in our test repo.
 var testBranch = "aa6b0aa64229caee1b07500334a64de9e1ffcddd",
@@ -31,7 +32,7 @@ describe("git-build plugin", function() {
                cmd: "[ \"$BUILD_BRANCH\" = 'test-branch' ]",
                logs: {
                   path: buildLogsPath,
-                  url:  "http://www.example.com/ci-builds/"
+                  url:  buildLogsUrl
                },
             }
          },
@@ -104,7 +105,7 @@ describe("git-build plugin", function() {
                cmd: "[ \"$BUILD_BRANCH\" = 'conflict-branch' ]",
                logs: {
                   path: buildLogsPath,
-                  url:  "http://www.example.com/ci-builds/"
+                  url:  buildLogsUrl
                },
             }
          },
@@ -145,7 +146,7 @@ describe("git-build plugin", function() {
                cmd: "sleep 1 && [ \"$BUILD_BRANCH\" = 'test-branch' ]",
                logs: {
                   path: buildLogsPath,
-                  url:  "http://www.example.com/ci-builds/"
+                  url:  buildLogsUrl
                },
             }
          },
@@ -192,6 +193,43 @@ describe("git-build plugin", function() {
       });
    });
 
+   it("should perform build logging correctly", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            "git-build": {
+               repoPaths: testRepoDirs[0],
+               cmd: "echo boogity; exit 0",
+               logs: {
+                  path: buildLogsPath,
+                  url:  buildLogsUrl
+               },
+            }
+         },
+      });
+
+      function finished() {
+         cimpler.shutdown();
+         done();
+      }
+
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.status, 'success');
+         var log = fs.readFileSync(build.logPath);
+         assert(/boogity/.test(log), "command output not present in log");
+         assert(/Successful/.test(log), "'Successful' not present in log");
+         assert(build.logUrl, "build.logUrl missing");
+         assert.equal(build.logUrl.substr(0, buildLogsUrl.length), buildLogsUrl);
+         finished();
+      });
+
+      cimpler.addBuild({
+         letter: 'A',
+         repo: "doesn't matter",
+         branch: "master",
+      });
+   });
+
+
    it("should allow custom commands to be specified per-build", function(done) {
       var started = 0, finished = 0;
       var cimpler = new Cimpler({
@@ -201,7 +239,7 @@ describe("git-build plugin", function() {
                cmd: "exit 1",
                logs: {
                   path: buildLogsPath,
-                  url:  "http://www.example.com/ci-builds/"
+                  url:  buildLogsUrl
                },
             }
          },
