@@ -150,7 +150,7 @@ function buildConsumer(config, cimpler, repoPath) {
                            Date.now() + ".log";
 
          if (config.logs.url) {
-            inBuild.logUrl = path.join(config.logs.url, logFilename);
+            inBuild.logUrl = config.logs.url + logFilename;
          }
 
          inBuild.logPath = path.join(config.logs.path, logFilename);
