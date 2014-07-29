@@ -40,17 +40,14 @@ function buildConsumer(config, cimpler, repoPath) {
       startFetch();
 
       function startFetch() {
-         var logPath = logFilePath(build);
          var commands = '(cd "' + repoPath + '" && ' +
             "git fetch --quiet && " +
             "git rev-parse origin/" + build.branch + ") 2>&1";
 
-         if (logPath) {
-            fs.writeFileSync(logPath, 
-            "----------------------------------------------\n" +
-            " Cimpler build started at: " + Date() + "\n" +
-            "----------------------------------------------\n");
-         }
+         logFile().write( 
+         "----------------------------------------------\n" +
+         " Cimpler build started at: " + Date() + "\n" +
+         "----------------------------------------------\n");
 
          exec(commands, function(err, stdout) {
             if (err) {
@@ -59,9 +56,7 @@ function buildConsumer(config, cimpler, repoPath) {
                build.error = failed;
                stdout += "\n\n" + failed;
                logger.warn(id(build) + " -- " + failed);
-               if (logPath) {
-                  fs.writeFileSync(logPath, stdout);
-               }
+               logFile().write(stdout);
                finishedBuild();
             } else {
                if (!build.commit) {
@@ -110,13 +105,9 @@ function buildConsumer(config, cimpler, repoPath) {
 
             }
 
-            // Assigns a log file to this build
-            var logPath = logFilePath(build);
 
             logger.info(id(build) + " -- " + message);
-            if (logPath) {
-               fs.writeFileSync(logPath, stdout);
-            }
+            logFile().write(stdout);
 
             nextStep(started);
          });
@@ -155,7 +146,8 @@ function buildConsumer(config, cimpler, repoPath) {
             return null;
 
          var logFilename = (inBuild.branch || 'HEAD') + "--" +
-                           (inBuild.commit || 'unknown') + ".log";
+                           (inBuild.commit || 'unknown') + "--" + 
+                           Date.now() + ".log";
 
          if (config.logs.url) {
             inBuild.logUrl = path.join(config.logs.url, logFilename);
@@ -167,19 +159,26 @@ function buildConsumer(config, cimpler, repoPath) {
 
       var logFileStream;
       function logFile() {
+         if (logFileStream) {
+            return logFileStream;
+         }
+
+         var logPath = logFilePath(build);
+         if (!logPath) {
+            logFileStream = dummyWriteStream();
+         }
+
          return logFileStream  =
             logFileStream ||
-            fs.createWriteStream(logFilePath(build), {flags:'a+'});
+            fs.createWriteStream(logPath);
       }
 
       function finishedBuild() {
-         if (logFileStream) {
-            var seconds = Math.round((Date.now() - startedAt) / 1000);
-            logFileStream.end(
-             "\n-------------------------------------------" +
-             "\n Cimpler build finished in " + seconds + "\n" +
-             "\n-------------------------------------------\n");
-         }
+         var seconds = Math.round((Date.now() - startedAt) / 1000);
+         logFile().end(
+          "\n-------------------------------------------" +
+          "\n Cimpler build finished in " + seconds + " seconds" +
+          "\n-------------------------------------------\n");
          finished();
       }
 
@@ -200,3 +199,14 @@ function buildConsumer(config, cimpler, repoPath) {
 function echoStatusCmd(noun) {
    return " && echo '"+noun+" Successful' || ( echo '"+noun+" Failed'; exit 1 )";
 }
+
+/**
+ * Create a dummy write stream that works in node >= 0.8 
+ */
+function dummyWriteStream() {
+   var stream = require('stream').Writable || require('stream');
+   var devnull = new stream();
+   devnull._write = devnull.write = devnull.end = function () {};
+   return devnull;
+}
+
