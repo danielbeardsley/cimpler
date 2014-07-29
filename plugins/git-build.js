@@ -180,9 +180,13 @@ function buildConsumer(config, cimpler, repoPath) {
 
       function finishedBuild() {
          var seconds = Math.round((Date.now() - startedAt) / 1000);
-         logFile().end(
+         logFile().write(
           "\n-------------------------------------------" +
-          "\n Cimpler build finished in " + seconds + " seconds" +
+          "\n Cimpler build finished in " + seconds + " seconds");
+         if (build.error) {
+            logFile().write("\n Error: " + build.error);
+         }
+         logFile().end(
           "\n-------------------------------------------\n");
          finished();
       }
