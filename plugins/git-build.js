@@ -119,7 +119,12 @@ function buildConsumer(config, cimpler, repoPath) {
                         echoStatusCmd('Build');
 
          var proc = exec(commands, function(err, stdout, stderr) {
-            build.status = err ? 'failure' : 'success';
+            if (err && err.signal) {
+               build.status = 'error';
+               build.error = err.signal + " - " + err.code;
+            } else {
+               build.status = err ? 'failure' : 'success';
+            }
             logger.info(id(build) + " -- Build " + build.status);
             finishedBuild();
          });
@@ -175,17 +180,31 @@ function buildConsumer(config, cimpler, repoPath) {
 
       function finishedBuild() {
          var seconds = Math.round((Date.now() - startedAt) / 1000);
-         logFile().end(
+         logFile().write(
           "\n-------------------------------------------" +
-          "\n Cimpler build finished in " + seconds + " seconds" +
+          "\n Cimpler build finished in " + seconds + " seconds");
+         if (build.error) {
+            logFile().write("\n Error: " + build.error);
+         }
+         logFile().end(
           "\n-------------------------------------------\n");
          finished();
       }
 
       function exec(cmd, callback) {
-         return childProcess.exec(cmd, execOptions,
+         var child, done = false, forceErr;
+         if (execOptions.timeout) {
+            setTimeout(function() {
+               if (done) {return}
+               forceErr = {signal: "timeout", code: execOptions.timeout};
+               child.kill();
+            }, execOptions.timeout);
+         }
+
+         return child = childProcess.exec(cmd, execOptions,
             function(err, stdout, stderr) {
-               callback(err, stdout.toString());
+               done = true;
+               callback(forceErr || err, stdout.toString());
             });
       }
 
