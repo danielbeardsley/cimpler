@@ -102,6 +102,10 @@ module.exports = {
           * of the build. Both stdout and stderr are sent to the log.
           */
          cmd: "make test",
+         /**
+          * optional timeout for 'cmd' in milliseconds
+          */
+         timeout: 600000,
          logs: {
             // Path to write log files for each build (optional)
             path: "/var/www/ci-builds/",

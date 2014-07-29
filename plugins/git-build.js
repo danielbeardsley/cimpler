@@ -119,7 +119,12 @@ function buildConsumer(config, cimpler, repoPath) {
                         echoStatusCmd('Build');
 
          var proc = exec(commands, function(err, stdout, stderr) {
-            build.status = err ? 'failure' : 'success';
+            if (err && err.signal) {
+               build.status = 'error';
+               build.error = err.signal + " - " + err.code;
+            } else {
+               build.status = err ? 'failure' : 'success';
+            }
             logger.info(id(build) + " -- Build " + build.status);
             finishedBuild();
          });
@@ -183,9 +188,19 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function exec(cmd, callback) {
-         return childProcess.exec(cmd, execOptions,
+         var child, done = false, forceErr;
+         if (execOptions.timeout) {
+            setTimeout(function() {
+               if (done) {return}
+               forceErr = {signal: "timeout", code: execOptions.timeout};
+               child.kill();
+            }, execOptions.timeout);
+         }
+
+         return child = childProcess.exec(cmd, execOptions,
             function(err, stdout, stderr) {
-               callback(err, stdout.toString());
+               done = true;
+               callback(forceErr || err, stdout.toString());
             });
       }
 

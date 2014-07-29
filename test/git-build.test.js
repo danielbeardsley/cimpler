@@ -198,7 +198,6 @@ describe("git-build plugin", function() {
          plugins: {
             "git-build": {
                repoPaths: testRepoDirs,
-               // Pass if test_branch is the build branch
                cmd: "exit 1",
                logs: {
                   path: buildLogsPath,
@@ -254,6 +253,39 @@ describe("git-build plugin", function() {
 
       cimpler.on('buildFinished', function(build) {
          assert.equal(build.status, 'failure');
+         finished();
+      });
+
+      cimpler.addBuild({
+         letter: 'A',
+         repo: "doesn't matter",
+         branch: "master"
+      });
+   });
+
+   it("should fail builds that timeout", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            "git-build": {
+               repoPaths: testRepoDirs[0],
+               // command that will take longer than timeout
+               cmd: "sleep 1",
+               timeout: 500, // ms
+               logs: {
+                  path: buildLogsPath,
+                  url:  "http://www.example.com/ci-builds/"
+               },
+            }
+         },
+      });
+
+      function finished() {
+         cimpler.shutdown();
+         done();
+      };
+
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.status, 'error');
          finished();
       });
 
