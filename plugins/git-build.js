@@ -39,15 +39,18 @@ function buildConsumer(config, cimpler, repoPath) {
 
       startFetch();
 
+      // This needs to be delayed until we have a commit hash
+      function writeLogHeader() {
+         logFile().write( 
+            "----------------------------------------------\n" +
+            " Cimpler build started at: " + Date() + "\n" +
+            "----------------------------------------------\n");
+      }
+
       function startFetch() {
          var commands = '(cd "' + repoPath + '" && ' +
             "git fetch --quiet && " +
             "git rev-parse origin/" + build.branch + ") 2>&1";
-
-         logFile().write( 
-         "----------------------------------------------\n" +
-         " Cimpler build started at: " + Date() + "\n" +
-         "----------------------------------------------\n");
 
          exec(commands, function(err, stdout) {
             if (err) {
@@ -56,12 +59,14 @@ function buildConsumer(config, cimpler, repoPath) {
                build.error = failed;
                stdout += "\n\n" + failed;
                logger.warn(id(build) + " -- " + failed);
+               writeLogHeader()
                logFile().write(stdout);
                finishedBuild();
             } else {
                if (!build.commit) {
                   build.commit = stdout.trim();
                }
+               writeLogHeader();
                startMerge();
             }
          });
