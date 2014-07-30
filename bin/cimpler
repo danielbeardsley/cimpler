@@ -9,7 +9,8 @@ args           = require('optimist')
    .demand(1)
    .usage("Examples:\n" +
    "   cimpler build [-b branch-name]   trigger a build on the current repo\n" +
-   "   cimpler status                   echo the list of builds in the queue (* means building)")
+   "   cimpler status                   echo the list of builds in the queue (* means building)\n" + 
+   "   cimpler server                   start the cimpler server. Logging to STDOUT.")
    .options('command', {
       alias: 'c',
       describe: 'Custom shell command to execute for this build instead of the one from the config file'
@@ -92,6 +93,8 @@ switch (command) {
          }
       });
       break;
-
+   case 'server':
+      require("../server.js");
+      break;
 }
 

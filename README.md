@@ -54,7 +54,7 @@ If you are using the github plugin,
 make sure the `config.httpPort` is accessible from the outside
 (or at least from github's servers).
 
-    $ node server.js
+    $ bin/cimpler --server
 
 ## Hacking
 
