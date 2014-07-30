@@ -191,9 +191,11 @@ function buildConsumer(config, cimpler, repoPath) {
          if (build.error) {
             logFile().write("\n Error: " + build.error);
          }
+         // Call 'finished' when end() flushes it's data to disk
+         // This is mostly for testing so we *known* that the data has been
+         // written.
          logFile().end(
-          "\n-------------------------------------------\n");
-         finished();
+          "\n-------------------------------------------\n",'utf8',finished);
       }
 
       function exec(cmd, callback) {
@@ -230,7 +232,10 @@ function echoStatusCmd(noun) {
 function dummyWriteStream() {
    var stream = require('stream').Writable || require('stream');
    var devnull = new stream();
-   devnull._write = devnull.write = devnull.end = function () {};
+   devnull._write = devnull.write = devnull.end =
+   function (a,b,callback) {
+      callback && callback();
+   };
    return devnull;
 }
 
