@@ -29,5 +29,7 @@
 
    "main": "./cimpler.js",
 
-   "scripts": { "test": "mocha" }
+   "scripts": {
+      "test": "mocha --timeout 4000 --slow 500 "
+   }
 }
