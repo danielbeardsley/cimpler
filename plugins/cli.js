@@ -32,15 +32,6 @@ exports.init = function(config, cimpler) {
          build._control.tail_log = true;
       }
 
-      try {
-         cimpler.addBuild(build);
-      } catch (e) {
-         var msg = "Error processing command line request." + e.message;
-         util.error(msg);
-         util.error(e.stack);
-         res.end(msg + " -- " + e.message);
-      }
-
       // Schedule the logs to be piped once the build starts
       if (build._control.tail_log) {
          // To support both <=0.8 and >=0.10
@@ -61,6 +52,16 @@ exports.init = function(config, cimpler) {
       } else {
          res.end('OK');
       }
+
+      try {
+         cimpler.addBuild(build);
+      } catch (e) {
+         var msg = "Error processing command line request." + e.message;
+         util.error(msg);
+         util.error(e.stack);
+         res.end(msg + " -- " + e.message);
+      }
+
    });
 
    var index = 0;
