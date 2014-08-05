@@ -57,6 +57,7 @@ function buildConsumer(config, cimpler, repoPath) {
                var failed = "Fetch Failed";
                build.status = 'error';
                build.error = failed;
+               build.code = err.code;
                stdout += "\n\n" + failed;
                logger.warn(id(build) + " -- " + failed);
                writeLogHeader()
@@ -101,6 +102,7 @@ function buildConsumer(config, cimpler, repoPath) {
                nextStep = finishedBuild;
                build.status = 'error';
                build.error = message;
+               build.code = err.code;
                stdout += "\n\n" + message;
 
             } else {
@@ -120,15 +122,16 @@ function buildConsumer(config, cimpler, repoPath) {
 
       function startBuild(started) {
          var buildCommand = build.buildCommand || config.cmd;
-         var commands = cdToRepo + " && (" + buildCommand + ")" +
-                        echoStatusCmd('Build');
+         var commands = cdToRepo + "\n" + buildCommand;
 
          var proc = exec(commands, function(err, stdout, stderr) {
             if (err && err.signal) {
                build.status = 'error';
                build.error = err.signal + " - " + err.code;
+               build.code = err.code;
             } else {
                build.status = err ? 'failure' : 'success';
+               build.code = err ? err.code : 0;
             }
             logger.info(id(build) + " -- Build " + build.status);
             finishedBuild();
@@ -190,6 +193,8 @@ function buildConsumer(config, cimpler, repoPath) {
           "\n Cimpler build finished in " + seconds + " seconds");
          if (build.error) {
             logFile().write("\n Error: " + build.error);
+         } else {
+            logFile().write("\n Status: " + build.status + " Exit Code: " + build.code);
          }
          // Call 'finished' when end() flushes it's data to disk
          // This is mostly for testing so we *known* that the data has been
@@ -221,10 +226,6 @@ function buildConsumer(config, cimpler, repoPath) {
       }
    };
 };
-
-function echoStatusCmd(noun) {
-   return " && echo '"+noun+" Successful' || ( echo '"+noun+" Failed'; exit 1 )";
-}
 
 /**
  * Create a dummy write stream that works in node >= 0.8 
