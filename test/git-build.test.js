@@ -127,6 +127,7 @@ describe("git-build plugin", function() {
          // Assert that the log exists and contains "Merge Failed"
          var log = fs.readFileSync(build.logPath).toString();
          assert.ok(log.match('Merge Failed'))
+         assert.notEqual(build.code, 0);
          check();
       });
 
@@ -254,8 +255,13 @@ describe("git-build plugin", function() {
          A: 'success',
          B: 'failure'
       };
+      var expectedCodes = {
+         A: 0,
+         B: 7
+      };
       cimpler.on('buildFinished', function(build) {
          assert.equal(build.status, expectedStatuses[build.letter]);
+         assert.equal(build.code, expectedCodes[build.letter]);
          check();
       });
 
@@ -269,7 +275,7 @@ describe("git-build plugin", function() {
          letter: 'B',
          repo: "doesn't matter",
          branch: "master",
-         buildCommand: 'exit 1'
+         buildCommand: 'exit 7'
       });
    });
 
