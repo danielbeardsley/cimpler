@@ -13,9 +13,9 @@ exports.init = function(config, cimpler) {
    });
 
    cimpler.on('buildAborted', function(build) {
-      if (build._control && build._control.abort) {
+      if (build._control && build._control.abortGitBuild) {
          build.aborted = true;
-         build._control.abort();
+         build._control.abortGitBuild();
       }
    });
 }
@@ -269,6 +269,6 @@ function setAbort(build, callback) {
    if (!build._control) {
       build._control = {};
    } 
-   build._control.abort = callback;
+   build._control.abortGitBuild = callback;
 }
 

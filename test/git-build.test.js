@@ -369,6 +369,7 @@ describe("git-build plugin", function() {
       function finished() {
          cimpler.shutdown();
          done();
+         done = function(){};
       };
 
       function newBuild(branch) {
