@@ -340,6 +340,46 @@ describe("git-build plugin", function() {
       });
    });
 
+   it("should abort a build when told to", function(done) {
+      var cimpler = new Cimpler({
+         abortMatchingBuilds: true,
+         plugins: {
+            "git-build": {
+               repoPaths: testRepoDirs[0],
+               // command that will take longer than timeout
+               cmd: "sleep 10"
+            }
+         },
+      });
+
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.status, 'error');
+         assert.equal(build.aborted, true);
+         assert.equal(build.branch, 'master');
+         finished();
+      });
+
+      // Don't add these two until we've started on the first one.
+      cimpler.on('buildStarted', function() {
+         cimpler.addBuild(newBuild("test-branch"));
+         cimpler.addBuild(newBuild("master"));
+      });
+      cimpler.addBuild(newBuild("master"));
+
+      function finished() {
+         cimpler.shutdown();
+         done();
+      };
+
+      function newBuild(branch) {
+         return {
+            letter: 'A',
+            repo: "doesn't matter",
+            branch: branch
+         };
+      }
+   });
+
    it("should pass the `repoRegex` the consumeBuild() function", function() {
       var gitBuild = require('../plugins/git-build');
       var _undefined;
@@ -348,7 +388,8 @@ describe("git-build plugin", function() {
       var mockCimpler = {
          consumeBuild: function(consumer, repoRegex) {
             regexes.push(repoRegex);
-         }
+         },
+         on:function(){}
       }
 
       gitBuild.init({
