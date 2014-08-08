@@ -11,6 +11,13 @@ exports.init = function(config, cimpler) {
       var consumer = buildConsumer(config, cimpler, repoPath);
       cimpler.consumeBuild(consumer, config.repoRegex);
    });
+
+   cimpler.on('buildAborted', function(build) {
+      if (build._control && build._control.abortGitBuild) {
+         build.aborted = true;
+         build._control.abortGitBuild();
+      }
+   });
 }
 
 function buildConsumer(config, cimpler, repoPath) {
@@ -52,7 +59,7 @@ function buildConsumer(config, cimpler, repoPath) {
             "git fetch --quiet && " +
             "git rev-parse origin/" + build.branch + ") 2>&1";
 
-         exec(commands, function(err, stdout) {
+         var fetching = exec(commands, function(err, stdout) {
             if (err) {
                var failed = "Fetch Failed";
                build.status = 'error';
@@ -70,6 +77,10 @@ function buildConsumer(config, cimpler, repoPath) {
                writeLogHeader();
                startMerge();
             }
+         });
+
+         setAbort(build, function() {
+            fetching.kill();
          });
       }
 
@@ -94,7 +105,7 @@ function buildConsumer(config, cimpler, repoPath) {
             "git submodule sync && " +
             "git submodule update --init --recursive ) 2>&1";
 
-         exec(commands, function(err, stdout) {
+         var merging = exec(commands, function(err, stdout) {
             var nextStep, message;
 
             if (err) {
@@ -118,6 +129,10 @@ function buildConsumer(config, cimpler, repoPath) {
 
             nextStep(started);
          });
+
+         setAbort(build, function() {
+            merging.kill();
+         });
       }
 
       function startBuild(started) {
@@ -135,6 +150,10 @@ function buildConsumer(config, cimpler, repoPath) {
             }
             logger.info(id(build) + " -- Build " + build.status);
             finishedBuild();
+         });
+
+         setAbort(build, function() {
+            proc.kill();
          });
 
          /**
@@ -187,6 +206,11 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function finishedBuild() {
+         if (build.aborted) {
+            build.error = "Build Aborted";
+            build.status = 'error';
+         }
+
          var seconds = Math.round((Date.now() - startedAt) / 1000);
          logFile().write(
           "\n-------------------------------------------" +
@@ -238,5 +262,13 @@ function dummyWriteStream() {
       callback && callback();
    };
    return devnull;
+}
+
+
+function setAbort(build, callback) {
+   if (!build._control) {
+      build._control = {};
+   } 
+   build._control.abortGitBuild = callback;
 }
 

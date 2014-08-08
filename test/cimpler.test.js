@@ -271,6 +271,65 @@ describe("Cimpler", function() {
          passBuildsThrough(builds, expectedOutBuilds, done);
       });
 
+      it("should replace the currently running build of the same branch", function(done) {
+         var newBuild = function(branch, data) {
+            return {
+               repo: 'A',
+               branch: branch,
+               data: data
+            };
+         };
+
+         var buildA1 = newBuild('A', 'A1');
+         var buildA2 = newBuild('A', 'A2');
+         var buildB  = newBuild('B', 'B');
+
+         var expectedEventOrder = [
+            ['buildAdded',    buildA1],
+            ['buildStarted',  buildA1],
+            ['buildAdded',    buildB],
+            ['buildAdded',    buildA2],
+            ['buildAborted',  buildA1],
+            ['buildStarted',  buildA2],
+            ['buildStarted',  buildB],
+         ];
+
+         var cimpler = new Cimpler({abortMatchingBuilds: true});
+
+         cimpler.consumeBuild(function(inBuild, started, finished) {
+            inBuild._finished = finished;
+            started();
+            setTimeout(function() { finished(); }, 10);
+         });
+
+         cimpler.on('buildAborted', function(build) {
+            if (build._finished) {
+               build._finished();
+            }
+         });
+
+         var eventValidator = function(eventType) {
+            return function(build) {
+               var nextEvent = expectedEventOrder.shift();
+               assert.equal(eventType, nextEvent[0]);
+               assert.equal(build.data, nextEvent[1].data);
+
+               if (expectedEventOrder.length === 0) {
+                  done();
+               }
+            };
+         };
+
+         var eventTypes = ['buildAdded', 'buildStarted', 'buildAborted'];
+         eventTypes.forEach(function(eventType) {
+            cimpler.on(eventType, eventValidator(eventType));
+         });
+
+         cimpler.addBuild(buildA1);
+         cimpler.addBuild(buildB);
+         cimpler.addBuild(buildA2);
+      });
+
       function passBuildsThrough(inBuilds, expectedOutBuilds, done) {
          var outBuilds = [],
          cimpler = new Cimpler();

@@ -9,6 +9,14 @@ module.exports = {
     */
    httpPort: 25751,
 
+   /**
+    * Adding the same repo/branch info to the queue more than once will cause
+    * the two items to be collapsed (if neither is currently building) into
+    * one. Change this setting to 'true' to enable Aborting (and effectively
+    * restarting) a current build if a matching one is added to the queue
+    */
+   abortMatchingBuilds: true,
+
    plugins: {
       /**
        * HTTP endpoint for retrieving build-status information
