@@ -73,20 +73,15 @@ switch (command) {
 
    case 'status':
       httpTrigger.getStatus(args.port, function(err, builds) {
+         if (args.verbose) {
+            console.dir([].concat(builds.building, builds.queued));
+            return;
+         }
          builds.building.forEach(function(build) {
-            if (args.verbose) {
-               build.building = true;
-               console.dir(build);
-            } else {
-               console.log("* " + build.branch);
-            }
+            console.log("* " + build.branch);
          });
          builds.queued.forEach(function(build) {
-            if (args.verbose) {
-               console.dir(build);
-            } else {
-               console.log("  " + build.branch);
-            }
+            console.log("  " + build.branch);
          });
          if (builds.building.length == 0 && builds.queued.length == 0) {
             console.log("(no builds in queue)");
