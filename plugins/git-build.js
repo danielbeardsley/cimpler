@@ -32,6 +32,7 @@ function buildConsumer(config, cimpler, repoPath) {
          },
          timeout: config.timeout || 0
       },
+      killChildrenOnExit = "trap '[ $(jobs -p) ] && kill $(jobs -p)' EXIT",
       cdToRepo = 'set -v; set -x; cd "' + repoPath + '"';
 
       for(var key in process.env) {
@@ -136,10 +137,11 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function startBuild(started) {
-         var buildCommand = build.buildCommand || config.cmd;
-         var commands = cdToRepo + "\n" + buildCommand;
+         var buildCommand = (build.buildCommand || config.cmd) + " 2>&1";
+         var commands = [killChildrenOnExit, cdToRepo, buildCommand];
+         var commandString = commands.join("; ");
 
-         var proc = exec(commands, function(err, stdout, stderr) {
+         var proc = exec(commandString, function(err, stdout, stderr) {
             if (err && err.signal) {
                build.status = 'error';
                build.error = err.signal + " - " + err.code;
@@ -228,25 +230,23 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function exec(cmd, callback) {
-         var child, done = false, forceErr;
-         if (execOptions.timeout) {
+         var child, done = false, forceErr, options = _.clone(execOptions);
+         if (options.timeout) {
             setTimeout(function() {
-               if (done) {return}
+               if (done) return;
                forceErr = {signal: "timeout", code: execOptions.timeout};
                child.kill();
-            }, execOptions.timeout);
+            }, options.timeout);
+            delete options.timeout;
          }
 
-         return child = childProcess.exec(cmd, execOptions,
+         child = childProcess.exec(cmd, execOptions,
             function(err, stdout, stderr) {
                done = true;
-               callback(forceErr || err, stdout.toString());
+               callback(forceErr || err, stdout.toString(), stderr.toString());
             });
-      }
-
-      function id(inBuild) {
-         return inBuild.branch +
-            (inBuild.commit ? ' (' + inBuild.commit.substr(0,10) + ')' : '');
+         build.pid = child.pid;
+         return child;
       }
    };
 };
@@ -275,3 +275,7 @@ function setAbort(build, callback) {
    }
 }
 
+function id(inBuild) {
+   return inBuild.branch +
+      (inBuild.commit ? ' (' + inBuild.commit.substr(0,10) + ')' : '');
+}
