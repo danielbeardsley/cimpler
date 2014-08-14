@@ -82,7 +82,7 @@ function buildConsumer(config, cimpler, repoPath) {
          });
 
          setAbort(build, function() {
-            fetching.kill('SIGINT');
+            fetching.kill('SIGTERM');
          });
       }
 
@@ -133,13 +133,13 @@ function buildConsumer(config, cimpler, repoPath) {
          });
 
          setAbort(build, function() {
-            merging.kill('SIGINT');
+            merging.kill('SIGTERM');
          });
       }
 
       function startBuild(started) {
          var buildCommand = (build.buildCommand || config.cmd) + " 2>&1";
-         var commands = [killChildrenOnExit, cdToRepo, buildCommand];
+         var commands = [cdToRepo, buildCommand];
          var commandString = commands.join("; ");
 
          var proc = exec(commandString, function(err, stdout, stderr) {
@@ -240,6 +240,8 @@ function buildConsumer(config, cimpler, repoPath) {
             }, options.timeout);
             delete options.timeout;
          }
+
+         cmd = killChildrenOnExit + '; ' + cmd;
 
          child = childProcess.exec(cmd, execOptions,
             function(err, stdout, stderr) {
