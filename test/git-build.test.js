@@ -307,78 +307,102 @@ describe("git-build plugin", function() {
       });
    });
 
-   it("should fail builds that timeout", function(done) {
-      var cimpler = new Cimpler({
-         plugins: {
-            "git-build": {
-               repoPaths: testRepoDirs[0],
-               // command that will take longer than timeout
-               cmd: "sleep 1",
-               timeout: 500, // ms
-               logs: {
-                  path: buildLogsPath,
-                  url:  "http://www.example.com/ci-builds/"
-               },
-            }
-         },
-      });
+   describe("timeout feature", function() {
+      it("should fail builds that timeout", function(done) {
+         var cimpler = new Cimpler({
+            plugins: {
+               "git-build": {
+                  repoPaths: testRepoDirs[0],
+                  // command that will take longer than timeout
+                  cmd: "sleep 1",
+                  timeout: 500, // ms
+                  logs: {
+                     path: buildLogsPath,
+                     url:  "http://www.example.com/ci-builds/"
+                  },
+               }
+            },
+         });
 
-      function finished() {
-         cimpler.shutdown();
-         done();
-      };
+         function finished() {
+            cimpler.shutdown();
+            done();
+         };
 
-      cimpler.on('buildFinished', function(build) {
-         assert.equal(build.status, 'error');
-         finished();
-      });
+         cimpler.on('buildFinished', function(build) {
+            assert.equal(build.status, 'error');
+            finished();
+         });
 
-      cimpler.addBuild({
-         letter: 'A',
-         repo: "doesn't matter",
-         branch: "master"
-      });
-   });
-
-   it("should abort a build when told to", function(done) {
-      var cimpler = new Cimpler({
-         abortMatchingBuilds: true,
-         plugins: {
-            "git-build": {
-               repoPaths: testRepoDirs[0],
-               // command that will take longer than timeout
-               cmd: "sleep 10"
-            }
-         },
-      });
-
-      cimpler.on('buildFinished', function(build) {
-         assert.equal(build.status, 'error');
-         assert.equal(build.aborted, true);
-         assert.equal(build.branch, 'master');
-         finished();
-      });
-
-      // Don't add these two until we've started on the first one.
-      cimpler.on('buildStarted', function() {
-         cimpler.addBuild(newBuild("test-branch"));
-         cimpler.addBuild(newBuild("master"));
-      });
-      cimpler.addBuild(newBuild("master"));
-
-      function finished() {
-         cimpler.shutdown();
-         done();
-         done = function(){};
-      };
-
-      function newBuild(branch) {
-         return {
+         cimpler.addBuild({
             letter: 'A',
             repo: "doesn't matter",
-            branch: branch
+            branch: "master"
+         });
+      });
+
+      it("should abort a build when told to", function(done) {
+         var cimpler = new Cimpler({
+            abortMatchingBuilds: true,
+            plugins: {
+               "git-build": {
+                  repoPaths: testRepoDirs[0],
+                  // command that will take longer than timeout
+                  cmd: "sleep 10"
+               }
+            },
+         });
+
+         cimpler.on('buildFinished', function(build) {
+            assert.equal(build.status, 'error');
+            assert.equal(build.aborted, true);
+            assert.equal(build.branch, 'master');
+            finished();
+         });
+
+         // Don't add these two until we've started on the first one.
+         cimpler.on('buildStarted', function() {
+            cimpler.addBuild(newBuild("test-branch"));
+            cimpler.addBuild(newBuild("master"));
+         });
+         cimpler.addBuild(newBuild("master"));
+
+         function finished() {
+            cimpler.shutdown();
+            done();
+            done = function(){};
          };
-      }
+
+      });
+
+      /**
+       * To test this feature we follow this logic:
+       *  - Queue a build with a 'sleep [randomnumber]' command
+       *  - Wait till it appears in the process list (ps aux | grep ...)
+       *  - Abort the build
+       *  - Wait till it disappears from the process list (Success!)
+       */
+      it("should kill all child processes", function(done) {
+         var sleepLength = Math.floor((1+Math.random()) * 100000);
+         var cimpler = newCimpler("sleep 1" + sleepLength);
+         var findSleep = 'ps aux | grep [1]' + sleepLength;
+
+         cimpler.on('buildFinished', function(build) {
+            repeatTillSuccessful('! ' + findSleep, finished);
+         });
+
+         var build = newBuild("master");
+         // Don't abort until the sleep is actually running
+         repeatTillSuccessful(findSleep, function(stdout) {
+            cimpler.emit('buildAborted', build);
+         });
+         cimpler.addBuild(build);
+
+         function finished() {
+            cimpler.shutdown();
+            done();
+         };
+      });
    });
 
    it("should pass the `repoRegex` the consumeBuild() function", function() {
@@ -423,6 +447,23 @@ describe("git-build plugin", function() {
    }
 
    /**
+    * Repeat a shell command forever (every 250ms) until it returns
+    * successfully.
+    */
+   function repeatTillSuccessful(cmd, callback) {
+      function tryIt() {
+         childProcess.exec(cmd, {}, function(err, stdout, stderr) {
+            if (err) {
+               setTimeout(tryIt, 250);
+            } else {
+               callback(stdout.toString().trim());
+            }
+         });
+      }
+      tryIt();
+   }
+
+   /**
     * Because Git doesn't allow adding any files or dirs named .git
     * we can't add the test repo's .git dir directly to the main repo.
     * We must resort to dynamically creating and destroying a
@@ -457,7 +498,27 @@ describe("git-build plugin", function() {
       // execution of the same test, the parallel test could fail.
       // fs.unlink(testRepoSource + '.git');
    });
+
+   function newCimpler(cmd, abortMatching) {
+      return new Cimpler({
+         plugins: {
+            "git-build": {
+               repoPaths: testRepoDirs[0],
+               // command that will take longer than timeout
+               cmd: cmd
+            }
+         },
+      });
+   }
 });
+
+function newBuild(branch) {
+   return {
+      letter: 'A',
+      repo: "doesn't matter",
+      branch: branch
+   };
+}
 
 function concurrencyChecker(max) {
    var levels = 0;
