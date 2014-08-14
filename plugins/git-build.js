@@ -80,7 +80,7 @@ function buildConsumer(config, cimpler, repoPath) {
          });
 
          setAbort(build, function() {
-            fetching.kill();
+            fetching.kill('SIGINT');
          });
       }
 
@@ -131,7 +131,7 @@ function buildConsumer(config, cimpler, repoPath) {
          });
 
          setAbort(build, function() {
-            merging.kill();
+            merging.kill('SIGINT');
          });
       }
 
@@ -153,7 +153,7 @@ function buildConsumer(config, cimpler, repoPath) {
          });
 
          setAbort(build, function() {
-            proc.kill();
+            proc.kill('SIGTERM');
          });
 
          /**
@@ -269,6 +269,9 @@ function setAbort(build, callback) {
    if (!build._control) {
       build._control = {};
    } 
-   build._control.abortGitBuild = callback;
+   build._control.abortGitBuild = function() {
+      logger.info(id(build) + " -- Build Aborted");
+      callback();
+   }
 }
 
