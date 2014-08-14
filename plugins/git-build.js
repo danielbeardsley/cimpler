@@ -2,6 +2,7 @@ var childProcess  = require('child_process'),
     fs            = require('fs'),
     util          = require('util'),
     logger        = require('log4js').getLogger(),
+    _             = require('underscore'),
     path          = require('path');
 
 exports.init = function(config, cimpler) {
