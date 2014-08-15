@@ -15,11 +15,6 @@ args           = require('optimist')
       alias: 'c',
       describe: 'Custom shell command to execute for this build instead of the one from the config file'
    })
-   .options('tail', {
-      boolean: true,
-      default: true,
-      describe: '[ or --no-tail ] Blocks until the build is started and tails the log when used with the "build" command.'
-   })
    .options('branch', {
       alias: 'b',
       describe: 'Name of the branch to build (defaults to current)'
@@ -51,12 +46,6 @@ switch (command) {
       }
 
       function getBranch() {
-         if (args.block) {
-            console.log("Blocking until the build has been started... Ctrl-C exits, but won't stop the build")
-         }
-         var options = {
-            tail: args.tail
-         };
          if (args.branch) {
             triggerBuild(args.branch);
          } else {
@@ -65,7 +54,10 @@ switch (command) {
 
          function triggerBuild(branch) {
             build.branch = branch;
-            options.httpPort = args.port;
+            var options = {
+               httpPort: args.port
+            };
+
             httpTrigger.injectBuild(build, options);
          }
       }

@@ -46,59 +46,6 @@ describe("CLI plugin", function() {
       req.end(JSON.stringify(build));
    });
 
-   it("should accept builds via HTTP and block", function(done) {
-      var cb = 0,
-      logStream = new stream.Stream(),
-      cimpler = createCimpler();
-
-      var build = {
-         repo:       'http',
-         branch:     'test-branch',
-         sha:        '12345678',
-         status:     'pending'
-      };
-
-      cimpler.consumeBuild(function(inBuild, started) {
-         logStream.readable = true;
-         setTimeout(function() {
-            inBuild.started = true;
-            inBuild._control.logs = {
-               stdout: logStream
-            }
-            started();
-            logStream.emit("data", "OUTPUT");
-            logStream.emit("end");
-         }, 50);
-      });
-
-      var options = {
-         port: httpPort,
-         path: '/build?tail_log=true',
-         method: 'POST',
-         headers: {
-            'Content-Type' : 'application/json'
-         }
-      };
-
-      var req = http.request(options, function(res) {
-         var body = '';
-         res.setEncoding('utf8');
-         res.on('data', function(chunk) {
-            body += chunk;
-         });
-
-         res.on('end', function(err) {
-            build.started = true;
-            assert.equal(body, "Added ... Build Started\n\nOUTPUT");
-            cimpler.shutdown();
-            if (err) assert.fail(err);
-            done();
-         });
-      });
-
-      req.end(JSON.stringify(build));
-   });
-
    function createCimpler() {
       return new Cimpler({
          plugins: {

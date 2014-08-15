@@ -25,9 +25,6 @@ But, cimpler does provide a local-repo post-receive hook and a nice CLI:
     Options:
       --command, -c  Custom shell command to execute for this build
                      instead of the one from the config file
-      --tail         [ or --no-tail ] Blocks until the build is started
-                     and tails the log when used with the "build"
-                     command.  [boolean] [default: true]
       --branch, -b   Name of the branch to build (defaults to current)
       --verbose, -v  Produce more output for the status command.
                      Includes details for each build.
