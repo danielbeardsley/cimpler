@@ -165,12 +165,6 @@ function buildConsumer(config, cimpler, repoPath) {
           */
          proc.stdout.pipe(logFile(), {end:false});
          proc.stderr.pipe(logFile(), {end:false});
-         if (build._control.tail_log) {
-            build._control.logs = {
-               stdout : proc.stdout,
-               stderr : proc.stderr
-            };
-         }
 
          // Fire the started event now that our build has a log.
          started();

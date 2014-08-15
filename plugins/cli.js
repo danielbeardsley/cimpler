@@ -1,6 +1,5 @@
 var util       = require('util'),
     _          = require('underscore'),
-    connectionTimeout = 30*60*1000, // 30 min
     allowedIps = [
        '127.0.0.1'
     ];
@@ -26,32 +25,6 @@ exports.init = function(config, cimpler) {
       }
 
       var build = req.body;
-      build._control = {};
-
-      if (req.query && req.query.tail_log) {
-         build._control.tail_log = true;
-      }
-
-      // Schedule the logs to be piped once the build starts
-      if (build._control.tail_log) {
-         // To support both <=0.8 and >=0.10
-         var connection = res.connection || res;
-         connection.setTimeout(connectionTimeout);
-
-         uponStarting(build, function() {
-            res.write("Build Started\n\n");
-            if (build._control.logs) {
-               // Pipe the log to the HTTP response obj
-               build._control.logs.stdout.pipe(res);
-            } else {
-               // Logs aren't available, end the response.
-               res.end('No Log');
-            }
-         });
-         res.write("Added ... ");
-      } else {
-         res.end('OK');
-      }
 
       try {
          cimpler.addBuild(build);
@@ -60,26 +33,8 @@ exports.init = function(config, cimpler) {
          util.error(msg);
          util.error(e.stack);
          res.end(msg + " -- " + e.message);
+         return;
       }
-
-   });
-
-   var index = 0;
-   var waitingOnBuilds = {};
-   function uponStarting(build, callback) {
-      waitingOnBuilds[index++] = {
-         build: build,
-         callback: callback
-      };
-   }
-
-   cimpler.on('buildStarted', function(build) {
-      Object.keys(waitingOnBuilds).forEach(function(key) {
-         var waitingFor = waitingOnBuilds[key];
-         if (waitingFor.build === build) {
-            waitingFor.callback();
-            delete waitingOnBuilds[key];
-         }
-      });
+      res.end('OK');
    });
 };
