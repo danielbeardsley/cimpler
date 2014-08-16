@@ -83,6 +83,8 @@ function buildConsumer(config, cimpler, repoPath) {
 
          setAbort(build, function() {
             fetching.kill('SIGTERM');
+            fetching.stdout.destroy();
+            fetching.stderr.destroy();
          });
       }
 
@@ -134,6 +136,8 @@ function buildConsumer(config, cimpler, repoPath) {
 
          setAbort(build, function() {
             merging.kill('SIGTERM');
+            merging.stdout.destroy();
+            merging.stderr.destroy();
          });
       }
 
@@ -157,6 +161,8 @@ function buildConsumer(config, cimpler, repoPath) {
 
          setAbort(build, function() {
             proc.kill('SIGTERM');
+            proc.stdout.destroy();
+            proc.stderr.destroy();
          });
 
          /**
