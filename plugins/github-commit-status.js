@@ -1,4 +1,5 @@
 var util   = require('util'),
+Git        = require('../lib/git'),
 GitHubApi  = require('github');
 
 exports.init = function(config, cimpler) {
@@ -24,7 +25,7 @@ exports.init = function(config, cimpler) {
          return;
       }
 
-      var repo = extractRepoFromURL(build.repo);
+      var repo = Git.parseGithubUrl(build.repo);
 
       // If we don't know the commit SHA, we can't report the status
       if (!build.commit) return;
@@ -40,14 +41,6 @@ exports.init = function(config, cimpler) {
       GitHub.repos.createStatus(commitStatus);
    }
 };
-
-function extractRepoFromURL(url) {
-   var matches = url.match(/([^:\/]+)\/([^\/]+?)(\.git|$)/);
-   return {
-      user: matches[1],
-      name: matches[2]
-   };
-}
 
 function getGithubApi(config) {
    var githubApi = new GitHubApi({
