@@ -43,7 +43,7 @@ function extractBuildInfo(requestBody) {
 
    // Build info structure
    return {
-     repo   : info.repository.url,
+     repo   : "github.com" + '/' + info.repository.full_name,
      commit : info.after,
      branch : branch,
      status : 'pending'
