@@ -7,6 +7,7 @@ module.exports = {
     *
     * All interaction is done via http.
     */
+   httpHost: 'example.com',
    httpPort: 25751,
 
    /**
