@@ -34,7 +34,7 @@ args           = require('optimist')
 
 var command = args._[0];
 
-connOptions = {
+connectionOptions = {
    httpHost: args.host,
    httpPort: args.port
 };
@@ -63,13 +63,13 @@ switch (command) {
 
          function triggerBuild(branch) {
             build.branch = branch;
-            httpTrigger.injectBuild(build, connOptions);
+            httpTrigger.injectBuild(build, connectionOptions);
          }
       }
       break;
 
    case 'status':
-      httpTrigger.getStatus(connOptions, function(err, builds) {
+      httpTrigger.getStatus(connectionOptions, function(err, builds) {
          if (args.verbose) {
             console.dir([].concat(builds.building, builds.queued));
             return;
