@@ -23,12 +23,21 @@ args           = require('optimist')
       alias: 'v',
       describe: 'Produce more output for the status command. Includes details for each build.'
    })
+   .options('host', {
+      alias: 'h',
+      describe: 'HTTP host of the cimpler server (defaults to the value in config.js)'
+   })
    .options('port', {
       alias: 'p',
       describe: 'HTTP port of the cimpler server (defaults to the value in config.js)'
    }).argv;
 
 var command = args._[0];
+
+connectionOptions = {
+   httpHost: args.host,
+   httpPort: args.port
+};
 
 switch (command) {
    case 'build':
@@ -54,17 +63,13 @@ switch (command) {
 
          function triggerBuild(branch) {
             build.branch = branch;
-            var options = {
-               httpPort: args.port
-            };
-
-            httpTrigger.injectBuild(build, options);
+            httpTrigger.injectBuild(build, connectionOptions);
          }
       }
       break;
 
    case 'status':
-      httpTrigger.getStatus(args.port, function(err, builds) {
+      httpTrigger.getStatus(connectionOptions, function(err, builds) {
          if (args.verbose) {
             console.dir([].concat(builds.building, builds.queued));
             return;

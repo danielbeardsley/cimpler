@@ -20,7 +20,7 @@ exports.init = function(config, cimpler) {
 
       if (allowedIps.indexOf(req.connection.address().address) < 0) {
          util.error("Connection denied from: " +
-            JSON.stringify(connection.address()));
+            JSON.stringify(req.connection.address()));
          return next({status: 403});
       }
 
