@@ -74,7 +74,10 @@ function buildConsumer(config, cimpler, repoPath) {
                finishedBuild();
             } else {
                if (!build.commit) {
+                  // Update the build commit and the environment variable if
+                  // we didn't know what the build commit was previously.
                   build.commit = stdout.trim();
+                  execOptions.env.BUILD_COMMIT = build.commit;
                }
                writeLogHeader();
                startMerge();
