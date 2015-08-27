@@ -15,6 +15,9 @@ var testBranch = "aa6b0aa64229caee1b07500334a64de9e1ffcddd",
     masterParent = "aac5cd96ddd3173678e3666d677699ea6adce875",
     hotfixTestBranch = "97d2ad995a7ea62bc425b3d75c7629e0b836a456";
 
+// Command to test that the BUILD_COMMIT environment variable is correct.
+var buildCommitTest = "[ \"$BUILD_COMMIT\" = '" + testBranch + "' ]";
+
 describe("git-build plugin", function() {
    var testRepoDirs = [tempDir(), tempDir()];
 
@@ -28,8 +31,9 @@ describe("git-build plugin", function() {
                mergeBranchRegexes: [
                   [/^hotfix-/, 'test-branch']
                ],
-               // Pass if test_branch is the build branch
-               cmd: "[ \"$BUILD_BRANCH\" = 'test-branch' ]",
+               // Pass if test_branch is the build branch and BUILD_COMMIT
+               // is correct.
+               cmd: "[ \"$BUILD_BRANCH\" = 'test-branch' ] && " + buildCommitTest,
                logs: {
                   path: buildLogsPath,
                   url:  buildLogsUrl
