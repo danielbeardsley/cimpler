@@ -61,7 +61,8 @@ describe("post-receive git-hook", function() {
             env: {
                GIT_DIR: testRepoDir,
                PATH: process.env.PATH,
-               CIMPLER_PORT: httpPort
+               CIMPLER_PORT: httpPort,
+               CIMPLER_HOST: "127.0.0.1"
             }
          };
          return childProcess.exec(cmd, execOptions, function(err, stdout, stderr) {

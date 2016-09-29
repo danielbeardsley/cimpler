@@ -23,7 +23,9 @@ readAll(process.stdin, function(input) {
          // read the port from an env variable to allow override
          // during testing
          console.log("Triggering: " + build.branch);
-         httpTrigger.injectBuild(build, {httpPort: process.env.CIMPLER_PORT}, function() {
+         httpTrigger.injectBuild(build, {
+            httpPort: process.env.CIMPLER_PORT,
+            httpHost: process.env.CIMPLER_HOST}, function() {
             if (index < builds.length) {
                process.nextTick(sendNextBuild);
             }
