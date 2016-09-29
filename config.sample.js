@@ -35,6 +35,8 @@ module.exports = {
           * https://github.com/ajaxorg/node-github
           *
           * Get an oauth token using bin/get-github-oauth-token
+          * or go to https://github.com/settings/tokens and
+          * create a token with only repo:status permission
           */
          auth: {
             type: 'oauth', // or 'basic'
