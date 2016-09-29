@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+
+var Github = require('github'),
+    read   = require('read');
+
+read({
+   prompt: "Github Username:"
+}, function(error, response) {
+   getPassword({username: response});
+})
+
+function getPassword(auth) {
+   read({
+      silent: true,
+      prompt: "Github Password:"
+   }, function(error, response) {
+      auth.password = response;
+      getOTP(auth);
+   })
+}
+
+function getOTP(auth) {
+   read({
+      prompt: "2-Factor Auth Code (leave blank for none):"
+   }, function(error, response) {
+      auth.otp = response;
+      getOAuthToken(auth);
+   })
+}
+
+function getOAuthToken(auth) {
+   var authorization = {
+      scopes: ["repo:status"],
+      note: "Cimpler CI server commit status reporting",
+      note_url: "https://github.com/danielbeardsley/cimpler",
+   };
+
+   if (auth.otp) {
+      authorization.headers = {
+         "X-GitHub-OTP": auth.otp
+      };
+   }
+
+   var github = new Github();
+   auth.type = 'basic';
+   github.authenticate(auth);
+   github.authorization.create(authorization
+   , function(err, res) {
+      if (err) {
+         return console.error(err);
+      }
+      if (res.token) {
+         console.log(JSON.stringify({
+            type: "oauth",
+            token: res.token
+         }));
+      } else {
+         console.error("Token not received");
+      }
+   });
+}
+
