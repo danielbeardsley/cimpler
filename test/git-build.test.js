@@ -16,7 +16,8 @@ var testBranch = "aa6b0aa64229caee1b07500334a64de9e1ffcddd",
     hotfixTestBranch = "97d2ad995a7ea62bc425b3d75c7629e0b836a456";
 
 // Command to test that the BUILD_COMMIT environment variable is correct.
-var buildCommitTest = "[ \"$BUILD_COMMIT\" = '" + testBranch + "' ]";
+var buildCommitTest = "[ \"$BUILD_COMMIT\" = '" + testBranch + "' ]" +
+                      " && [ -n \"$BUILD_LOG_URL\" ]";
 
 describe("git-build plugin", function() {
    var testRepoDirs = [tempDir(), tempDir()];
