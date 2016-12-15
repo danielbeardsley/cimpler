@@ -24,8 +24,7 @@ describe("Shell plugin", function() {
             'BUILD_REPO',
             'BUILD_COMMIT',
             'BUILD_BRANCH',
-            'BUILD_STATUS',
-            'BUILD_URL'],
+            'BUILD_STATUS'],
          cimpler = new Cimpler();
 
          // Load the shell plugin with a cmd that writes the env vars to a file

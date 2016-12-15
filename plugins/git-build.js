@@ -189,7 +189,7 @@ function buildConsumer(config, cimpler, repoPath) {
 
          if (config.logs.url) {
             inBuild.logUrl = config.logs.url + logFilename;
-            execOptions.env.BUILD_URL = inBuild.logUrl;
+            execOptions.env.BUILD_LOG_URL = inBuild.logUrl;
          }
 
          inBuild.logPath = path.join(config.logs.path, logFilename);
