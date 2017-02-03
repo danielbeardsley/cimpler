@@ -15,7 +15,8 @@ var testBranch = "aa6b0aa64229caee1b07500334a64de9e1ffcddd",
     hotfixTestBranch = "97d2ad995a7ea62bc425b3d75c7629e0b836a456";
 
 // Command to test that the BUILD_COMMIT environment variable is correct.
-var buildCommitTest = "[ \"$BUILD_COMMIT\" = '" + testBranch + "' ]";
+var buildCommitTest = "[ \"$BUILD_COMMIT\" = '" + testBranch + "' ]" +
+                      " && [ -n \"$BUILD_LOG_URL\" ]";
 
 describe("git-build plugin", function() {
    var testRepoDirs = [tempDir(), tempDir()];
@@ -386,6 +387,12 @@ describe("git-build plugin", function() {
        *  - Wait till it disappears from the process list (Success!)
        */
       it("should kill all child processes", function(done) {
+         // Sadly, the bash EXIT trap that this feature depends on doesn't work
+         // in travis-ci, so we can't run this test.
+         if (process.env.TRAVIS) {
+            return done();
+         }
+
          var sleepLength = Math.floor((1+Math.random()) * 100000);
          var cimpler = newCimpler("sleep 1" + sleepLength);
          var findSleep = 'ps aux | grep [1]' + sleepLength;

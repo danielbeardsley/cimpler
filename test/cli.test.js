@@ -19,7 +19,7 @@ describe("CLI build command", function() {
          httpPort: httpPort,
          testMode: true  // Don't console.log() anything
       }),
-      bin = "../../bin/cimpler -p " + httpPort,
+      bin = "../../bin/cimpler -h 127.0.0.1 -p " + httpPort,
       builtBranches  = [],
       expectedBuilds = 2,
       cimplerCalls   = 0,
@@ -96,7 +96,7 @@ describe("CLI status command", function() {
          httpPort: httpPort,
          testMode: true  // Don't console.log() anything
       }),
-      bin = __dirname + "/../bin/cimpler -p " + httpPort;
+      bin = __dirname + "/../bin/cimpler -h 127.0.0.1 -p " + httpPort;
 
       cimpler.addBuild({
          repo:   'http://',
