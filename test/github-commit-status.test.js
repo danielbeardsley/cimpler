@@ -146,8 +146,8 @@ function newApi() {
    };
 
    function ghAPI() {
-      this.statuses = {
-         create: function(status) {
+      this.repos = {
+         createStatus: function(status) {
             info.statuses.push(status);
          }
       };
