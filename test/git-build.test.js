@@ -1,5 +1,4 @@
 var Cimpler      = require('../lib/cimpler'),
-    util         = require('util'),
     fs           = require('fs'),
     assert       = require('assert');
     expect       = require("./expect"),
@@ -441,7 +440,7 @@ describe("git-build plugin", function() {
          if (!expectFailure != !err) {
             var msg = err ? "Command failed: " + cmd :
                             "Command was supposed to fail (but didn't): " + cmd;
-            util.error(msg);
+            console.error(msg);
             console.log(stdout.toString());
             console.log(stderr.toString());
             process.exit(1);

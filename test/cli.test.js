@@ -1,5 +1,4 @@
 var Cimpler      = require('../lib/cimpler'),
-    util         = require('util'),
     fs           = require('fs'),
     assert       = require('assert');
     _            = require('underscore');
@@ -150,12 +149,12 @@ function execInDir(dir) {
       };
       childProcess.exec(cmd, execOptions, function(err, stdout, stderr) {
          if (!expectFailure && err) {
-            util.error("Command failed: " + cmd);
+            console.error("Command failed: " + cmd);
             console.log(stdout.toString());
             console.log(stderr.toString());
             process.exit(1);
          } else if (expectFailure && !err) {
-            util.error("Command was supposed to fail (but didn't): " + cmd);
+            console.error("Command was supposed to fail (but didn't): " + cmd);
             console.log(stdout.toString());
             console.log(stderr.toString());
             process.exit(1);

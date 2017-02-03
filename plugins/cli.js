@@ -1,5 +1,4 @@
-var util       = require('util'),
-    _          = require('underscore');
+var _          = require('underscore');
 
 
 exports.init = function(config, cimpler) {
@@ -21,8 +20,8 @@ exports.init = function(config, cimpler) {
          cimpler.addBuild(build);
       } catch (e) {
          var msg = "Error processing command line request." + e.message;
-         util.error(msg);
-         util.error(e.stack);
+         console.error(msg);
+         console.error(e.stack);
          res.end(msg + " -- " + e.message);
          return;
       }

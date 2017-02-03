@@ -1,5 +1,4 @@
-var util       = require('util'),
-    logger     = require('log4js').getLogger();
+var logger     = require('log4js').getLogger();
 
 exports.init = function(config, cimpler) {
    /**
@@ -17,8 +16,8 @@ exports.init = function(config, cimpler) {
             cimpler.addBuild(build);
          }
       } catch (e) {
-         util.error("Bad Request");
-         util.error(e.stack);
+         console.error("Bad Request");
+         console.error(e.stack);
       }
       res.end();
    });
