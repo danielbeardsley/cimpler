@@ -5,7 +5,7 @@ exports.init = function(config, cimpler) {
    // Just to allow mocking the api in the tests.
    GitHubApi = config._overrideApi || GitHubApi;
 
-   var GitHub = getGithubApi();
+   var GitHub = getGithubApi(config);
 
    cimpler.on('buildStarted', function(build) {
       if (!build.error) {
@@ -48,7 +48,7 @@ function extractRepoFromURL(url) {
    };
 }
 
-function getGithubApi() {
+function getGithubApi(config) {
    var githubApi = new GitHubApi({
       headers: {
          "user-agent": "Cimpler CI"
