@@ -33,11 +33,14 @@ module.exports = {
           * Passed straight through to github.authenticate()
           * from the `github` npm module:
           * https://github.com/ajaxorg/node-github
+          * So it accepts whatever that function accpets.
+          *
+          * Get an oauth token by going to https://github.com/settings/tokens
+          * and createa token with only repo:status permission
           */
          auth: {
-            type: 'basic', // or 'oauth'
-            username: 'githubuser',
-            password: 'password'
+            type: 'oauth', // or 'basic'
+            token: 'abcdefghijklmnopqrs...'
          }
       },
 

@@ -5,8 +5,7 @@ exports.init = function(config, cimpler) {
    // Just to allow mocking the api in the tests.
    GitHubApi = config._overrideApi || GitHubApi;
 
-   var GitHub = new GitHubApi({ version: '3.0.0' });
-   GitHub.authenticate(config.auth);
+   var GitHub = getGithubApi(config);
 
    cimpler.on('buildStarted', function(build) {
       if (!build.error) {
@@ -37,7 +36,7 @@ exports.init = function(config, cimpler) {
          state: status,
          target_url: build.logUrl,
          description: description };
-      GitHub.statuses.create(commitStatus);
+      GitHub.repos.createStatus(commitStatus);
    }
 };
 
@@ -47,4 +46,14 @@ function extractRepoFromURL(url) {
       user: matches[1],
       name: matches[2]
    };
+}
+
+function getGithubApi(config) {
+   var githubApi = new GitHubApi({
+      headers: {
+         "user-agent": "Cimpler CI"
+      }
+   });
+   githubApi.authenticate(config.auth);
+   return githubApi;
 }

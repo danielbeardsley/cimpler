@@ -15,7 +15,7 @@
    },
 
    "dependencies": {
-      "github": "~0.1.5",
+      "github": "~3.1.1",
       "optimist": "~0.3.4",
       "notify-queue": "~0.0.5",
       "connect": "~2.6.0",
