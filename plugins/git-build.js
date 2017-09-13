@@ -31,7 +31,8 @@ function buildConsumer(config, cimpler, repoPath) {
             BUILD_BRANCH: build.branch,
             BUILD_STATUS: build.status
          },
-         timeout: config.timeout || 0
+         timeout: config.timeout || 0,
+         maxBuffer: config.maxBuffer || 1024 * 1024 * 2
       },
       killChildrenOnExit = "trap '[ $(jobs -p) ] && kill $(jobs -p)' EXIT",
       cdToRepo = 'set -v; set -x; cd "' + repoPath + '"';
