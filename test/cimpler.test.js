@@ -203,6 +203,36 @@ describe("Cimpler", function() {
             };
          }
       });
+
+      it("should allow filtering with a function that is passed the build", function(done) {
+         var cimpler = new Cimpler();
+         var check = expect(1, done);
+
+         cimpler.consumeBuild(buildAsserter('A', 'master'), function(build) {
+            return build.repo == 'A' && build.branch == 'master';
+         });
+
+         cimpler.addBuild(build('A', 'master'));
+         cimpler.addBuild(build('A', 'test'));
+         cimpler.addBuild(build('B', 'master'));
+         cimpler.addBuild(build('B', 'test'));
+
+         function buildAsserter(expectedRepo, expectedBranch) {
+            return function(inBuild, started, finished) {
+               assert.equal(inBuild.repo, expectedRepo);
+               assert.equal(inBuild.branch, expectedBranch);
+               finished();
+               check();
+            };
+         }
+
+         function build(repo, branch) {
+            return {
+               repo: repo,
+               branch: branch
+            };
+         }
+      });
    });
 
    describe(".addBuild()", function() {
