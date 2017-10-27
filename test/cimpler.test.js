@@ -360,6 +360,44 @@ describe("Cimpler", function() {
          cimpler.addBuild(buildA2);
       });
 
+      it("should merge builds depending on return value of config supplied shouldMergeBuilds function", function(done) {
+         var builds = [
+            { repo: 'A' },
+            { repo: 'A' },
+            { repo: 'B' },
+            { repo: 'B' },
+            { repo: 'C' },
+            { repo: 'C' },
+         ];
+
+         var falseConfig = {
+            shouldMergeBuilds: function(runningBuild, newBuild) {
+               return false;
+            }
+         };
+
+         var cimpler = new Cimpler(falseConfig);
+
+         builds.forEach(function(build) {
+            cimpler.addBuild(build);
+         });
+         assert.equal(builds.length, cimpler.builds()['queued'].length);
+
+         var trueConfig = {
+            shouldMergeBuilds: function(runningBuild, newBuild) {
+               return true;
+            }
+         };
+         cimpler = new Cimpler(trueConfig);
+
+         builds.forEach(function(build) {
+            cimpler.addBuild(build);
+         });
+         assert.equal(1, cimpler.builds()['queued'].length);
+
+         done();
+      });
+
       function passBuildsThrough(inBuilds, expectedOutBuilds, done) {
          var outBuilds = [],
          cimpler = new Cimpler();
