@@ -47,7 +47,7 @@ function buildConsumer(config, cimpler, repoPath) {
 
       logger.info(id(build) + " -- Building with git");
 
-      startFetch();
+      sometimesPrune();
 
       // This needs to be delayed until we have a commit hash
       function writeLogHeader() {
@@ -55,6 +55,34 @@ function buildConsumer(config, cimpler, repoPath) {
             "----------------------------------------------\n" +
             " Cimpler build started at: " + Date() + "\n" +
             "----------------------------------------------\n");
+      }
+
+      /**
+       * If there are too many loose objects, git auto-gc will not run 'git
+       * prune' on its own and complain and fail with:
+       * "too many loose objects, run git prune".
+       * So, run git prune every once in a while so we dont' run into this.
+       */
+      function sometimesPrune() {
+         var next = startFetch;
+         if (shouldPrune()) {
+            var command = 'cd "' + repoPath + '" && ' + "git prune 2>&1";
+            exec(command, function(err, stdout) {
+               if (err) {
+                  var failed = "git prune failed";
+                  build.status = 'error';
+                  build.error = failed;
+                  build.code = err.code;
+                  stdout += "\n\n" + failed;
+                  logger.warn(id(build) + " -- " + failed);
+                  finishedBuild();
+               } else {
+                  next();
+               }
+            })
+         } else {
+            next();
+         }
       }
 
       function startFetch() {
@@ -286,4 +314,8 @@ function setAbort(build, callback) {
 function id(inBuild) {
    return inBuild.branch +
       (inBuild.commit ? ' (' + inBuild.commit.substr(0,10) + ')' : '');
+}
+
+function shouldPrune() {
+   return Math.random() < 0.05;
 }
