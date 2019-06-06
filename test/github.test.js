@@ -17,8 +17,9 @@ options = {
       "Content-Type": "application/x-www-form-urlencoded"
    }
 },
+testBranchName = "branch-name-with/slashes.and.dots",
 postBuild = {
-   ref:"b/master",
+   ref:"refs/heads/" + testBranchName,
    repository:{url:"http"},
    after: commit
 };
@@ -61,7 +62,7 @@ describe("Github plugin", function() {
          assert.deepEqual(sanitizedBuild, {
             repo:    'http',
             commit:   commit,
-            branch:  'master',
+            branch:  testBranchName,
             status:  'pending'
          });
          finished();
