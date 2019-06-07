@@ -27,13 +27,13 @@ function extractBuildInfo(requestBody) {
    var info = JSON.parse(requestBody.payload);
 
    // ref: "refs/heads/some-long-branch-name/maybe-even-slashes"
-   var matches = info.ref.match(/^(refs\/[^\/]+)\/(.*$)/);
+   const matches = info.ref.match(/^(refs\/[^\/]+)\/(.*$)/);
    if (!matches) {
       return null;
    }
 
-   var headType = matches[1];
-   var branch = matches[2];
+   const headType = matches[1];
+   const branch = matches[2];
 
    // Filter out notifications about anything but branches (i.e. tags)
    if (headType !== 'refs/heads') {
