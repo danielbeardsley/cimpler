@@ -26,13 +26,20 @@ exports.init = function(config, cimpler) {
 function extractBuildInfo(requestBody) {
    var info = JSON.parse(requestBody.payload);
 
-   // Filter out notifications about annotated tags
-   if (info.ref.indexOf('refs/tags/') == 0) {
+   // ref: "refs/heads/some-long-branch-name/maybe-even-slashes"
+   const matches = info.ref.match(/^(refs\/[^\/]+)\/(.*$)/);
+   if (!matches) {
       return null;
    }
 
-   // ref: "refs/heads/master"
-   var branch = info.ref.split('/').pop();
+   const headType = matches[1];
+   const branch = matches[2];
+
+   // Filter out notifications about anything but branches (i.e. tags)
+   if (headType !== 'refs/heads') {
+      return null;
+   }
+
 
    // Build info structure
    return {
