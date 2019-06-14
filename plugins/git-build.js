@@ -3,8 +3,11 @@ var childProcess  = require('child_process'),
     util          = require('util'),
     logger        = require('log4js').getLogger(),
     _             = require('underscore'),
-    path          = require('path');
-
+    path          = require('path'),
+    shellQuote    = require('shell-quote').quote,
+    quote = function (input) {
+       return shellQuote([input]);
+    }
 exports.init = function(config, cimpler) {
    var paths = config.repoPaths;
    paths = Array.isArray(paths) ? paths : [paths]
@@ -35,7 +38,7 @@ function buildConsumer(config, cimpler, repoPath) {
          maxBuffer: config.maxBuffer || 1024 * 1024 * 2
       },
       killChildrenOnExit = "trap '[ $(jobs -p) ] && kill $(jobs -p)' EXIT",
-      cdToRepo = 'set -v; set -x; cd "' + repoPath + '"';
+      cdToRepo = 'set -v; set -x; cd ' + quote(repoPath);
 
       for(var key in process.env) {
          execOptions.env[key] = process.env[key];
@@ -66,7 +69,7 @@ function buildConsumer(config, cimpler, repoPath) {
       function sometimesPrune() {
          var next = startFetch;
          if (shouldPrune()) {
-            var command = 'cd "' + repoPath + '" && ' + "git prune 2>&1";
+            var command = 'cd ' + quote(repoPath) + ' && ' + "git prune 2>&1";
             exec(command, function(err, stdout) {
                if (err) {
                   var failed = "git prune failed";
@@ -86,9 +89,9 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function startFetch() {
-         var commands = '(cd "' + repoPath + '" && ' +
+         var commands = '(cd ' + quote(repoPath) + ' && ' +
             "git fetch --quiet && " +
-            "git rev-parse origin/" + build.branch + ") 2>&1";
+            "git rev-parse " + quote("origin/" + build.branch) + ") 2>&1";
 
          var fetching = exec(commands, function(err, stdout) {
             if (err) {
@@ -136,8 +139,8 @@ function buildConsumer(config, cimpler, repoPath) {
          var commands = '(' + cdToRepo + " && " +
             "git reset --hard && " +
             "git clean -ffd && " +
-            "git checkout "+build.commit+" && " +
-            "git merge origin/"+branchToMerge+" && " +
+            "git checkout "+ quote(build.commit) + " && " +
+            "git merge " + quote("origin/" + branchToMerge) + " && " +
             "git submodule sync && " +
             "git submodule update --init --recursive ) 2>&1";
 
