@@ -215,7 +215,7 @@ function buildConsumer(config, cimpler, repoPath) {
          if (!config.logs || !config.logs.path)
             return null;
 
-         var logFilename = (inBuild.branch || 'HEAD') + "--" +
+         var logFilename = (inBuild.branch.replace(/[^0-9a-zA-Z]+/g, '-') || 'HEAD') + "--" +
                            (inBuild.commit || 'unknown') + "--" + 
                            Date.now() + ".log";
 
