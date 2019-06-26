@@ -230,7 +230,7 @@ describe("git-build plugin", function() {
       cimpler.addBuild({
          letter: 'A',
          repo: "doesn't matter",
-         branch: "master",
+         branch: "omg/a/slash",
       });
    });
 

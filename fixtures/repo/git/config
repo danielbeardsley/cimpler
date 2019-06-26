@@ -9,3 +9,7 @@
 [remote "first"]
 	url = http://bad.com
 	fetch = +refs/heads/*:refs/remotes/first/*
+[branch "omg/a/slash"]
+	remote = .
+	merge = refs/heads/master
+	rebase = true

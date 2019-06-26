@@ -9,7 +9,7 @@ readAll(process.stdin, function(input) {
       var parts = line.split(/\s+/);
       return {
          commit: parts[1],
-         branch: parts[2].split('/').pop()
+         branch: parts[2].replace(/^refs\/heads\//, '')
       };
    });
 
