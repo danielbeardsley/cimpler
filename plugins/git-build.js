@@ -294,6 +294,7 @@ function buildConsumer(config, cimpler, repoPath) {
                child.stderr.setEncoding('utf8');
                var stdout = child.stdout.read();
                var stderr = child.stderr.read();
+               clearAbort(build);
                var errObj = code == 0 ? null : {code: code, signal: signal};
                callback(forceErr || errObj, stdout, stderr);
             });
@@ -325,6 +326,13 @@ function setAbort(build, callback) {
       logger.info(id(build) + " -- Build Aborted");
       callback();
    }
+}
+
+function clearAbort(build) {
+   if (!build._control) {
+      build._control = {};
+   }
+   delete build._control.abortGitBuild;
 }
 
 function id(inBuild) {
