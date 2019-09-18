@@ -37,16 +37,8 @@ function buildConsumer(config, cimpler, repoPath) {
          timeout: config.timeout || 0,
          maxBuffer: config.maxBuffer || 1024 * 1024 * 2,
          stdio: 'pipe',
+         detached: true
       },
-      killChildrenOnExit = `
-         trap '
-            [ -z "$(jobs -p)" ] || kill -SIGTERM $(jobs -p)
-            && sleep 2
-            && [ -z "$(jobs -p)" ] || kill -SIGKILL $(jobs -p)
-            ; wait $(jobs -p)
-         '
-         EXIT`
-      ,
       cdToRepo = 'set -v; set -x; cd ' + quote(repoPath);
 
       for(var key in process.env) {
@@ -204,7 +196,7 @@ function buildConsumer(config, cimpler, repoPath) {
          });
 
          setAbort(build, function() {
-            proc.kill('SIGTERM');
+            process.kill(-proc.pid);
             proc.stdout.destroy();
             proc.stderr.destroy();
          });
@@ -281,7 +273,7 @@ function buildConsumer(config, cimpler, repoPath) {
             setTimeout(function() {
                if (done) return;
                forceErr = {signal: "timeout", code: execOptions.timeout};
-               child.kill();
+               process.kill(-child.pid);
             }, options.timeout);
             delete options.timeout;
          }
