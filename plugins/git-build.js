@@ -38,10 +38,15 @@ function buildConsumer(config, cimpler, repoPath) {
          maxBuffer: config.maxBuffer || 1024 * 1024 * 2,
          shell: '/bin/bash'
       },
-      killChildrenOnExit = `trap '[ -z "$(jobs -p)" ] || kill -SIGTERM $(jobs -p) \
-         && sleep 2 \ 
-         && [ -z "$(jobs -p)" ] || kill -SIGKILL $(jobs -p); \
-         wait $(jobs -p)' EXIT`,
+      killChildrenOnExit = `
+         trap '
+            [ -z "$(jobs -p)" ] || kill -SIGTERM $(jobs -p)
+            && sleep 2
+            && [ -z "$(jobs -p)" ] || kill -SIGKILL $(jobs -p)
+            ; wait $(jobs -p)
+         '
+         EXIT`
+      ,
       cdToRepo = 'set -v; set -x; cd ' + quote(repoPath);
 
       for(var key in process.env) {
