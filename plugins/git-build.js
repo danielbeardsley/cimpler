@@ -116,12 +116,6 @@ function buildConsumer(config, cimpler, repoPath) {
                startMerge();
             }
          });
-
-         setAbort(build, function() {
-            fetching.kill('SIGTERM');
-            fetching.stdout.destroy();
-            fetching.stderr.destroy();
-         });
       }
 
       function startMerge() {
@@ -169,12 +163,6 @@ function buildConsumer(config, cimpler, repoPath) {
 
             nextStep(started);
          });
-
-         setAbort(build, function() {
-            merging.kill('SIGTERM');
-            merging.stdout.destroy();
-            merging.stderr.destroy();
-         });
       }
 
       function startBuild(started) {
@@ -193,12 +181,6 @@ function buildConsumer(config, cimpler, repoPath) {
             }
             logger.info(id(build) + " -- Build " + build.status);
             finishedBuild();
-         });
-
-         setAbort(build, function() {
-            process.kill(-proc.pid);
-            proc.stdout.destroy();
-            proc.stderr.destroy();
          });
 
          /**
@@ -286,10 +268,15 @@ function buildConsumer(config, cimpler, repoPath) {
                child.stderr.setEncoding('utf8');
                var stdout = child.stdout.read();
                var stderr = child.stderr.read();
-               clearAbort(build);
+               setAbort(build, function () {});
                var errObj = code == 0 ? null : {code: code, signal: signal};
                callback(forceErr || errObj, stdout, stderr);
             });
+
+         setAbort(build, function() {
+            process.kill(-child.pid);
+         });
+
          build.pid = child.pid;
          return child;
       }
@@ -318,13 +305,6 @@ function setAbort(build, callback) {
       logger.info(id(build) + " -- Build Aborted");
       callback();
    }
-}
-
-function clearAbort(build) {
-   if (!build._control) {
-      build._control = {};
-   }
-   delete build._control.abortGitBuild;
 }
 
 function id(inBuild) {
