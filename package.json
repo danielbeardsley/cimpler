@@ -27,6 +27,6 @@
    },
    "main": "./cimpler.js",
    "scripts": {
-      "test": "mocha --reporter spec --timeout 4000 --slow 500 test/*"
+      "test": "mocha --reporter spec --timeout 30000 --slow 500 test/*"
    }
 }
