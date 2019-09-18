@@ -36,7 +36,7 @@ function buildConsumer(config, cimpler, repoPath) {
          },
          timeout: config.timeout || 0,
          maxBuffer: config.maxBuffer || 1024 * 1024 * 2,
-         shell: '/bin/bash'
+         stdio: 'pipe',
       },
       killChildrenOnExit = `
          trap '
@@ -286,12 +286,16 @@ function buildConsumer(config, cimpler, repoPath) {
             delete options.timeout;
          }
 
-         cmd = killChildrenOnExit + '; ' + cmd;
-
-         child = childProcess.exec(cmd, execOptions,
-            function(err, stdout, stderr) {
+         var args = ['-c', cmd];
+         child = childProcess.spawn('bash', args, execOptions).on('exit',
+            function(code, signal) {
                done = true;
-               callback(forceErr || err, stdout.toString(), stderr.toString());
+               child.stdout.setEncoding('utf8');
+               child.stderr.setEncoding('utf8');
+               var stdout = child.stdout.read();
+               var stderr = child.stderr.read();
+               var errObj = code == 0 ? null : {code: code, signal: signal};
+               callback(forceErr || errObj, stdout, stderr);
             });
          build.pid = child.pid;
          return child;
