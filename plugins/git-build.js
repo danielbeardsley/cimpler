@@ -35,9 +35,10 @@ function buildConsumer(config, cimpler, repoPath) {
             BUILD_STATUS: build.status
          },
          timeout: config.timeout || 0,
-         maxBuffer: config.maxBuffer || 1024 * 1024 * 2
+         maxBuffer: config.maxBuffer || 1024 * 1024 * 2,
+         stdio: 'pipe',
+         detached: true
       },
-      killChildrenOnExit = "trap '[ $(jobs -p) ] && kill $(jobs -p)' EXIT",
       cdToRepo = 'set -v; set -x; cd ' + quote(repoPath);
 
       for(var key in process.env) {
@@ -115,12 +116,6 @@ function buildConsumer(config, cimpler, repoPath) {
                startMerge();
             }
          });
-
-         setAbort(build, function() {
-            fetching.kill('SIGTERM');
-            fetching.stdout.destroy();
-            fetching.stderr.destroy();
-         });
       }
 
       function startMerge() {
@@ -168,12 +163,6 @@ function buildConsumer(config, cimpler, repoPath) {
 
             nextStep(started);
          });
-
-         setAbort(build, function() {
-            merging.kill('SIGTERM');
-            merging.stdout.destroy();
-            merging.stderr.destroy();
-         });
       }
 
       function startBuild(started) {
@@ -192,12 +181,6 @@ function buildConsumer(config, cimpler, repoPath) {
             }
             logger.info(id(build) + " -- Build " + build.status);
             finishedBuild();
-         });
-
-         setAbort(build, function() {
-            proc.kill('SIGTERM');
-            proc.stdout.destroy();
-            proc.stderr.destroy();
          });
 
          /**
@@ -272,18 +255,28 @@ function buildConsumer(config, cimpler, repoPath) {
             setTimeout(function() {
                if (done) return;
                forceErr = {signal: "timeout", code: execOptions.timeout};
-               child.kill();
+               process.kill(-child.pid);
             }, options.timeout);
             delete options.timeout;
          }
 
-         cmd = killChildrenOnExit + '; ' + cmd;
-
-         child = childProcess.exec(cmd, execOptions,
-            function(err, stdout, stderr) {
+         var args = ['-c', cmd];
+         child = childProcess.spawn('bash', args, execOptions).on('exit',
+            function(code, signal) {
                done = true;
-               callback(forceErr || err, stdout.toString(), stderr.toString());
+               child.stdout.setEncoding('utf8');
+               child.stderr.setEncoding('utf8');
+               var stdout = child.stdout.read();
+               var stderr = child.stderr.read();
+               setAbort(build, function () {});
+               var errObj = code == 0 ? null : {code: code, signal: signal};
+               callback(forceErr || errObj, stdout, stderr);
             });
+
+         setAbort(build, function() {
+            process.kill(-child.pid);
+         });
+
          build.pid = child.pid;
          return child;
       }
