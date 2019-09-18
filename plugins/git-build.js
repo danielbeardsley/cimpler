@@ -35,7 +35,8 @@ function buildConsumer(config, cimpler, repoPath) {
             BUILD_STATUS: build.status
          },
          timeout: config.timeout || 0,
-         maxBuffer: config.maxBuffer || 1024 * 1024 * 2
+         maxBuffer: config.maxBuffer || 1024 * 1024 * 2,
+         shell: '/bin/bash'
       },
       killChildrenOnExit = `trap '[ -z "$(jobs -p)" ] || kill -SIGTERM $(jobs -p) \
          && sleep 2 \ 
