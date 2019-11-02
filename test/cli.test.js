@@ -1,5 +1,6 @@
 var Cimpler      = require('../lib/cimpler'),
     fs           = require('fs'),
+    path         = require('path'),
     assert       = require('assert');
     _            = require('underscore');
     expect       = require("./expect"),
@@ -85,6 +86,28 @@ describe("CLI build command", function() {
    });
 });
 
+describe("CLI server command", function() {
+   var exec = execInDir(testRepoDir);
+
+   it("takes in the config option", function(done) {
+      var configPath = path.join(testRepoDir, "./config.temp.js");
+      var port = 25752;
+      fs.writeFileSync(configPath,
+      "module.exports = " + JSON.stringify({
+         httpHost: 'localhost',
+         httpPort: port,
+         plugins: {cli: true}
+      }));
+      var proc = exec("../../bin/cimpler server --config=" + configPath, function(output) {
+         assert(output.match(/Listening on port: 25752/));
+         done();
+      }, true);
+      setTimeout(function() {
+         proc.kill();
+      }, 1000);
+   });
+});
+
 describe("CLI status command", function() {
    var exec = execInDir("./");
 
@@ -147,7 +170,7 @@ function execInDir(dir) {
       var execOptions = {
          cwd: dir
       };
-      childProcess.exec(cmd, execOptions, function(err, stdout, stderr) {
+      return childProcess.exec(cmd, execOptions, function(err, stdout, stderr) {
          if (!expectFailure && err) {
             console.error("Command failed: " + cmd);
             console.log(stdout.toString());
@@ -159,7 +182,7 @@ function execInDir(dir) {
             console.log(stderr.toString());
             process.exit(1);
          }
-         callback(stdout.toString());
+         callback && callback(stdout.toString() + stderr.toString());
       });
    };
 }

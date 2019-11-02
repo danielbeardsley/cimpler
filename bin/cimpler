@@ -4,17 +4,21 @@ var childProcess = require('child_process'),
 httpTrigger    = require('../lib/http-trigger'),
 Git            = require('../lib/git'),
 ConfigProvider = require('../lib/config-provider'),
+Cimpler        = require('../lib/cimpler'),
 git            = new Git(),
 build          = {},
 args           = require('optimist')
    .demand(1)
    .usage("Examples:\n" +
-   "   cimpler build [-b branch-name]   trigger a build on the current repo\n" +
-   "   cimpler status                   echo the list of builds in the queue (* means building)\n" + 
-   "   cimpler server                   start the cimpler server. Logging to STDOUT.")
+   "   cimpler build [-b branch-name]      trigger a build on the current repo\n" +
+   "   cimpler status                      echo the list of builds in the queue (* means building)\n" +
+   "   cimpler server [--config=path/config.js]  start the cimpler server. Logging to STDOUT.")
    .options('command', {
       alias: 'c',
       describe: 'Custom shell command to execute for this build instead of the one from the config file'
+   })
+   .options('config', {
+      describe: 'specify the config file to use'
    })
    .options('branch', {
       alias: 'b',
@@ -40,7 +44,10 @@ connectionOptions = {
    httpPort: args.port
 };
 
-ConfigProvider.load();
+if (args.config) {
+   var path = require('path');
+   ConfigProvider.load(args.config);
+}
 
 switch (command) {
    case 'build':
@@ -89,7 +96,7 @@ switch (command) {
       });
       break;
    case 'server':
-      require("../server.js");
+      cimpler = new Cimpler(ConfigProvider.get());
       break;
 }
 
