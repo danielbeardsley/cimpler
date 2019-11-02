@@ -3,6 +3,7 @@
 var childProcess = require('child_process'),
 httpTrigger    = require('../lib/http-trigger'),
 Git            = require('../lib/git'),
+ConfigProvider = require('../lib/config-provider'),
 git            = new Git(),
 build          = {},
 args           = require('optimist')
@@ -38,6 +39,8 @@ connectionOptions = {
    httpHost: args.host,
    httpPort: args.port
 };
+
+ConfigProvider.load();
 
 switch (command) {
    case 'build':
