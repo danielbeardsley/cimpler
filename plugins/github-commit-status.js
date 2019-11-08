@@ -30,6 +30,7 @@ exports.init = function(config, cimpler) {
       if (!build.commit) return;
 
       var commitStatus = {
+         context: config.context || 'default',
          user: repo.user,
          repo: repo.name,
          sha: build.commit,
