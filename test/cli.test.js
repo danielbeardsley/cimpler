@@ -91,18 +91,19 @@ describe("CLI server command", function() {
 
    it("takes in the config option", function(done) {
       var configPath = path.join(testRepoDir, "./config.temp.js");
-      var port = 25752;
       fs.writeFileSync(configPath,
       "module.exports = " + JSON.stringify({
          httpHost: 'localhost',
-         httpPort: port,
+         httpPort: httpPort,
          plugins: {cli: true}
       }));
       var proc = exec("../../bin/cimpler server --config=" + configPath, function(output) {
-         assert(output.match(/Listening on port: 25752/));
+         var pattern = "Listening on port: " + httpPort;
+         assert(output.match(new RegExp(pattern)))
          done();
+         clearInterval(killerInterval);
       }, true);
-      setTimeout(function() {
+      var killerInterval = setInterval(function() {
          proc.kill();
       }, 1000);
    });
