@@ -30,6 +30,7 @@ describe("Github commit status plugin", function() {
          assert.equal(statuses.length, 2);
 
          var status = {
+            context: 'test-context',
             user: 'user',
             repo: 'repo',
             sha: build.commit,
@@ -57,6 +58,7 @@ describe("Github commit status plugin", function() {
             assert.equal(statuses.length, 2);
 
             var status = {
+               context: 'test-context',
                user: 'user',
                repo: 'repo',
                sha: build.commit,
@@ -87,6 +89,7 @@ describe("Github commit status plugin", function() {
             assert.equal(statuses.length, 1);
 
             var expectedStatus = {
+               context: 'test-context',
                user: 'user',
                repo: 'repo',
                sha: build.commit,
@@ -111,7 +114,8 @@ function sendBuild(build, callback) {
    GH = newApi();
 
    cimpler.registerPlugin(GCS, {
-      _overrideApi: GH
+      _overrideApi: GH,
+      context: 'test-context',
    });
 
    var statuses = GH.collected.statuses;
