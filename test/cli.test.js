@@ -1,8 +1,8 @@
 var Cimpler      = require('../lib/cimpler'),
     fs           = require('fs'),
     path         = require('path'),
-    assert       = require('assert');
-    _            = require('underscore');
+    assert       = require('assert'),
+    _            = require('underscore'),
     expect       = require("./expect"),
     childProcess = require('child_process'),
     testRepoDir  = __dirname + "/../fixtures/repo/",
