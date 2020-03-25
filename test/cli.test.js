@@ -90,13 +90,7 @@ describe("CLI server command", function() {
    var exec = execInDir(testRepoDir);
 
    it("takes in the config option", function(done) {
-      var configPath = path.join(testRepoDir, "./config.temp.js");
-      fs.writeFileSync(configPath,
-      "module.exports = " + JSON.stringify({
-         httpHost: 'localhost',
-         httpPort: httpPort,
-         plugins: {cli: true}
-      }));
+      var configPath = testConfig(httpPort);
       var proc = exec("../../bin/cimpler server --config=" + configPath, function(output) {
          var pattern = "Listening on port: " + httpPort;
          assert(output.match(new RegExp(pattern)))
@@ -186,4 +180,15 @@ function execInDir(dir) {
          callback && callback(stdout.toString() + stderr.toString());
       });
    };
+}
+
+function testConfig(port) {
+   var configPath = path.join(testRepoDir, "./config.temp.js");
+   fs.writeFileSync(configPath,
+   "module.exports = " + JSON.stringify({
+      httpHost: 'localhost',
+      httpPort: httpPort,
+      plugins: {cli: true}
+   }));
+   return configPath;
 }
