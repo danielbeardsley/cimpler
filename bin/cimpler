@@ -45,6 +45,9 @@ switch (command) {
          build.buildCommand = args.command;
       }
       git.remote(function(remote, repoPath) {
+         if (remote && remote.indexOf('github.com') !== -1) {
+            remote = Git.canonicalizeGithubUrl(remote);
+         }
          build.repo = remote || repoPath;
          getBranch();
       });
