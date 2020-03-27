@@ -94,7 +94,7 @@ describe("CLI server command", function() {
    var exec = execInDir(testRepoDir);
 
    it("takes in the config option", function(done) {
-      var configPath = testConfigFile(httpPort);
+      var configPath = testConfigFile();
       var proc = exec(bin, ["server", "--config=" + configPath],
       function(output) {
          var pattern = "Listening on port: " + httpPort;
@@ -197,7 +197,7 @@ function execInDir(dir) {
    };
 }
 
-function testConfigFile(port) {
+function testConfigFile() {
    var configPath = path.join(testRepoDir, "./config.temp.js");
    fs.writeFileSync(configPath,
    "module.exports = " + JSON.stringify({
