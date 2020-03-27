@@ -21,7 +21,6 @@ describe("CLI build command", function() {
          httpPort: httpPort,
          testMode: true  // Don't console.log() anything
       }),
-      bin = "../../bin/cimpler -h 127.0.0.1 -p " + httpPort,
       builtBranches  = [],
       expectedBuilds = 2,
       cimplerCalls   = 0,
@@ -32,6 +31,9 @@ describe("CLI build command", function() {
          status: 'pending',
          _control: {}
       };
+
+      var bin = "../../bin/cimpler"
+      var args = ["-h", "127.0.0.1", "-p", httpPort];
 
       var check = expect(4, function() {
          cimpler.shutdown();
@@ -52,11 +54,12 @@ describe("CLI build command", function() {
          check();
       });
 
-      exec(bin, function(stdout) { }, /* expect failure = */ true);
+      exec(bin, args, function(stdout) { }, /* expect failure = */ true);
 
-      exec(bin + " build", function(stdout) {
+      exec(bin, args.concat(["build"]), function(stdout) {
          check();
-         exec(bin + " build --branch=test-branch --command='blah'", function(stdout) {
+         exec(bin, args.concat(["build", "--branch=test-branch", "--command=blah"]),
+         function(stdout) {
             check();
          });
       });
@@ -92,9 +95,10 @@ describe("CLI server command", function() {
 
    it("takes in the config option", function(done) {
       var configPath = testConfigFile(httpPort);
-      var proc = exec("../../bin/cimpler server --config=" + configPath, function(output) {
+      var proc = exec(__dirname + "/../bin/cimpler", ["server", "--config=" + configPath],
+      function(output) {
          var pattern = "Listening on port: " + httpPort;
-         assert(output.match(new RegExp(pattern)))
+         assert(output.match(new RegExp(pattern)));
          done();
          clearInterval(killerInterval);
       }, true);
@@ -114,8 +118,10 @@ describe("CLI status command", function() {
          },
          httpPort: httpPort,
          testMode: true  // Don't console.log() anything
-      }),
-      bin = __dirname + "/../bin/cimpler -h 127.0.0.1 -p " + httpPort;
+      });
+
+      var bin = __dirname + "/../bin/cimpler";
+      var args = ["-h", "127.0.0.1", "-p", httpPort];
 
       cimpler.addBuild({
          repo:   'http://',
@@ -141,7 +147,7 @@ describe("CLI status command", function() {
       });
 
       function testNextCommand(callback) {
-         testCommand(bin + " status", expectedOutputs.shift(), function(){
+         testCommand(bin, args.concat(["status"]), expectedOutputs.shift(), function(){
             callback();
             if (expectedOutputs.length == 1) {
                testNextCommand(function() {
@@ -152,8 +158,8 @@ describe("CLI status command", function() {
          });
       }
 
-      function testCommand(command, expectedOutput, callback) {
-         exec(command, function(stdout) {
+      function testCommand(command, args, expectedOutput, callback) {
+         exec(command, args, function(stdout) {
             assert.equal(stdout, expectedOutput);
             callback();
          });
@@ -162,24 +168,33 @@ describe("CLI status command", function() {
 });
 
 function execInDir(dir) {
-   return function exec(cmd, callback, expectFailure) {
+   return function exec(cmd, args, callback, expectFailure) {
       var execOptions = {
          cwd: dir
       };
-      return childProcess.exec(cmd, execOptions, function(err, stdout, stderr) {
-         if (!expectFailure && err) {
+      var output = [];
+      var proc = childProcess.spawn(cmd, args, execOptions);
+
+      var collect = function(out) {
+         output.push(out);
+      };
+
+      proc.stdout.on('data', collect);
+      proc.stderr.on('data', collect);
+      proc.on('close', function(code, signal) {
+         var outputStr = output.join('');
+         if (!expectFailure && code != 0) {
             console.error("Command failed: " + cmd);
-            console.log(stdout.toString());
-            console.log(stderr.toString());
+            console.log(outputStr);
             process.exit(1);
-         } else if (expectFailure && !err) {
+         } else if (expectFailure && code == 0) {
             console.error("Command was supposed to fail (but didn't): " + cmd);
-            console.log(stdout.toString());
-            console.log(stderr.toString());
+            console.log(outputStr);
             process.exit(1);
          }
-         callback && callback(stdout.toString() + stderr.toString());
+         callback && callback(outputStr);
       });
+      return proc;
    };
 }
 
