@@ -4,7 +4,8 @@ var Cimpler  = require('../lib/cimpler'),
     assert   = require('assert'),
     expect   = require("./expect"),
     _        = require('underscore'),
-    httpPort = 25750;
+    testConfig = require('./test-config.js'),
+    httpPort = testConfig.httpPort;
 
 var config = {a: 1},
 commit = "sha1232322",

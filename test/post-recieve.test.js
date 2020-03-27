@@ -1,13 +1,14 @@
 var Cimpler      = require('../lib/cimpler'),
     util         = require('util'),
     fs           = require('fs'),
-    assert       = require('assert');
+    assert       = require('assert'),
     expect       = require("./expect"),
     childProcess = require('child_process'),
     path         = require('path'),
     _            = require('underscore'),
-    testRepoDir  = path.normalize(__dirname + "/../fixtures/repo/"),
-    httpPort     = 25750;
+    testConfig   = require('./test-config.js'),
+    testRepoDir  = testConfig.testRepoDir,
+    httpPort     = testConfig.httpPort;
 
 describe("post-receive git-hook", function() {
    it("should trigger a build when passed info via stdin", function(done) {

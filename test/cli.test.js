@@ -5,8 +5,9 @@ var Cimpler      = require('../lib/cimpler'),
     _            = require('underscore'),
     expect       = require("./expect"),
     childProcess = require('child_process'),
-    testRepoDir  = __dirname + "/../fixtures/repo/",
-    httpPort     = 25750;
+    testConfig   = require('./test-config.js'),
+    testRepoDir  = testConfig.testRepoDir,
+    httpPort     = testConfig.httpPort;
 
 describe("CLI build command", function() {
    var exec = execInDir(testRepoDir);
@@ -90,7 +91,7 @@ describe("CLI server command", function() {
    var exec = execInDir(testRepoDir);
 
    it("takes in the config option", function(done) {
-      var configPath = testConfig(httpPort);
+      var configPath = testConfigFile(httpPort);
       var proc = exec("../../bin/cimpler server --config=" + configPath, function(output) {
          var pattern = "Listening on port: " + httpPort;
          assert(output.match(new RegExp(pattern)))
@@ -182,7 +183,7 @@ function execInDir(dir) {
    };
 }
 
-function testConfig(port) {
+function testConfigFile(port) {
    var configPath = path.join(testRepoDir, "./config.temp.js");
    fs.writeFileSync(configPath,
    "module.exports = " + JSON.stringify({

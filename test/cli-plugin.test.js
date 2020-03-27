@@ -3,10 +3,11 @@ var Cimpler  = require('../lib/cimpler'),
     assert   = require('assert'),
     stream   = require('stream'),
     _        = require('underscore'),
-    childProcess = require('child_process');
+    childProcess = require('child_process'),
+    testConfig   = require('./test-config.js'),
+    httpPort     = testConfig.httpPort;
 
 describe("CLI plugin", function() {
-   var httpPort = 25750;
    it("should accept builds via HTTP", function(done) {
       var cb = 0,
       cimpler = createCimpler();
