@@ -8,6 +8,7 @@ var Cimpler      = require('../lib/cimpler'),
     testConfig   = require('./test-config.js'),
     testRepoDir  = testConfig.testRepoDir,
     httpPort     = testConfig.httpPort;
+var bin          = __dirname + "/../bin/cimpler";
 
 describe("CLI build command", function() {
    var exec = execInDir(testRepoDir);
@@ -32,7 +33,6 @@ describe("CLI build command", function() {
          _control: {}
       };
 
-      var bin = "../../bin/cimpler"
       var args = ["-h", "127.0.0.1", "-p", httpPort];
 
       var check = expect(4, function() {
@@ -95,7 +95,7 @@ describe("CLI server command", function() {
 
    it("takes in the config option", function(done) {
       var configPath = testConfigFile(httpPort);
-      var proc = exec(__dirname + "/../bin/cimpler", ["server", "--config=" + configPath],
+      var proc = exec(bin, ["server", "--config=" + configPath],
       function(output) {
          var pattern = "Listening on port: " + httpPort;
          assert(output.match(new RegExp(pattern)));
@@ -120,7 +120,6 @@ describe("CLI status command", function() {
          testMode: true  // Don't console.log() anything
       });
 
-      var bin = __dirname + "/../bin/cimpler";
       var args = ["-h", "127.0.0.1", "-p", httpPort];
 
       cimpler.addBuild({
