@@ -18,7 +18,7 @@ args           = require('optimist')
       describe: 'Custom shell command to execute for this build instead of the one from the config file'
    })
    .options('config', {
-      describe: 'specify the config file to use'
+      describe: 'specify the config file to use for any command (defaults to {project root}/config.js)'
    })
    .options('branch', {
       alias: 'b',
@@ -30,11 +30,11 @@ args           = require('optimist')
    })
    .options('host', {
       alias: 'h',
-      describe: 'HTTP host of the cimpler server (defaults to the value in config.js)'
+      describe: 'HTTP host of the cimpler server (defaults to the value in config)'
    })
    .options('port', {
       alias: 'p',
-      describe: 'HTTP port of the cimpler server (defaults to the value in config.js)'
+      describe: 'HTTP port of the cimpler server (defaults to the value in config)'
    }).argv;
 
 var command = args._[0];
