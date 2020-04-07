@@ -137,6 +137,7 @@ function buildConsumer(config, cimpler, repoPath) {
             "git submodule foreach --recursive git clean -ffd && " +
             "git checkout "+ quote(build.commit) + " && " +
             "git merge " + quote("origin/" + branchToMerge) + " && " +
+            "git clean -ffd && " +
             "git submodule sync && " +
             "git submodule update --init --recursive ) 2>&1";
 
