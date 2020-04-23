@@ -2,7 +2,8 @@ var Cimpler  = require('../lib/cimpler');
 var http     = require('http');
 var assert   = require('assert');
 var _        = require('underscore');
-var httpPort = 25750;
+var testConfig = require('./test-config.js');
+var httpPort = testConfig.httpPort;
 
 describe("build-status plugin", function() {
    it("should provide build list via http", function(done) {

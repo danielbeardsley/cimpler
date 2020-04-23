@@ -3,17 +3,22 @@
 var childProcess = require('child_process'),
 httpTrigger    = require('../lib/http-trigger'),
 Git            = require('../lib/git'),
+ConfigProvider = require('../lib/config-provider'),
+Cimpler        = require('../lib/cimpler'),
 git            = new Git(),
 build          = {},
 args           = require('optimist')
    .demand(1)
    .usage("Examples:\n" +
-   "   cimpler build [-b branch-name]   trigger a build on the current repo\n" +
-   "   cimpler status                   echo the list of builds in the queue (* means building)\n" + 
-   "   cimpler server                   start the cimpler server. Logging to STDOUT.")
+   "   cimpler build [-b branch-name]      trigger a build on the current repo\n" +
+   "   cimpler status                      echo the list of builds in the queue (* means building)\n" +
+   "   cimpler server [--config=path/config.js]  start the cimpler server. Logging to STDOUT.")
    .options('command', {
       alias: 'c',
       describe: 'Custom shell command to execute for this build instead of the one from the config file'
+   })
+   .options('config', {
+      describe: 'specify the config file to use for any command (defaults to {project root}/config.js)'
    })
    .options('branch', {
       alias: 'b',
@@ -25,11 +30,11 @@ args           = require('optimist')
    })
    .options('host', {
       alias: 'h',
-      describe: 'HTTP host of the cimpler server (defaults to the value in config.js)'
+      describe: 'HTTP host of the cimpler server (defaults to the value in config)'
    })
    .options('port', {
       alias: 'p',
-      describe: 'HTTP port of the cimpler server (defaults to the value in config.js)'
+      describe: 'HTTP port of the cimpler server (defaults to the value in config)'
    }).argv;
 
 var command = args._[0];
@@ -38,6 +43,11 @@ connectionOptions = {
    httpHost: args.host,
    httpPort: args.port
 };
+
+if (args.config) {
+   var path = require('path');
+   ConfigProvider.load(args.config);
+}
 
 switch (command) {
    case 'build':
@@ -89,7 +99,7 @@ switch (command) {
       });
       break;
    case 'server':
-      require("../server.js");
+      cimpler = new Cimpler(ConfigProvider.get());
       break;
 }
 

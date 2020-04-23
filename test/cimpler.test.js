@@ -3,7 +3,8 @@ var Cimpler       = require('../lib/cimpler'),
     expect        = require("./expect"),
     assert        = require('assert'),
     http          = require('http'),
-    httpPort      = 25750;
+    testConfig    = require('./test-config.js'),
+    httpPort      = testConfig.httpPort;
 
 describe("Cimpler", function() {
    describe(".registerPlugins()", function() {
