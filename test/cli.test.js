@@ -49,6 +49,7 @@ describe("CLI build command", function() {
          // So the next assertion will succeed
          expectedBuild.branch = 'test-branch';
          expectedBuild.buildCommand = 'blah';
+         expectedBuild.commit = 'abcdef123456';
 
          finished();
          check();
@@ -58,7 +59,7 @@ describe("CLI build command", function() {
 
       exec(bin, args.concat(["build"]), function(stdout) {
          check();
-         exec(bin, args.concat(["build", "--branch=test-branch", "--command=blah"]),
+         exec(bin, args.concat(["build", "--branch=test-branch", "--command=blah", "--commit=abcdef123456"]),
          function(stdout) {
             check();
          });

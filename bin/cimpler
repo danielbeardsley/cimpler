@@ -10,9 +10,10 @@ build          = {},
 args           = require('optimist')
    .demand(1)
    .usage("Examples:\n" +
-   "   cimpler build [-b branch-name]      trigger a build on the current repo\n" +
-   "   cimpler status                      echo the list of builds in the queue (* means building)\n" +
-   "   cimpler server [--config=path/config.js]  start the cimpler server. Logging to STDOUT.")
+   "   cimpler build [-b branch-name] [--commit commit-sha] trigger a build on the current repo\n" +
+   "   cimpler build [-c command]                           trigger a build on the current repo with the specific command\n" +
+   "   cimpler status                                       echo the list of builds in the queue (* means building)\n" +
+   "   cimpler server [--config=path/config.js]             start the cimpler server. Logging to STDOUT.")
    .options('command', {
       alias: 'c',
       describe: 'Custom shell command to execute for this build instead of the one from the config file'
@@ -23,6 +24,9 @@ args           = require('optimist')
    .options('branch', {
       alias: 'b',
       describe: 'Name of the branch to build (defaults to current)'
+   })
+   .options('commit', {
+      describe: 'Commit sha to build (defaults to most recent commit on the branch)'
    })
    .options('verbose', {
       alias: 'v',
@@ -62,12 +66,16 @@ switch (command) {
          getBranch();
       });
 
-      if (args.branch === true) {
+      if (args.branch === true || args.commit === true) {
          require('optimist').showHelp();
          process.exit(1);
       }
 
       function getBranch() {
+         if (args.commit) {
+            build.commit = args.commit;
+         }
+
          if (args.branch) {
             triggerBuild(args.branch);
          } else {
