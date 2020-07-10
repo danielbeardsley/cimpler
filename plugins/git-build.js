@@ -134,7 +134,7 @@ function buildConsumer(config, cimpler, repoPath) {
          var commands = '(' + cdToRepo + " && " +
             "git reset --hard && " +
             "git clean -ffd && " +
-            "git submodule foreach --recursive git clean -ffd && " +
+            "(git submodule foreach --recursive git clean -ffd || true) && " +
             "git checkout "+ quote(build.commit) + " && " +
             "git merge " + quote("origin/" + branchToMerge) + " && " +
             "git clean -ffd && " +
