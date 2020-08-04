@@ -119,7 +119,7 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function startMerge() {
-         var branchToMerge = 'master';
+         var branchToMerge = config.mainBranch || 'master';
          var regex, mergeBranch;
          if (config.mergeBranchRegexes) {
             for (var i = 0; i < config.mergeBranchRegexes.length; ++i) {
