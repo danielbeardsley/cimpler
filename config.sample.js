@@ -109,6 +109,12 @@ module.exports = {
           */
          mergeBranchRegexes: [],
          /**
+          * The branch that each pull request is merged into before running CI.
+          * Typically 'main', 'master', 'development', ...
+          * Defaults to 'master'.
+          */
+         mainBranch: 'main',
+         /**
           * The shell command that is run for each build.
           * The exit code of this command determines success or failure
           * of the build. Both stdout and stderr are sent to the log.
