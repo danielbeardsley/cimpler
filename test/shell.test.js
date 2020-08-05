@@ -56,7 +56,7 @@ describe("Shell plugin", function() {
 
                assert.equal(contents, expectedContents + "\n");
                if (exists)
-                  fs.unlink(tempFile);
+                  fs.unlink(tempFile,() => {});
 
                done();
             });

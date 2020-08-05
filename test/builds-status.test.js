@@ -68,7 +68,7 @@ function onEntireBody(stream, done) {
    stream.on('end', function () {
       done(null, body); 
    });
-   stream.on('close', function (err) {
+   stream.on('error', function (err) {
       done(err, body); 
    });
 }
