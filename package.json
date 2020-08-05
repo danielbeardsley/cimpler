@@ -23,10 +23,10 @@
       "underscore": "~1.4.3"
    },
    "devDependencies": {
-      "mocha": "~1.6.0"
+      "mocha": "^6.2.3"
    },
    "main": "./cimpler.js",
    "scripts": {
-      "test": "mocha --reporter spec --timeout 30000 --slow 500 test/*"
+      "test": "mocha --reporter spec --exit --timeout 30000 --slow 500 test/*"
    }
 }
