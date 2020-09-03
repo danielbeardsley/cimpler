@@ -2,6 +2,7 @@ var Cimpler       = require('../lib/cimpler'),
     dummyPlugin   = require('../plugins/dummy'),
     expect        = require("./expect"),
     assert        = require('assert'),
+    _             = require('underscore'),
     http          = require('http'),
     testConfig    = require('./test-config.js'),
     httpPort      = testConfig.httpPort;
@@ -239,11 +240,13 @@ describe("Cimpler", function() {
    describe(".addBuild()", function() {
       it("should not replace existing builds from different branches", function(done) {
          var branches  = "A B C D E F".split();
+         let i = 0;
 
          var builds = branches.map(function(branch) {
             return {
                repo: "blah",
-               branch:branch
+               branch:branch,
+               queuedAt: i++,
             };
          });
 
@@ -256,19 +259,28 @@ describe("Cimpler", function() {
             branch:  "A"
          };
 
-         var builds = [build,build,build,build];
+         var builds = [build,build,build,build].map(_.clone);
 
          // This ensures the builds get the various properties added to them.
-         build = {
+         const outBuild1 = {
             repo:    "blah",
             branch:  "A",
             _control: {},
-            status:  "pending"
+            status:  "pending",
+            queuedAt: 0
+         };
+
+         const outBuild2 = {
+            repo:    "blah",
+            branch:  "A",
+            _control: {},
+            status:  "pending",
+            queuedAt: 1
          };
 
          // expected.length == 2 because the first one is pop()ed immediately
          // and thus can't be replaced.
-         passBuildsThrough(builds, [build, build], done);
+         passBuildsThrough(builds, [outBuild1, outBuild2].map(_.clone), done);
       });
 
       it("should not replace existing builds from different Repos", function(done) {
@@ -402,6 +414,8 @@ describe("Cimpler", function() {
       function passBuildsThrough(inBuilds, expectedOutBuilds, done) {
          var outBuilds = [],
          cimpler = new Cimpler();
+         let x = 0;
+         cimpler.getTimestamp = function() {return x++;};
 
          cimpler.consumeBuild(function(inBuild, started, finished) {
             outBuilds.push(inBuild);

@@ -32,7 +32,8 @@ function buildConsumer(config, cimpler, repoPath) {
             BUILD_REPO:   build.repo,
             BUILD_COMMIT: build.commit,
             BUILD_BRANCH: build.branch,
-            BUILD_STATUS: build.status
+            BUILD_STATUS: build.status,
+            BUILD_QUEUED_AT: build.queuedAt,
          },
          timeout: config.timeout || 0,
          maxBuffer: config.maxBuffer || 1024 * 1024 * 2,
@@ -55,9 +56,10 @@ function buildConsumer(config, cimpler, repoPath) {
 
       // This needs to be delayed until we have a commit hash
       function writeLogHeader() {
+         const queueTimeMin = Math.round((Date.now() - build.queuedAt) / 1000*60);
          logFile().write( 
             "----------------------------------------------\n" +
-            " Cimpler build started at: " + Date() + "\n" +
+            " Cimpler build started at: " + Date() + " time in queue: " + queueTimeMin + "min \n" +
             "----------------------------------------------\n");
       }
 

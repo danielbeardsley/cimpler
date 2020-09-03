@@ -7,7 +7,8 @@ exports.init = function(config, cimpler) {
             BUILD_REPO:   build.repo,
             BUILD_COMMIT: build.commit,
             BUILD_BRANCH: build.branch,
-            BUILD_STATUS: build.status
+            BUILD_STATUS: build.status,
+            BUILD_QUEUED_AT: build.queuedAt,
          }
       };
       childProcess.exec(config.cmd, options, function(err) {

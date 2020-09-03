@@ -22,7 +22,7 @@ describe("CLI plugin", function() {
       cimpler.consumeBuild(function(inBuild) {
          cimpler.shutdown();
 
-         var sanitizedBuild = _.omit(inBuild, '_control');
+         var sanitizedBuild = _.omit(inBuild, '_control', 'queuedAt');
          assert.deepEqual(sanitizedBuild, build);
          done();
       });

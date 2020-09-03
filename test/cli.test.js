@@ -45,7 +45,7 @@ describe("CLI build command", function() {
          started();
 
          builtBranches.push(inBuild.branch);
-         assert.deepEqual(inBuild, expectedBuild);
+         assert.deepEqual(_.omit(inBuild, 'queuedAt'), expectedBuild);
          // So the next assertion will succeed
          expectedBuild.branch = 'test-branch';
          expectedBuild.buildCommand = 'blah';

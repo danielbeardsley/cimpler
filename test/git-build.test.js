@@ -198,6 +198,35 @@ describe("git-build plugin", function() {
       });
    });
 
+   it("should expose the BUILD_QUEUED_AT env var", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            "git-build": {
+               repoPaths: testRepoDirs[0],
+               cmd: '[ "$BUILD_QUEUED_AT" = "1234" ]',
+            }
+         },
+      });
+
+      function finished() {
+         cimpler.shutdown();
+         done();
+      }
+
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.status, 'success');
+         assert.equal(1234, build.queuedAt);
+         finished();
+      });
+
+      cimpler.getTimestamp = () => 1234;
+      cimpler.addBuild({
+         letter: 'A',
+         repo: "doesn't matter",
+         branch: "omg/a/slash",
+      });
+   });
+
    it("should perform build logging correctly", function(done) {
       var cimpler = new Cimpler({
          plugins: {
