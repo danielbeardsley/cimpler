@@ -56,7 +56,7 @@ function buildConsumer(config, cimpler, repoPath) {
 
       // This needs to be delayed until we have a commit hash
       function writeLogHeader() {
-         const queueTimeMin = Math.round((Date.now() - build.queuedAt) / 1000*60);
+         const queueTimeMin = Math.round((Date.now() - build.queuedAt) / (1000*60));
          logFile().write( 
             "----------------------------------------------\n" +
             " Cimpler build started at: " + Date() + " time in queue: " + queueTimeMin + "min \n" +
