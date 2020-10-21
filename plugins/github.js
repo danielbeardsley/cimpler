@@ -65,12 +65,12 @@ function extractPushBuildInfo(payload) {
 function extractPullRequestBuildInfo(payload) {
    // Filter out all actions but open and synchronize
    const action = payload.action;
-   if (!['open', 'synchronize'].includes(action)) {
+   if (!['opened', 'synchronize'].includes(action)) {
       return null;
    }
 
    const headCommit = payload.pull_request.head;
-   const repoName = headCommit.full_name;
+   const repoName = payload.repository.full_name;;
    const branch = headCommit.ref;
    const commit = headCommit.sha;
    const status = 'pending';
