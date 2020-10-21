@@ -11,7 +11,7 @@ exports.init = function(config, cimpler) {
       }
 
       const payload = JSON.parse(req.body.payload);
-      const event = req.headers['X-GitHub-Event'];
+      const event = req.headers['x-github-event'];
       var build = null;
 
       /**

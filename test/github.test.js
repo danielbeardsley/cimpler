@@ -15,7 +15,8 @@ options = {
    method: 'POST',
    agent: false,
    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-GitHub-Event": "push"
    }
 },
 testBranchName = "branch-name-with/slashes.and.dots",
