@@ -10,27 +10,28 @@ exports.init = function(config, cimpler) {
          return next();
       }
 
-      const payload = JSON.parse(req.body.payload);
       const event = req.headers['x-github-event'];
       var build = null;
 
-      /**
-       * The webhook sent must be a push event OR a pull_request event,
-       * not both.
-       */
-      if (event == 'push') {
-         build = extractPushBuildInfo(payload);
-      } else if (event == 'pull_request') {
-         build = extractPullRequestBuildInfo(payload);
-      }
+      try {
+         const payload = JSON.parse(req.body.payload);
 
-      if (build) {
-         try {
-            cimpler.addBuild(build);
-         } catch (e) {
-            console.error("Bad Request");
-            console.error(e.stack);
+         /**
+          * The webhook sent must be a push event OR a pull_request event,
+          * not both.
+          */
+         if (event == 'push') {
+            build = extractPushBuildInfo(payload);
+         } else if (event == 'pull_request') {
+            build = extractPullRequestBuildInfo(payload);
          }
+
+         if (build) {
+            cimpler.addBuild(build);
+         }
+      } catch (e) {
+         console.error("Bad Request");
+         console.error(e.stack);
       }
       res.end();
    });
