@@ -10,24 +10,35 @@ exports.init = function(config, cimpler) {
          return next();
       }
 
-      try {
-         var build = extractBuildInfo(req.body);
-         if (build) {
+      const payload = JSON.parse(req.body.payload);
+      const event = req.headers['X-GitHub-Event'];
+      var build = null;
+
+      /**
+       * The webhook sent must be a push event OR a pull_request event,
+       * not both.
+       */
+      if (event == 'push') {
+         build = extractPushBuildInfo(payload);
+      } else if (event == 'pull_request') {
+         build = extractPullRequestBuildInfo(payload);
+      }
+
+      if (build) {
+         try {
             cimpler.addBuild(build);
+         } catch (e) {
+            console.error("Bad Request");
+            console.error(e.stack);
          }
-      } catch (e) {
-         console.error("Bad Request");
-         console.error(e.stack);
       }
       res.end();
    });
 };
 
-function extractBuildInfo(requestBody) {
-   var info = JSON.parse(requestBody.payload);
-
+function extractPushBuildInfo(payload) {
    // ref: "refs/heads/some-long-branch-name/maybe-even-slashes"
-   const matches = info.ref.match(/^(refs\/[^\/]+)\/(.*$)/);
+   const matches = payload.ref.match(/^(refs\/[^\/]+)\/(.*$)/);
    if (!matches) {
       return null;
    }
@@ -43,10 +54,30 @@ function extractBuildInfo(requestBody) {
 
    // Build info structure
    return {
-     repo   : "github.com" + '/' + info.repository.full_name,
-     commit : info.after,
+     repo   : "github.com" + '/' + payload.repository.full_name,
+     commit : payload.after,
      branch : branch,
      status : 'pending'
    };
 }
 
+function extractPullRequestBuildInfo(payload) {
+   // Filter out all actions but open and synchronize
+   const action = payload.action;
+   if (!['open', 'synchronize'].includes(action)) {
+      return null;
+   }
+
+   const headCommit = payload.pull_request.head;
+   const repoName = headCommit.full_name;
+   const branch = headCommit.ref;
+   const commit = headCommit.sha;
+   const status = 'pending';
+
+   return {
+      repo   : "github.com" + '/' + repoName,
+      commit : commit,
+      branch : branch,
+      status : status
+   };
+}
