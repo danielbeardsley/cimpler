@@ -81,6 +81,7 @@ describe("Github plugin", function() {
          });
          finished();
       });
+
       // Ensure this callback doesn't get called again by
       // delaying the done()
       setTimeout(function() {
@@ -124,6 +125,7 @@ describe("Github plugin", function() {
             status:  'pending'
          });
       finished();
+      });
 
       // Ensure this callback doesn't get called again by
       // delaying the done()
@@ -131,8 +133,7 @@ describe("Github plugin", function() {
          cimpler.shutdown();
          assert.equal(cb, 1, "Assert the callback was called once.");
          done();
-         }, 100);
-      });
+      }, 100);
    });
    it("should listen for and add builds for pull_request opened events",
    function(done) {
@@ -171,6 +172,7 @@ describe("Github plugin", function() {
          finished();
 
       });
+
       // Ensure this callback doesn't get called again by
       // delaying the done()
       setTimeout(function() {
@@ -202,9 +204,11 @@ describe("Github plugin", function() {
       req.end();
 
       var cb = 0;
-      cimpler.consumeBuild(function(build, started, finished) {
+      cimpler.consumeBuild(function() {
+         cb++;
          assert.ok(false, "We should never consume a build.");
       });
+
       // Ensure we don't miss any requests
       setTimeout(function() {
          cimpler.shutdown();
