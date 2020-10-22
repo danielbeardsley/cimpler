@@ -69,7 +69,6 @@ describe("Github plugin", function() {
 
       var cb = 0;
       cimpler.consumeBuild(function(build, started, finished) {
-         assert.equal(cb, 0, "Only one build should get through");
          cb++;
 
          var sanitizedBuild = _.pick(build, 'repo', 'commit', 'branch', 'status')
@@ -114,7 +113,6 @@ describe("Github plugin", function() {
 
       var cb = 0;
       cimpler.consumeBuild(function(build, started, finished) {
-         assert.equal(cb, 0, "Only one build should get through");
          cb++;
 
          var sanitizedBuild = _.pick(build, 'repo', 'commit', 'branch', 'status')
@@ -159,7 +157,6 @@ describe("Github plugin", function() {
 
       var cb = 0;
       cimpler.consumeBuild(function(build, started, finished) {
-         assert.equal(cb, 0, "Only one build should get through");
          cb++;
 
          var sanitizedBuild = _.pick(build, 'repo', 'commit', 'branch', 'status')
@@ -206,7 +203,6 @@ describe("Github plugin", function() {
       var cb = 0;
       cimpler.consumeBuild(function() {
          cb++;
-         assert.ok(false, "We should never consume a build.");
       });
 
       // Ensure we don't miss any requests
