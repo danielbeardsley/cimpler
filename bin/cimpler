@@ -39,6 +39,10 @@ args           = require('optimist')
    .options('port', {
       alias: 'p',
       describe: 'HTTP port of the cimpler server (defaults to the value in config)'
+   })
+   .options('timeout', {
+      alias: 't',
+      describe: 'Specify the timeout of the build (in milliseconds)'
    }).argv;
 
 var command = args._[0];
@@ -57,6 +61,9 @@ switch (command) {
    case 'build':
       if (args.command) {
          build.buildCommand = args.command;
+      }
+      if (args.timeout) {
+         build.buildTimeout = args.timeout;
       }
       git.remote(function(remote, repoPath) {
          if (remote && remote.indexOf('github.com') !== -1) {
