@@ -35,7 +35,7 @@ function buildConsumer(config, cimpler, repoPath) {
             BUILD_STATUS: build.status,
             BUILD_QUEUED_AT: build.queuedAt,
          },
-         timeout: config.timeout || 0,
+         timeout: process.env.buildTimeout || config.timeout || 0,
          maxBuffer: config.maxBuffer || 1024 * 1024 * 2,
          stdio: 'pipe',
          detached: true
