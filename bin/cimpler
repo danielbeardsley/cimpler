@@ -42,7 +42,7 @@ args           = require('optimist')
    })
    .options('timeout', {
       alias: 't',
-      describe: 'Specify the timeout of the build (in milliseconds)'
+      describe: 'Specify the timeout for builds (in milliseconds)'
    }).argv;
 
 var command = args._[0];
@@ -117,4 +117,3 @@ switch (command) {
       cimpler = new Cimpler(ConfigProvider.get());
       break;
 }
-
