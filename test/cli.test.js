@@ -109,6 +109,33 @@ describe("CLI server command", function() {
    });
 });
 
+describe("CLI build timeout", function() {
+   var exec = execInDir(testRepoDir);
+
+   it("sets the build timeout", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            cli: {
+            }
+         },
+         httpPort: httpPort,
+         testMode: true  // Don't console.log() anything
+      });
+      var timeout = 1 * 1000; // 1 second timeout
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.buildTimeout, timeout);
+      });
+      var args = ["-h", "127.0.0.1", "-p", httpPort];
+      var proc = exec(bin,  args.concat(["build", '--timeout=' + timeout]));
+      cimpler.consumeBuild(function(inBuild, started, finished) {
+         started();
+         finished();
+         cimpler.shutdown();
+         done();
+      });
+   });
+});
+
 describe("CLI status command", function() {
    var exec = execInDir("./");
 
