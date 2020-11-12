@@ -184,7 +184,7 @@ function buildConsumer(config, cimpler, repoPath) {
                build.code = err ? err.code : 0;
             }
             logger.info(id(build) + " -- Build " + build.status);
-            finishedBuild();
+            setTimeout(finishedBuild, 0);
          });
 
          /**
