@@ -374,7 +374,7 @@ describe("git-build plugin", function() {
          });
       });
 
-      it.only("should be overriden by build.buildTimeout", function(done) {
+      it("should be overriden by build.buildTimeout", function(done) {
          const seconds = 4;
          const timeoutSeconds = 0.1;
          let start;
