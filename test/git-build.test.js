@@ -374,6 +374,49 @@ describe("git-build plugin", function() {
          });
       });
 
+      it("should be overriden by build.buildTimeout", function(done) {
+         const seconds = 4;
+         const timeoutSeconds = 0.1;
+         let start;
+
+         var cimpler = new Cimpler({
+            plugins: {
+               "git-build": {
+                  // This timeout should be overridden by the buildTimeout
+                  timeout: seconds * 2,
+                  repoPaths: testRepoDirs[0],
+                  // command that will take longer than timeout
+                  cmd: "sleep " + seconds,
+                  logs: {
+                     path: buildLogsPath,
+                     url:  "http://www.example.com/ci-builds/"
+                  },
+               }
+            },
+         });
+
+         function finished() {
+            cimpler.shutdown();
+            done();
+         }
+
+         cimpler.on('buildFinished', function(build) {
+            assert.equal(build.status, 'error');
+            if (Date.now() - start > seconds * 1000) {
+               assert.fail("Build should have timed out before the sleep command finished");
+            }
+            finished();
+         });
+
+         start = Date.now();
+         cimpler.addBuild({
+            letter: 'A',
+            repo: "doesn't matter",
+            branch: "master",
+            buildTimeout: timeoutSeconds * 1000
+         });
+      });
+
       it("should abort a build when told to", function(done) {
          var cimpler = new Cimpler({
             abortMatchingBuilds: true,

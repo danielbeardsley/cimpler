@@ -35,7 +35,7 @@ function buildConsumer(config, cimpler, repoPath) {
             BUILD_STATUS: build.status,
             BUILD_QUEUED_AT: build.queuedAt,
          },
-         timeout: config.timeout || 0,
+         timeout: build.buildTimeout || config.timeout || 0,
          maxBuffer: config.maxBuffer || 1024 * 1024 * 2,
          stdio: 'pipe',
          detached: true
@@ -184,7 +184,7 @@ function buildConsumer(config, cimpler, repoPath) {
                build.code = err ? err.code : 0;
             }
             logger.info(id(build) + " -- Build " + build.status);
-            finishedBuild();
+            setTimeout(finishedBuild, 0);
          });
 
          /**
