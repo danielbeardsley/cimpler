@@ -8,6 +8,12 @@ exports.init = function(config, cimpler) {
 
    var GitHub = getGithubApi(config);
 
+   cimpler.on('buildAdded', function(build) {
+      if (!build.error) {
+         reportBuildStatus(build, 'pending', 'Build Queued');
+      }
+   });
+
    cimpler.on('buildStarted', function(build) {
       if (!build.error) {
          reportBuildStatus(build, 'pending', 'Build Started');
