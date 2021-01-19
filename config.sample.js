@@ -130,7 +130,12 @@ module.exports = {
             // Base Url to access the above log files.
             url:  "http://www.example.com/ci-builds/"
          },
-         enabled: true
+         enabled: true,
+         /**
+          * Surrounds all cimpler output in formatted html tags
+          */
+         printHtml: true
+
       }/** , {
          * Any plugin who's configuration object is an array
          * will have it's .init() function called once for each element
