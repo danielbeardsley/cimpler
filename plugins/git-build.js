@@ -108,7 +108,7 @@ function buildConsumer(config, cimpler, repoPath) {
                stdout += "\n\n" + failed;
                logger.warn(id(build) + " -- " + failed);
                writeLogHeader()
-               logFile().write(stdout);
+               writeLogFile(stdout);
                finishedBuild();
             } else {
                if (!build.commit) {
@@ -166,7 +166,7 @@ function buildConsumer(config, cimpler, repoPath) {
 
 
             logger.info(id(build) + " -- " + message);
-            logFile().write(stdout);
+            writeLogFile(stdout);
 
             nextStep(started);
          });
@@ -219,23 +219,30 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function logBuildStarted(text) {
-         if (config.printHtml) {
-            logFile().write('<pre>');
-         }
-         logFile().write(text);
-
+         writeLogFile(text);
       }
 
       function logBuildFinished(text) {
+         writeLogFile(text, /* end */ true);
+      }
+
+      function writeLogFile(text, end = false) {
+         if (config.printHtml) {
+            logFile().write('<pre>');
+         }
+
          logFile().write(text);
 
          if (config.printHtml) {
             logFile().write('</pre>');
          }
-         // Call 'finished' when end() flushes it's data to disk
-         // This is mostly for testing so we *known* that the data has been
-         // written.
-         logFile().end('', 'utf8', finished);
+
+         if (end) {
+            // Call 'finished' when end() flushes it's data to disk
+            // This is mostly for testing so we *known* that the data has been
+            // written.
+            logFile().end('', 'utf8', finished);
+         }
       }
 
       var logFileStream;
