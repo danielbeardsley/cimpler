@@ -57,10 +57,13 @@ function buildConsumer(config, cimpler, repoPath) {
       // This needs to be delayed until we have a commit hash
       function writeLogHeader() {
          const queueTimeMin = Math.round((Date.now() - build.queuedAt) / (1000*60));
-         logFile().write( 
+
+         var startedMessage =
             "----------------------------------------------\n" +
             " Cimpler build started at: " + Date() + " time in queue: " + queueTimeMin + "min \n" +
-            "----------------------------------------------\n");
+            "----------------------------------------------\n";
+
+         logBuildStarted(startedMessage);
       }
 
       /**
@@ -215,6 +218,26 @@ function buildConsumer(config, cimpler, repoPath) {
          return inBuild.logPath;
       }
 
+      function logBuildStarted(text) {
+         if (config.printHtml) {
+            logFile().write('<pre>');
+         }
+         logFile().write(text);
+
+      }
+
+      function logBuildFinished(text) {
+         logFile().write(text);
+
+         if (config.printHtml) {
+            logFile().write('</pre>');
+         }
+         // Call 'finished' when end() flushes it's data to disk
+         // This is mostly for testing so we *known* that the data has been
+         // written.
+         logFile().end('', 'utf8', finished);
+      }
+
       var logFileStream;
       function logFile() {
          if (logFileStream) {
@@ -238,19 +261,18 @@ function buildConsumer(config, cimpler, repoPath) {
          }
 
          var seconds = Math.round((Date.now() - startedAt) / 1000);
-         logFile().write(
+         var finishedMessage =
           "\n-------------------------------------------" +
-          "\n Cimpler build finished in " + seconds + " seconds");
+          "\n Cimpler build finished in " + seconds + " seconds";
          if (build.error) {
-            logFile().write("\n Error: " + build.error);
+            finishedMessage += "\n Error: " + build.error;
          } else {
-            logFile().write("\n Status: " + build.status + " Exit Code: " + build.code);
+            finishedMessage += "\n Status: " + build.status + " Exit Code: " + build.code;
          }
-         // Call 'finished' when end() flushes it's data to disk
-         // This is mostly for testing so we *known* that the data has been
-         // written.
-         logFile().end(
-          "\n-------------------------------------------\n",'utf8',finished);
+         finishedMessage +=
+          "\n-------------------------------------------\n";
+
+         logBuildFinished(finishedMessage);
       }
 
       function exec(cmd, callback) {
