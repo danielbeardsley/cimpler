@@ -40,7 +40,7 @@ function buildConsumer(config, cimpler, repoPath) {
          stdio: 'pipe',
          detached: true
       },
-      cdToRepo = 'set -v; set -x; cd ' + quote(repoPath);
+      cdToRepo = 'set -v; cd ' + quote(repoPath);
 
       for(var key in process.env) {
          execOptions.env[key] = process.env[key];
