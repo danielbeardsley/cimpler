@@ -134,7 +134,11 @@ module.exports = {
          /**
           * Surrounds all cimpler output in formatted html tags
           */
-         printHtml: true
+         printHtml: true,
+         /**
+          * Do not merge in the main branch
+          */
+         noMerge: true,
 
       }/** , {
          * Any plugin who's configuration object is an array

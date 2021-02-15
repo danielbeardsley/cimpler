@@ -140,8 +140,8 @@ function buildConsumer(config, cimpler, repoPath) {
             "git reset --hard && " +
             "git clean -ffd && " +
             "(git submodule foreach --recursive git clean -ffd || true) && " +
-            "git checkout "+ quote(build.commit) + " && " +
-            "git merge --no-verify " + quote("origin/" + branchToMerge) + " && " +
+            "git checkout " + quote(build.commit) + " && " +
+            (config.noMerge ? '' : ("git merge --no-verify " + quote("origin/" + branchToMerge) + " && ")) +
             "git clean -ffd && " +
             "git submodule sync && " +
             "git submodule update --init --recursive ) 2>&1";
