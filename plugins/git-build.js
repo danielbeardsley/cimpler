@@ -124,9 +124,10 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function startMerge() {
+         let shouldMerge = config.mainBranch !== null;
          var branchToMerge = config.mainBranch || 'master';
          var regex, mergeBranch;
-         if (config.mergeBranchRegexes) {
+         if (shouldMerge && config.mergeBranchRegexes) {
             for (var i = 0; i < config.mergeBranchRegexes.length; ++i) {
                regex = config.mergeBranchRegexes[i][0];
                mergeBranch = config.mergeBranchRegexes[i][1];
@@ -141,7 +142,7 @@ function buildConsumer(config, cimpler, repoPath) {
             "git clean -ffd && " +
             "(git submodule foreach --recursive git clean -ffd || true) && " +
             "git checkout " + quote(build.commit) + " && " +
-            (config.noMerge ? '' : ("git merge --no-verify " + quote("origin/" + branchToMerge) + " && ")) +
+            (shouldMerge ? ("git merge --no-verify " + quote("origin/" + branchToMerge) + " && ") : '') +
             "git clean -ffd && " +
             "git submodule sync && " +
             "git submodule update --init --recursive ) 2>&1";
