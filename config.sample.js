@@ -111,6 +111,7 @@ module.exports = {
          /**
           * The branch that each pull request is merged into before running CI.
           * Typically 'main', 'master', 'development', ...
+          * Setting as null will not merge in any branch.
           * Defaults to 'master'.
           */
          mainBranch: 'main',
@@ -134,7 +135,7 @@ module.exports = {
          /**
           * Surrounds all cimpler output in formatted html tags
           */
-         printHtml: true
+         printHtml: true,
 
       }/** , {
          * Any plugin who's configuration object is an array
