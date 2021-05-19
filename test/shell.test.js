@@ -24,7 +24,8 @@ describe("Shell plugin", function() {
             'BUILD_REPO',
             'BUILD_COMMIT',
             'BUILD_BRANCH',
-            'BUILD_STATUS'],
+            'BUILD_STATUS',
+            'BUILD_NUMBER'],
          cimpler = new Cimpler();
 
          // Load the shell plugin with a cmd that writes the env vars to a file
@@ -36,7 +37,8 @@ describe("Shell plugin", function() {
             repo:'repo',
             commit: '12345',
             branch: 'master',
-            status: 'began'
+            status: 'began',
+            number: '999'
          });
 
          cimpler.on('buildFinished',
@@ -51,7 +53,8 @@ describe("Shell plugin", function() {
                   build.repo,
                   build.commit,
                   build.branch,
-                  'began' // build.status (status will have changed)
+                  'began', // build.status (status will have changed)
+                  build.number
                ].join(' ');
 
                assert.equal(contents, expectedContents + "\n");
