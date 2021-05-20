@@ -273,7 +273,7 @@ describe("git-build plugin", function() {
 
       cimpler.on('buildFinished', function(build) {
          assert.equal(build.status, 'success');
-         assert.equal(null, build.number);
+         assert.strictEqual(null, build.number);
          finished();
       });
 
