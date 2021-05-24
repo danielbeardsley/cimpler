@@ -232,7 +232,7 @@ describe("git-build plugin", function() {
          plugins: {
             "git-build": {
                repoPaths: testRepoDirs[0],
-               cmd: 'echo hello',
+               cmd: '[ $BUILD_NUMBER = 1234 ]',
             }
          },
       });
@@ -261,7 +261,7 @@ describe("git-build plugin", function() {
          plugins: {
             "git-build": {
                repoPaths: testRepoDirs[0],
-               cmd: 'echo hello',
+               cmd: '[ $BUILD_NUMBER = null ]',
             }
          },
       });
