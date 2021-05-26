@@ -227,6 +227,64 @@ describe("git-build plugin", function() {
       });
    });
 
+   it("should expose the BUILD_NUMBER env var", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            "git-build": {
+               repoPaths: testRepoDirs[0],
+               cmd: '[ $BUILD_NUMBER = 1234 ]',
+            }
+         },
+      });
+
+      function finished() {
+         cimpler.shutdown();
+         done();
+      }
+
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.status, 'success');
+         assert.equal(1234, build.number);
+         finished();
+      });
+
+      cimpler.addBuild({
+         letter: 'A',
+         repo: "doesn't matter",
+         branch: "omg/a/slash",
+         number: '1234',
+      });
+   });
+
+   it("should allow a null BUILD_NUMBER", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            "git-build": {
+               repoPaths: testRepoDirs[0],
+               cmd: '[ $BUILD_NUMBER = null ]',
+            }
+         },
+      });
+
+      function finished() {
+         cimpler.shutdown();
+         done();
+      }
+
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.status, 'success');
+         assert.strictEqual(null, build.number);
+         finished();
+      });
+
+      cimpler.addBuild({
+         letter: 'A',
+         repo: "doesn't matter",
+         branch: "omg/a/slash",
+         number: null,
+      });
+   });
+
    it("should perform build logging correctly", function(done) {
       var cimpler = new Cimpler({
          plugins: {

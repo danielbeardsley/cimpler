@@ -58,7 +58,8 @@ function extractPushBuildInfo(payload) {
      repo   : "github.com" + '/' + payload.repository.full_name,
      commit : payload.after,
      branch : branch,
-     status : 'pending'
+     status : 'pending',
+     number : null
    };
 }
 
@@ -74,11 +75,13 @@ function extractPullRequestBuildInfo(payload) {
    const branch = headCommit.ref;
    const commit = headCommit.sha;
    const status = 'pending';
+   const number = payload.number;
 
    return {
       repo   : "github.com" + '/' + repoName,
       commit : commit,
       branch : branch,
-      status : status
+      status : status,
+      number : number
    };
 }

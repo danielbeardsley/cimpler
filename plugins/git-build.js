@@ -34,6 +34,7 @@ function buildConsumer(config, cimpler, repoPath) {
             BUILD_BRANCH: build.branch,
             BUILD_STATUS: build.status,
             BUILD_QUEUED_AT: build.queuedAt,
+            BUILD_NUMBER: build.number,
          },
          timeout: build.buildTimeout || config.timeout || 0,
          maxBuffer: config.maxBuffer || 1024 * 1024 * 2,
