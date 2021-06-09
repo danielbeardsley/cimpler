@@ -1,6 +1,6 @@
 var util   = require('util'),
 Git        = require('../lib/git'),
-GitHubApi  = require('github');
+GitHubApi  = require('@octokit/rest');
 
 exports.init = function(config, cimpler) {
    // Just to allow mocking the api in the tests.

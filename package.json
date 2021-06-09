@@ -14,8 +14,8 @@
       "url": "https://github.com/danielbeardsley/cimpler.git"
    },
    "dependencies": {
+      "@octokit/rest": "^18.5.6",
       "connect": "~2.6.0",
-      "github": "~3.1.1",
       "log4js": "~0.5.4",
       "notify-queue": "~0.0.5",
       "optimist": "~0.3.4",
