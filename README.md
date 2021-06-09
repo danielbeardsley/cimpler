@@ -113,7 +113,7 @@ property like: `function(config, cimpler)`
 
 ## Requirements
 
- * [Node.js](http://nodejs.org/) (0.6 and above)
+ * [Node.js](http://nodejs.org/) (8 and above)
 
 ## Inspired By
 
