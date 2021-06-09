@@ -3,21 +3,6 @@ var Cimpler  = require('../lib/cimpler'),
     assert   = require('assert');
 
 describe("Github commit status plugin", function() {
-   describe("authentication", function() {
-      it("should pass the 'auth' config object straight through", function() {
-         var auth = {a: 1},
-         cimpler = new Cimpler(),
-         GH = newApi();
-
-         cimpler.registerPlugin(GCS, {
-            auth: auth,
-            _overrideApi: GH
-         });
-
-         assert.equal(GH.collected.auth, auth);
-      });
-   });
-
    it("started then finished", function(done) {
       var build = {
          repo: "git://github.com/user/repo.git",
@@ -31,7 +16,7 @@ describe("Github commit status plugin", function() {
 
          var status = {
             context: 'test-context',
-            user: 'user',
+            owner: 'user',
             repo: 'repo',
             sha: build.commit,
             state: 'pending',
@@ -59,7 +44,7 @@ describe("Github commit status plugin", function() {
 
             var status = {
                context: 'test-context',
-               user: 'user',
+               owner: 'user',
                repo: 'repo',
                sha: build.commit,
                state: 'pending',
@@ -90,7 +75,7 @@ describe("Github commit status plugin", function() {
 
             var expectedStatus = {
                context: 'test-context',
-               user: 'user',
+               owner: 'user',
                repo: 'repo',
                sha: build.commit,
                state: 'error',
@@ -114,6 +99,7 @@ function sendBuild(build, callback) {
    GH = newApi();
 
    cimpler.registerPlugin(GCS, {
+      auth: {token: 1},
       _overrideApi: GH,
       context: 'test-context',
    });
@@ -151,13 +137,9 @@ function newApi() {
 
    function ghAPI() {
       this.repos = {
-         createStatus: function(status) {
+         createCommitStatus: function(status) {
             info.statuses.push(status);
          }
-      };
-
-      this.authenticate = function(auth) {
-         info.auth = auth;
       };
    }
 
