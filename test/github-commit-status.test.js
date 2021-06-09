@@ -31,7 +31,7 @@ describe("Github commit status plugin", function() {
 
          var status = {
             context: 'test-context',
-            user: 'user',
+            owner: 'user',
             repo: 'repo',
             sha: build.commit,
             state: 'pending',
@@ -59,7 +59,7 @@ describe("Github commit status plugin", function() {
 
             var status = {
                context: 'test-context',
-               user: 'user',
+               owner: 'user',
                repo: 'repo',
                sha: build.commit,
                state: 'pending',
@@ -90,7 +90,7 @@ describe("Github commit status plugin", function() {
 
             var expectedStatus = {
                context: 'test-context',
-               user: 'user',
+               owner: 'user',
                repo: 'repo',
                sha: build.commit,
                state: 'error',
