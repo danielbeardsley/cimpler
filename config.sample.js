@@ -30,16 +30,14 @@ module.exports = {
          /**
           * For updating commit status via the github API
           *
-          * Passed straight through to github.authenticate()
-          * from the `github` npm module:
-          * https://github.com/ajaxorg/node-github
-          * So it accepts whatever that function accpets.
+          * Passed straight through to Octokit
+          * from the `@octokit/rest` npm module,
+          * so it accepts whatever that function accepts.
           *
           * Get an oauth token by going to https://github.com/settings/tokens
-          * and createa token with only repo:status permission
+          * and create a token with only repo:status permission.
           */
          auth: {
-            type: 'oauth', // or 'basic'
             token: 'abcdefghijklmnopqrs...'
          }
       },
