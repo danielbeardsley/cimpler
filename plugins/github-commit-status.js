@@ -1,10 +1,10 @@
 var util   = require('util'),
-Git        = require('../lib/git'),
-GitHubApi  = require('@octokit/rest');
+Git        = require('../lib/git');
+let { Octokit } = require('@octokit/rest');
 
 exports.init = function(config, cimpler) {
    // Just to allow mocking the api in the tests.
-   GitHubApi = config._overrideApi || GitHubApi;
+   Octokit = config._overrideApi || Octokit;
 
    var GitHub = getGithubApi(config);
 
@@ -32,22 +32,21 @@ exports.init = function(config, cimpler) {
 
       var commitStatus = {
          context: config.context || 'default',
-         user: repo.user,
+         owner: repo.user,
          repo: repo.name,
          sha: build.commit,
          state: status,
          target_url: build.logUrl,
          description: description };
-      GitHub.repos.createStatus(commitStatus);
+      GitHub.repos.createCommitStatus(commitStatus);
    }
 };
 
 function getGithubApi(config) {
-   var githubApi = new GitHubApi({
+   return new Octokit({
       headers: {
          "user-agent": "Cimpler CI"
-      }
+      },
+      auth: config.auth.token
    });
-   githubApi.authenticate(config.auth);
-   return githubApi;
 }
