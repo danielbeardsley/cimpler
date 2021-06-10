@@ -34,7 +34,7 @@ module.exports = {
           * from the `@octokit/rest` npm module,
           * so it accepts whatever that function accepts.
           *
-          * Get an oauth token by going to https://github.com/settings/tokens
+          * Get a token by going to https://github.com/settings/tokens
           * and create a token with only repo:status permission.
           */
          auth: {
