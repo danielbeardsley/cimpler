@@ -23,8 +23,7 @@
       "qs": "^6.7.0",
       "response-time": "^2.3.2",
       "shell-quote": "^1.6.1",
-      "underscore": "~1.4.3",
-      "url": "^0.11.0"
+      "underscore": "~1.4.3"
    },
    "devDependencies": {
       "mocha": "^6.2.3"
