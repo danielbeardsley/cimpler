@@ -1,6 +1,6 @@
 var util   = require('util'),
 Git        = require('../lib/git'),
-GitHubApi  = require('github');
+GitHubApi  = require('@octokit/rest');
 
 exports.init = function(config, cimpler) {
    // Just to allow mocking the api in the tests.
@@ -32,7 +32,7 @@ exports.init = function(config, cimpler) {
 
       var commitStatus = {
          context: config.context || 'default',
-         user: repo.user,
+         owner: repo.user,
          repo: repo.name,
          sha: build.commit,
          state: status,

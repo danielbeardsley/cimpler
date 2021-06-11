@@ -31,15 +31,14 @@ module.exports = {
           * For updating commit status via the github API
           *
           * Passed straight through to github.authenticate()
-          * from the `github` npm module:
-          * https://github.com/ajaxorg/node-github
-          * So it accepts whatever that function accpets.
+          * from the `@octokit/rest` npm module,
+          * so it accepts whatever that function accepts.
           *
-          * Get an oauth token by going to https://github.com/settings/tokens
-          * and createa token with only repo:status permission
+          * Get an token by going to https://github.com/settings/tokens
+          * and create a token with only repo:status permission.
           */
          auth: {
-            type: 'oauth', // or 'basic'
+            type: 'token',
             token: 'abcdefghijklmnopqrs...'
          }
       },
@@ -111,6 +110,7 @@ module.exports = {
          /**
           * The branch that each pull request is merged into before running CI.
           * Typically 'main', 'master', 'development', ...
+          * Setting as null will not merge in any branch.
           * Defaults to 'master'.
           */
          mainBranch: 'main',
@@ -130,7 +130,12 @@ module.exports = {
             // Base Url to access the above log files.
             url:  "http://www.example.com/ci-builds/"
          },
-         enabled: true
+         enabled: true,
+         /**
+          * Surrounds all cimpler output in formatted html tags
+          */
+         printHtml: true,
+
       }/** , {
          * Any plugin who's configuration object is an array
          * will have it's .init() function called once for each element

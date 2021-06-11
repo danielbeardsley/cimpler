@@ -32,14 +32,16 @@ function buildConsumer(config, cimpler, repoPath) {
             BUILD_REPO:   build.repo,
             BUILD_COMMIT: build.commit,
             BUILD_BRANCH: build.branch,
-            BUILD_STATUS: build.status
+            BUILD_STATUS: build.status,
+            BUILD_QUEUED_AT: build.queuedAt,
+            BUILD_NUMBER: build.number,
          },
-         timeout: config.timeout || 0,
+         timeout: build.buildTimeout || config.timeout || 0,
          maxBuffer: config.maxBuffer || 1024 * 1024 * 2,
          stdio: 'pipe',
          detached: true
       },
-      cdToRepo = 'set -v; set -x; cd ' + quote(repoPath);
+      cdToRepo = 'set -v; cd ' + quote(repoPath);
 
       for(var key in process.env) {
          execOptions.env[key] = process.env[key];
@@ -55,10 +57,14 @@ function buildConsumer(config, cimpler, repoPath) {
 
       // This needs to be delayed until we have a commit hash
       function writeLogHeader() {
-         logFile().write( 
+         const queueTimeMin = Math.round((Date.now() - build.queuedAt) / (1000*60));
+
+         var startedMessage =
             "----------------------------------------------\n" +
-            " Cimpler build started at: " + Date() + "\n" +
-            "----------------------------------------------\n");
+            " Cimpler build started at: " + Date() + " time in queue: " + queueTimeMin + "min \n" +
+            "----------------------------------------------\n";
+
+         logBuildStarted(startedMessage);
       }
 
       /**
@@ -103,7 +109,7 @@ function buildConsumer(config, cimpler, repoPath) {
                stdout += "\n\n" + failed;
                logger.warn(id(build) + " -- " + failed);
                writeLogHeader()
-               logFile().write(stdout);
+               writeLogFile(stdout);
                finishedBuild();
             } else {
                if (!build.commit) {
@@ -119,9 +125,10 @@ function buildConsumer(config, cimpler, repoPath) {
       }
 
       function startMerge() {
+         let shouldMerge = config.mainBranch !== null;
          var branchToMerge = config.mainBranch || 'master';
          var regex, mergeBranch;
-         if (config.mergeBranchRegexes) {
+         if (shouldMerge && config.mergeBranchRegexes) {
             for (var i = 0; i < config.mergeBranchRegexes.length; ++i) {
                regex = config.mergeBranchRegexes[i][0];
                mergeBranch = config.mergeBranchRegexes[i][1];
@@ -135,8 +142,8 @@ function buildConsumer(config, cimpler, repoPath) {
             "git reset --hard && " +
             "git clean -ffd && " +
             "(git submodule foreach --recursive git clean -ffd || true) && " +
-            "git checkout "+ quote(build.commit) + " && " +
-            "git merge " + quote("origin/" + branchToMerge) + " && " +
+            "git checkout " + quote(build.commit) + " && " +
+            (shouldMerge ? ("git merge --no-verify " + quote("origin/" + branchToMerge) + " && ") : '') +
             "git clean -ffd && " +
             "git submodule sync && " +
             "git submodule update --init --recursive ) 2>&1";
@@ -161,7 +168,7 @@ function buildConsumer(config, cimpler, repoPath) {
 
 
             logger.info(id(build) + " -- " + message);
-            logFile().write(stdout);
+            writeLogFile(stdout);
 
             nextStep(started);
          });
@@ -182,7 +189,7 @@ function buildConsumer(config, cimpler, repoPath) {
                build.code = err ? err.code : 0;
             }
             logger.info(id(build) + " -- Build " + build.status);
-            finishedBuild();
+            setTimeout(finishedBuild, 0);
          });
 
          /**
@@ -213,6 +220,33 @@ function buildConsumer(config, cimpler, repoPath) {
          return inBuild.logPath;
       }
 
+      function logBuildStarted(text) {
+         writeLogFile(text);
+      }
+
+      function logBuildFinished(text) {
+         writeLogFile(text, /* end */ true);
+      }
+
+      function writeLogFile(text, end = false) {
+         if (config.printHtml) {
+            logFile().write('<pre>');
+         }
+
+         logFile().write(text);
+
+         if (config.printHtml) {
+            logFile().write('</pre>');
+         }
+
+         if (end) {
+            // Call 'finished' when end() flushes it's data to disk
+            // This is mostly for testing so we *known* that the data has been
+            // written.
+            logFile().end('', 'utf8', finished);
+         }
+      }
+
       var logFileStream;
       function logFile() {
          if (logFileStream) {
@@ -236,19 +270,18 @@ function buildConsumer(config, cimpler, repoPath) {
          }
 
          var seconds = Math.round((Date.now() - startedAt) / 1000);
-         logFile().write(
+         var finishedMessage =
           "\n-------------------------------------------" +
-          "\n Cimpler build finished in " + seconds + " seconds");
+          "\n Cimpler build finished in " + seconds + " seconds";
          if (build.error) {
-            logFile().write("\n Error: " + build.error);
+            finishedMessage += "\n Error: " + build.error;
          } else {
-            logFile().write("\n Status: " + build.status + " Exit Code: " + build.code);
+            finishedMessage += "\n Status: " + build.status + " Exit Code: " + build.code;
          }
-         // Call 'finished' when end() flushes it's data to disk
-         // This is mostly for testing so we *known* that the data has been
-         // written.
-         logFile().end(
-          "\n-------------------------------------------\n",'utf8',finished);
+         finishedMessage +=
+          "\n-------------------------------------------\n";
+
+         logBuildFinished(finishedMessage);
       }
 
       function exec(cmd, callback) {

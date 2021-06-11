@@ -45,7 +45,7 @@ describe("CLI build command", function() {
          started();
 
          builtBranches.push(inBuild.branch);
-         assert.deepEqual(inBuild, expectedBuild);
+         assert.deepEqual(_.omit(inBuild, 'queuedAt'), expectedBuild);
          // So the next assertion will succeed
          expectedBuild.branch = 'test-branch';
          expectedBuild.buildCommand = 'blah';
@@ -106,6 +106,33 @@ describe("CLI server command", function() {
       var killerInterval = setInterval(function() {
          proc.kill();
       }, 1000);
+   });
+});
+
+describe("CLI build timeout", function() {
+   var exec = execInDir(testRepoDir);
+
+   it("sets the build timeout", function(done) {
+      var cimpler = new Cimpler({
+         plugins: {
+            cli: {
+            }
+         },
+         httpPort: httpPort,
+         testMode: true  // Don't console.log() anything
+      });
+      var timeout = 1 * 1000; // 1 second timeout
+      cimpler.on('buildFinished', function(build) {
+         assert.equal(build.buildTimeout, timeout);
+      });
+      var args = ["-h", "127.0.0.1", "-p", httpPort];
+      var proc = exec(bin,  args.concat(["build", '--timeout=' + timeout]));
+      cimpler.consumeBuild(function(inBuild, started, finished) {
+         started();
+         finished();
+         cimpler.shutdown();
+         done();
+      });
    });
 });
 
