@@ -15,10 +15,13 @@
    },
    "dependencies": {
       "@octokit/rest": "^15.18.3",
-      "connect": "~2.6.0",
+      "body-parser": "^1.19.0",
+      "connect": "~3.7.0",
       "log4js": "~0.5.4",
       "notify-queue": "~0.0.5",
       "optimist": "~0.3.4",
+      "qs": "^6.7.0",
+      "response-time": "^2.3.2",
       "shell-quote": "^1.6.1",
       "underscore": "~1.4.3"
    },
