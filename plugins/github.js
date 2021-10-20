@@ -14,7 +14,7 @@ exports.init = function(config, cimpler) {
       var build = null;
 
       try {
-         const payload = JSON.parse(req.body.payload);
+         const payload = getPayloadFromRequest(req);
 
          /**
           * The webhook sent must be a push event OR a pull_request event,
@@ -36,6 +36,14 @@ exports.init = function(config, cimpler) {
       res.end();
    });
 };
+
+function getPayloadFromRequest(req) {
+   if (req.body && req.body.payload && (typeof req.body.payload) === 'string') {
+      return JSON.parse(req.body.payload);
+   } else {
+      return req.body;
+   }
+}
 
 function extractPushBuildInfo(payload) {
    // ref: "refs/heads/some-long-branch-name/maybe-even-slashes"
