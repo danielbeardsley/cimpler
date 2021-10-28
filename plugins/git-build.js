@@ -77,14 +77,16 @@ function buildConsumer(config, cimpler, repoPath) {
          var next = startFetch;
          if (shouldPrune()) {
             var command = 'cd ' + quote(repoPath) + ' && ' + "git prune 2>&1";
-            exec(command, function(err, stdout) {
+            exec(command, function(err, output) {
                if (err) {
                   var failed = "git prune failed";
                   build.status = 'error';
                   build.error = failed;
                   build.code = err.code;
-                  stdout += "\n\n" + failed;
+                  output += "\n\n" + failed;
                   logger.warn(id(build) + " -- " + failed);
+                  writeLogHeader();
+                  writeLogFile(output);
                   finishedBuild();
                } else {
                   next();
