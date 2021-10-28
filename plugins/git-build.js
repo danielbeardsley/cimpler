@@ -296,17 +296,17 @@ function buildConsumer(config, cimpler, repoPath) {
          }
 
          var args = ['-c', cmd];
-         child = childProcess.spawn('bash', args, execOptions).on('exit',
-            function(code, signal) {
-               done = true;
-               child.stdout.setEncoding('utf8');
-               child.stderr.setEncoding('utf8');
-               var stdout = child.stdout.read();
-               var stderr = child.stderr.read();
-               setAbort(build, function () {});
-               var errObj = code == 0 ? null : {code: code, signal: signal};
-               callback(forceErr || errObj, stdout, stderr);
-            });
+         child = childProcess.spawn('bash', args, execOptions)
+         .on('exit', function(code, signal) {
+            done = true;
+            child.stdout.setEncoding('utf8');
+            child.stderr.setEncoding('utf8');
+            var stdout = child.stdout.read();
+            var stderr = child.stderr.read();
+            setAbort(build, function () {});
+            var errObj = code == 0 ? null : {code: code, signal: signal};
+            callback(forceErr || errObj, stdout, stderr);
+         });
 
          setAbort(build, function() {
             process.kill(-child.pid);
