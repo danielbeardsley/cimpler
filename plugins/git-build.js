@@ -179,7 +179,7 @@ function buildConsumer(config, cimpler, repoPath) {
          var commands = [cdToRepo, buildCommand];
          var commandString = commands.join("; ");
 
-         var proc = exec(commandString, function(err, stdout, stderr) {
+         var proc = exec(commandString, function(err) {
             if (err && err.signal) {
                build.status = 'error';
                build.error = err.signal + " - " + err.code;
