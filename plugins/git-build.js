@@ -77,7 +77,7 @@ function buildConsumer(config, cimpler, repoPath) {
          var next = startFetch;
          if (shouldPrune()) {
             var command = 'cd ' + quote(repoPath) + ' && ' + "git prune 2>&1";
-            exec(command, function(err, output) {
+            exec(command, true, function(err, output) {
                if (err) {
                   var failed = "git prune failed";
                   build.status = 'error';
@@ -102,7 +102,7 @@ function buildConsumer(config, cimpler, repoPath) {
             "git fetch --quiet && " +
             "git rev-parse " + quote("origin/" + build.branch) + ") 2>&1";
 
-         var fetching = exec(commands, function(err, stdout) {
+         var fetching = exec(commands, true, function(err, stdout) {
             if (err) {
                var failed = "Fetch Failed";
                build.status = 'error';
@@ -150,7 +150,7 @@ function buildConsumer(config, cimpler, repoPath) {
             "git submodule sync && " +
             "git submodule update --init --recursive ) 2>&1";
 
-         var merging = exec(commands, function(err, stdout) {
+         var merging = exec(commands, true, function(err, stdout) {
             var nextStep, message;
 
             if (err) {
@@ -181,7 +181,7 @@ function buildConsumer(config, cimpler, repoPath) {
          var commands = [cdToRepo, buildCommand];
          var commandString = commands.join("; ");
 
-         var proc = exec(commandString, function(err) {
+         var proc = exec(commandString, false, function(err) {
             if (err && err.signal) {
                build.status = 'error';
                build.error = err.signal + " - " + err.code;
@@ -286,7 +286,7 @@ function buildConsumer(config, cimpler, repoPath) {
          logBuildFinished(finishedMessage);
       }
 
-      function exec(cmd, callback) {
+      function exec(cmd, captureOutput, callback) {
          var child, done = false, forceErr, options = _.clone(execOptions);
          var output = [];
          if (options.timeout) {
@@ -309,8 +309,10 @@ function buildConsumer(config, cimpler, repoPath) {
 
          child.stdout.setEncoding('utf8');
          child.stderr.setEncoding('utf8');
-         child.stdout.on('data', function(out) { output.push(out); });
-         child.stderr.on('data', function(out) { output.push(out); });
+         if (captureOutput) {
+            child.stdout.on('data', function(out) { output.push(out); });
+            child.stderr.on('data', function(out) { output.push(out); });
+         }
 
          setAbort(build, function() {
             process.kill(-child.pid);
