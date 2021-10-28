@@ -288,6 +288,7 @@ function buildConsumer(config, cimpler, repoPath) {
 
       function exec(cmd, callback) {
          var child, done = false, forceErr, options = _.clone(execOptions);
+         var output = [];
          if (options.timeout) {
             setTimeout(function() {
                if (done) return;
@@ -301,14 +302,15 @@ function buildConsumer(config, cimpler, repoPath) {
          child = childProcess.spawn('bash', args, execOptions)
          .on('exit', function(code, signal) {
             done = true;
-            child.stdout.setEncoding('utf8');
-            child.stderr.setEncoding('utf8');
-            var stdout = child.stdout.read();
-            var stderr = child.stderr.read();
             setAbort(build, function () {});
             var errObj = code == 0 ? null : {code: code, signal: signal};
-            callback(forceErr || errObj, stdout, stderr);
+            callback(forceErr || errObj, output.join(""));
          });
+
+         child.stdout.setEncoding('utf8');
+         child.stderr.setEncoding('utf8');
+         child.stdout.on('data', function(out) { output.push(out); });
+         child.stderr.on('data', function(out) { output.push(out); });
 
          setAbort(build, function() {
             process.kill(-child.pid);
