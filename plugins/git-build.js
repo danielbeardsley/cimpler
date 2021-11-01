@@ -77,14 +77,16 @@ function buildConsumer(config, cimpler, repoPath) {
          var next = startFetch;
          if (shouldPrune()) {
             var command = 'cd ' + quote(repoPath) + ' && ' + "git prune 2>&1";
-            exec(command, function(err, stdout) {
+            exec(command, true, function(err, output) {
                if (err) {
                   var failed = "git prune failed";
                   build.status = 'error';
                   build.error = failed;
                   build.code = err.code;
-                  stdout += "\n\n" + failed;
+                  output += "\n\n" + failed;
                   logger.warn(id(build) + " -- " + failed);
+                  writeLogHeader();
+                  writeLogFile(output);
                   finishedBuild();
                } else {
                   next();
@@ -100,7 +102,7 @@ function buildConsumer(config, cimpler, repoPath) {
             "git fetch --quiet && " +
             "git rev-parse " + quote("origin/" + build.branch) + ") 2>&1";
 
-         var fetching = exec(commands, function(err, stdout) {
+         var fetching = exec(commands, true, function(err, stdout) {
             if (err) {
                var failed = "Fetch Failed";
                build.status = 'error';
@@ -148,7 +150,7 @@ function buildConsumer(config, cimpler, repoPath) {
             "git submodule sync && " +
             "git submodule update --init --recursive ) 2>&1";
 
-         var merging = exec(commands, function(err, stdout) {
+         var merging = exec(commands, true, function(err, stdout) {
             var nextStep, message;
 
             if (err) {
@@ -179,7 +181,7 @@ function buildConsumer(config, cimpler, repoPath) {
          var commands = [cdToRepo, buildCommand];
          var commandString = commands.join("; ");
 
-         var proc = exec(commandString, function(err, stdout, stderr) {
+         var proc = exec(commandString, false, function(err) {
             if (err && err.signal) {
                build.status = 'error';
                build.error = err.signal + " - " + err.code;
@@ -284,8 +286,9 @@ function buildConsumer(config, cimpler, repoPath) {
          logBuildFinished(finishedMessage);
       }
 
-      function exec(cmd, callback) {
+      function exec(cmd, captureOutput, callback) {
          var child, done = false, forceErr, options = _.clone(execOptions);
+         var output = [];
          if (options.timeout) {
             setTimeout(function() {
                if (done) return;
@@ -296,17 +299,20 @@ function buildConsumer(config, cimpler, repoPath) {
          }
 
          var args = ['-c', cmd];
-         child = childProcess.spawn('bash', args, execOptions).on('exit',
-            function(code, signal) {
-               done = true;
-               child.stdout.setEncoding('utf8');
-               child.stderr.setEncoding('utf8');
-               var stdout = child.stdout.read();
-               var stderr = child.stderr.read();
-               setAbort(build, function () {});
-               var errObj = code == 0 ? null : {code: code, signal: signal};
-               callback(forceErr || errObj, stdout, stderr);
-            });
+         child = childProcess.spawn('bash', args, execOptions)
+         .on('exit', function(code, signal) {
+            done = true;
+            setAbort(build, function () {});
+            var errObj = code == 0 ? null : {code: code, signal: signal};
+            callback(forceErr || errObj, output.join(""));
+         });
+
+         child.stdout.setEncoding('utf8');
+         child.stderr.setEncoding('utf8');
+         if (captureOutput) {
+            child.stdout.on('data', function(out) { output.push(out); });
+            child.stderr.on('data', function(out) { output.push(out); });
+         }
 
          setAbort(build, function() {
             process.kill(-child.pid);
