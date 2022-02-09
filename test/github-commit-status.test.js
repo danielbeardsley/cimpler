@@ -27,7 +27,7 @@ describe("Github commit status plugin", function() {
       };
 
       sendBuild(build, function(statuses) {
-         assert.equal(statuses.length, 2);
+         assert.equal(statuses.length, 3);
 
          var status = {
             context: 'test-context',
@@ -36,11 +36,13 @@ describe("Github commit status plugin", function() {
             sha: build.commit,
             state: 'pending',
             target_url: build.logUrl,
-            description: 'Build Started' };
+            description: 'Build Queued' };
          assert.deepEqual(statuses[0], status);
-         status.description = "Build BLAH";
-         status.state = 'BLAH';
+         status.description = "Build Started";
          assert.deepEqual(statuses[1], status);
+         status.description = "Build BLAH";
+         status.state = "BLAH";
+         assert.deepEqual(statuses[2], status);
          done();
       });
    });
@@ -55,7 +57,7 @@ describe("Github commit status plugin", function() {
             fail_message: "ERR"
          };
          sendBuild(build, function(statuses) {
-            assert.equal(statuses.length, 2);
+            assert.equal(statuses.length, 3);
 
             var status = {
                context: 'test-context',
@@ -66,11 +68,11 @@ describe("Github commit status plugin", function() {
                target_url: build.logUrl,
                description: 'Build Started' };
 
-            assert.deepEqual(statuses[0], status);
+            assert.deepEqual(statuses[1], status);
             // The status for 'finished' will be 'error' if build.error
             status.description = "ERR";
-            status.state = 'error';
-            assert.deepEqual(statuses[1], status);
+            status.state = "error";
+            assert.deepEqual(statuses[2], status);
             done();
          });
       });
@@ -85,19 +87,21 @@ describe("Github commit status plugin", function() {
             failFast: true
          };
          sendBuild(build, function(statuses) {
-            var status = statuses[0];
-            assert.equal(statuses.length, 1);
+            assert.equal(statuses.length, 2);
 
             var expectedStatus = {
                context: 'test-context',
                owner: 'user',
                repo: 'repo',
                sha: build.commit,
-               state: 'error',
+               state: "pending",
                target_url: build.logUrl,
-               description: build.error };
+               description: "Build Queued" };
 
-            assert.deepEqual(expectedStatus, status);
+            assert.deepEqual(expectedStatus, statuses[0]);
+            expectedStatus.description = build.error;
+            expectedStatus.state = "error";
+            assert.deepEqual(expectedStatus, statuses[1]);
             done();
          });
       });
@@ -122,9 +126,9 @@ function sendBuild(build, callback) {
    assert.equal(statuses.length, 0);
 
    cimpler.addBuild(build);
+   assert.equal(statuses.length, 1);
 
    cimpler.consumeBuild(function(build, started, finished) {
-      assert.equal(statuses.length, 0);
       if (!build.failFast) {
          started();
       }
